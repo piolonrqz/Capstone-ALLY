@@ -26,7 +26,7 @@ public class ClientEntity {
     @Column(name = "pref_lang")
     private String prefferedLang;
 
-    @OneToMany(mappedBy = "lawyer")
+    @OneToMany(mappedBy = "client")
     private List<CaseEntity> cases;
 
     public ClientEntity(int clientId, String location, String prefferedLang){
