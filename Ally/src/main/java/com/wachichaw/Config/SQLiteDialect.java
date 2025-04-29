@@ -34,6 +34,22 @@ public class SQLiteDialect extends Dialect {
             public boolean supportsIdentityColumns() {
                 return true;
             }
+    
+            @Override
+            public String getIdentitySelectString(String table, String column, int type) {
+                return "select last_insert_rowid()";
+            }
+    
+            @Override
+            public String getIdentityColumnString(int type) {
+                // SQLite uses "integer primary key autoincrement" for identity columns
+                return "integer";
+            }
+    
+            @Override
+            public boolean hasDataTypeInIdentityColumn() {
+                return false; // SQLite doesn't allow specifying type in identity column
+            }
         };
     }
 
