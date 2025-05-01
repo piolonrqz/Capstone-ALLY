@@ -1,7 +1,10 @@
-# Compiled class file
+# Compiled class files
 *.class
 
-# Log file
+# Ignore application.properties
+/src/main/resources/application.properties
+
+# Log files
 *.log
 
 # BlueJ files
@@ -19,7 +22,7 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
 
