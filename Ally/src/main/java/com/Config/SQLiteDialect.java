@@ -9,11 +9,7 @@ import java.sql.Types;
 public class SQLiteDialect extends Dialect {
 
     protected void registerColumnType(int code, String name) {
-        // Implementation for registering column types
-        // This is a placeholder; you may need to implement this method based on your requirements.
-    }
-    public SQLiteDialect() {
-        this(null);
+        
     }
     
     public SQLiteDialect(DialectResolutionInfo info) {
@@ -37,6 +33,9 @@ public class SQLiteDialect extends Dialect {
         };
     }
 
+    public String getIdentitySelectString() {
+        return "SELECT last_insert_rowid()";
+    }
     @Override
     public boolean hasAlterTable() {
         return false;

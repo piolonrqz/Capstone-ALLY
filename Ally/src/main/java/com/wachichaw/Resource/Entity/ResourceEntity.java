@@ -2,8 +2,7 @@ package com.wachichaw.Resource.Entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
-
-import com.wachichaw.User.Entity.UserEntity;
+import com.wachichaw.Admin.Entity.AdminEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,15 +34,17 @@ public class ResourceEntity{
 
     @ManyToOne
     @JoinColumn(name = "uploaded_by") 
-    private UserEntity uploadedBy;
+    private AdminEntity uploadedBy;
 
 
     @CreationTimestamp
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
+
+    public ResourceEntity(){}
     
 
-    public ResourceEntity(int resourceId, String title, String contentType, boolean isOfflineAvailable, UserEntity uploadedBy, LocalDateTime uploadedAt){
+    public ResourceEntity(int resourceId, String title, String contentType, boolean isOfflineAvailable, AdminEntity uploadedBy, LocalDateTime uploadedAt){
         this.resourceId = resourceId;
         this.title = title;
         this.contentType = contentType;
@@ -85,11 +86,11 @@ public class ResourceEntity{
         this.isOfflineAvailable = isOfflineAvailable;
     }
 
-    public UserEntity getUploadedBy(){
+    public AdminEntity getUploadedBy(){
         return uploadedBy;
     }
 
-    public void setUploadedBy(UserEntity uploadedBy){
+    public void setUploadedBy(AdminEntity uploadedBy){
         this.uploadedBy = uploadedBy;
     }
 

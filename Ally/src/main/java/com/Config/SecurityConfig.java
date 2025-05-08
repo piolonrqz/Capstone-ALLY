@@ -17,12 +17,11 @@ public class SecurityConfig {
                     "/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui./index.html"
-                ).permitAll() // ✅ Allow Swagger access without auth
-                .anyRequest().authenticated() // Require auth for other endpoints
+                ).permitAll() 
+                .anyRequest().authenticated() 
             )
-            .httpBasic(Customizer.withDefaults()) // Basic auth for protected endpoints
-            .csrf(csrf -> csrf.disable()); // Disable CSRF if you're not using forms
-
+            .httpBasic(Customizer.withDefaults()) 
+            .csrf(csrf -> csrf.disable()); 
         return http.build();
     }
 }

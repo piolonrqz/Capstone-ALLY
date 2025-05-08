@@ -1,15 +1,14 @@
 package com.wachichaw.User.Service;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.Config.ImageUploadController;
+import com.wachichaw.Client.Entity.ClientEntity;
+import com.wachichaw.Lawyer.Entity.LawyerEntity;
+import com.wachichaw.User.Entity.AccountType;
 import com.wachichaw.User.Entity.UserEntity;
 import com.wachichaw.User.Repo.UserRepo;
 
@@ -18,16 +17,36 @@ public class UserService {
 
     @Autowired
     private final UserRepo userRepo;
-    @Autowired
-    private ImageUploadController imageUploadController;  
+     
 
     public UserService(UserRepo userRepo){
         this.userRepo = userRepo;
     }
 
 
-    public UserEntity CreateUser(UserEntity user){
-       return userRepo.save(user);
+    public ClientEntity createClient(String email, String pass, String Fname, String Lname, String contact_info, String location) {
+        ClientEntity client = new ClientEntity();
+        client.setEmail(email);
+        client.setPassword(pass);
+        client.setFname(Fname);
+        client.setLname(Lname);
+        client.setContactInfo(contact_info);
+        client.setLocation(location);
+        client.setAccountType(AccountType.CLIENT);  // Set account type as LAWYER
+        return userRepo.save(client);
+    }
+
+    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, String specialization, String experience, String credentials) {
+        LawyerEntity lawyer = new LawyerEntity();
+        lawyer.setEmail(email);
+        lawyer.setPassword(pass);
+        lawyer.setFname(Fname);
+        lawyer.setLname(Lname);
+        lawyer.setSpecialization(specialization);
+        lawyer.setExperience(experience);
+        lawyer.setCredentials(credentials);
+        lawyer.setAccountType(AccountType.LAWYER);
+        return userRepo.save(lawyer);
     }
 
     public List<UserEntity> getAllUser() {
@@ -38,46 +57,11 @@ public class UserService {
         return userRepo.findById(id);
     }
 
-     public UserEntity updateUser(int userId, MultipartFile file, String currentPassword, String name, String email, String newPassword) throws IOException, java.io.IOException {
-    // Find the user by its ID
-    UserEntity existingUser = userRepo.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("User not found"));
-
-    // Verify the current password
-    if (!existingUser.getPassword().equals(currentPassword)) {
-        throw new RuntimeException("Current password is incorrect");
-    }
-
-    // Update the user's name
-    if (name != null && !name.isEmpty()) {
-        existingUser.setName(name);
-    }
-
-    // Update the user's password
-    if (newPassword != null && !newPassword.isEmpty()) {
-        existingUser.setPassword(newPassword);
-    }
-    // Update the user's email if provided and unique
-    if (email != null && !email.equals(existingUser.getEmail())) {
-        if (userRepo.existsByEmail(email)) {
-            throw new RuntimeException("Email already in use");
-        }
-        existingUser.setEmail(email);
-    }
-
-    // Handle profile picture upload if a file is provided
-    if (file != null && !file.isEmpty()) {
-        String profPicUrl = imageUploadController.uploadProfpic(file);
-        existingUser.setProfPic(profPicUrl); 
-    }
-
-    return userRepo.save(existingUser);
-}
-
+     
 public String deleteUser(int id) {
     String msg = " ";
     userRepo.deleteById(id);
-    msg = "User record successfully deleted!";
+    msg = "User successfully deleted!";
     return msg;
 }
     

@@ -13,7 +13,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Cases")
-public class CaseEntity {
+public class LegalCasesEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,15 +41,15 @@ public class CaseEntity {
     private LawyerEntity lawyer;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", referencedColumnName = "user_id")
     private ClientEntity client;
 
-    @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "legalcaseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages;
 
+    public LegalCasesEntity(){}
 
-
-    public CaseEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, String status, LawyerEntity lawyer, ClientEntity client) {
+    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, String status, LawyerEntity lawyer, ClientEntity client) {
         this.caseId = caseId;
         this.title = title;
         this.caseNumber = caseNumber;
@@ -122,5 +122,12 @@ public class CaseEntity {
 
     public void setClient(ClientEntity client) {
         this.client = client;
+    }
+    public List<MessageEntity> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<MessageEntity> messages) {
+        this.messages = messages;
     }
 }

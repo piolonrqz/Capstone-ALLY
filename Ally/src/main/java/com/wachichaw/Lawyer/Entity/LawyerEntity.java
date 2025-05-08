@@ -2,68 +2,48 @@ package com.wachichaw.Lawyer.Entity;
 
 import java.util.List;
 
-import com.wachichaw.Case.Entity.CaseEntity;
+import com.wachichaw.Case.Entity.LegalCasesEntity;
+import com.wachichaw.User.Entity.AccountType;
+import com.wachichaw.User.Entity.UserEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Lawyer")
-public class LawyerEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "lawyer_id")
-    private int lawyerId;
-
-    @Column(name = "bio")
-    private String bio;
+public class LawyerEntity extends UserEntity{
 
     @Column(name = "specialization")
     private String specialization;
 
-    @Column(name = "working_hours")
-    private String workingHours;
+    @Column(name = "experience")
+    private String experience;
 
-    @Column(name = "availability_status")
-    private String availabilityStatus;
+    @Column(name = "credentials")
+    private String credentials;
 
-    @Column(name = "bar_license_numbere")
-    private String barLicenseNumber;
+    @Column(name = "credentials_verified", nullable = true)
+    private Boolean credentials_verified = false;
 
     @OneToMany(mappedBy = "lawyer")
-    private List<CaseEntity> cases;
+    private List<LegalCasesEntity> legalcaseEntity;
 
-
-    public LawyerEntity(int lawyerId, String bio, String specialization, String workingHours, String availabilityStatus, String barLicenseNumber) {
-        this.lawyerId = lawyerId;
-        this.bio = bio;
-        this.specialization = specialization;
-        this.workingHours = workingHours;
-        this.availabilityStatus = availabilityStatus;
-        this.barLicenseNumber = barLicenseNumber;
+    public LawyerEntity(){
     }
 
-    public int getLawyerId() {
-        return lawyerId;
-    }
 
-    public void setLawyerId(int lawyerId) {
-        this.lawyerId = lawyerId;
-    }
-
-    public String getBio() {
-        return bio;
-    }
-
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
+    public LawyerEntity(int userId, String email, String password, String Fname, String Lname,
+                    String specialization, String experience, String credentials,
+                    String profPic, boolean isVerified, AccountType accountType) {
+    super(userId, email, password, Fname, Lname, null, isVerified);
+    this.setAccountType(accountType); 
+    this.specialization = specialization;
+    this.experience = experience;
+    this.credentials = credentials;
+}
 
     public String getSpecialization() {
         return specialization;
@@ -73,27 +53,19 @@ public class LawyerEntity {
         this.specialization = specialization;
     }
 
-    public String getWorkingHours() {
-        return workingHours;
+    public String getExperience() {
+        return experience;
     }
 
-    public void setWorkingHours(String workingHours) {
-        this.workingHours = workingHours;
+    public void setExperience(String experience) {
+        this.experience = experience;
     }
 
-    public String getAvailabilityStatus() {
-        return availabilityStatus;
+    public String getCredentials() {
+        return credentials;
     }
 
-    public void setAvailabilityStatus(String availabilityStatus) {
-        this.availabilityStatus = availabilityStatus;
-    }
-
-    public String getBarLicenseNumber() {
-        return barLicenseNumber;
-    }
-
-    public void setBarLicenseNumber(String barLicenseNumber) {
-        this.barLicenseNumber = barLicenseNumber;
+    public void setCredentials(String credentials) {
+        this.credentials = credentials;
     }
 }

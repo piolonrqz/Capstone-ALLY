@@ -2,7 +2,7 @@ package com.wachichaw.Message.Entity;
 
 import java.time.LocalDateTime;
 
-import com.wachichaw.Case.Entity.CaseEntity;
+import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.Client.Entity.ClientEntity;
 
 import jakarta.persistence.Column;
@@ -25,7 +25,7 @@ public class MessageEntity {
 
     @ManyToOne
     @JoinColumn(name = "case_id", nullable = false)
-    private CaseEntity caseEntity;
+    private LegalCasesEntity legalcaseEntity;
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
@@ -42,9 +42,9 @@ public class MessageEntity {
 
     public MessageEntity() {}
 
-    public MessageEntity(int messageId, CaseEntity caseEntity, ClientEntity senderId, String content, LocalDateTime sentAt, boolean isTemporary) {
+    public MessageEntity(int messageId, LegalCasesEntity caseEntity, ClientEntity senderId, String content, LocalDateTime sentAt, boolean isTemporary) {
         this.messageId = messageId;
-        this.caseEntity = caseEntity;
+        this.legalcaseEntity = caseEntity;
         this.senderId = senderId;
         this.content = content;
         this.sentAt = sentAt;
@@ -59,12 +59,12 @@ public class MessageEntity {
         this.messageId = messageId;
     }
 
-    public CaseEntity getCaseEntity() {
-        return caseEntity;
+    public LegalCasesEntity getLegalcaseEntity() {
+        return legalcaseEntity;
     }
 
-    public void setCaseEntity(CaseEntity caseEntity) {
-        this.caseEntity = caseEntity;
+    public void setLegalcaseEntity(LegalCasesEntity legalcaseEntity) {
+        this.legalcaseEntity = legalcaseEntity;
     }
 
     public ClientEntity getSenderId() {

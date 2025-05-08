@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.wachichaw.Client.Entity.ClientEntity;
+import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.User.Entity.UserEntity;
 import com.wachichaw.User.Service.UserService;
 
@@ -17,19 +19,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
     
     @Autowired
     private UserService userService;
     
-    public UserController(){
+    public UserController(UserService userService) {
         super();
     }
 
-    @PostMapping("/save")
-    public UserEntity CreateUser(@RequestBody UserEntity user) {        
-        return userService.CreateUser(user);
+
+    @PostMapping("/client")
+    public ClientEntity createClient(@RequestBody ClientEntity client) {
+        return userService.createClient(client.getEmail(), client.getPassword(), client.getFname(), client.getLname(), client.getContactInfo(), client.getLocation());
+    }
+
+    @PostMapping("/add")
+    public LawyerEntity createLawyer(@RequestBody LawyerEntity lawyer) {
+        return userService.createLawyer(lawyer.getEmail(), lawyer.getPassword(), lawyer.getFname(), lawyer.getLname(),lawyer.getSpecialization(), lawyer.getExperience(), lawyer.getCredentials());
     }
 
     @GetMapping("/getAll")

@@ -2,9 +2,9 @@ package com.wachichaw.Document.Entity;
 
 import java.time.LocalDateTime;
 
-import com.wachichaw.Case.Entity.CaseEntity;
-import com.wachichaw.User.Entity.UserEntity;
 
+import com.wachichaw.Case.Entity.LegalCasesEntity;
+import com.wachichaw.Client.Entity.ClientEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,11 +25,11 @@ public class DocumentEntity {
 
     @ManyToOne
     @JoinColumn(name = "case_id")
-    private CaseEntity caseEntity; 
+    private LegalCasesEntity legalcaseEntity; 
 
     @ManyToOne
     @JoinColumn(name = "uploaded_by")
-    private UserEntity uploadedBy;
+    private ClientEntity uploadedBy;
 
     @Column(name = "document_name")
     private String documentName;
@@ -43,10 +43,9 @@ public class DocumentEntity {
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
-    // ✅ Constructor
-    public DocumentEntity(int document_id, CaseEntity caseEntity, UserEntity uploadedBy, String documentName, String filePath, String documentType, LocalDateTime uploadedAt) {
+    public DocumentEntity(int document_id, LegalCasesEntity legalcaseEntity, ClientEntity uploadedBy, String documentName, String filePath, String documentType, LocalDateTime uploadedAt) {
         this.document_id = document_id;
-        this.caseEntity = caseEntity;
+        this.legalcaseEntity = legalcaseEntity;
         this.uploadedBy = uploadedBy;
         this.documentName = documentName;
         this.filePath = filePath;
@@ -54,10 +53,8 @@ public class DocumentEntity {
         this.uploadedAt = uploadedAt;
     }
 
-    // ✅ Default constructor
     public DocumentEntity() {}
 
-    // ✅ Getters and Setters
     public int getDocument_id() {
         return document_id;
     }
@@ -66,19 +63,19 @@ public class DocumentEntity {
         this.document_id = document_id;
     }
 
-    public CaseEntity getCaseEntity() {
-        return caseEntity;
+    public LegalCasesEntity getCaseEntity() {
+        return legalcaseEntity;
     }
 
-    public void setCaseEntity(CaseEntity caseEntity) {
-        this.caseEntity = caseEntity;
+    public void setCaseEntity(LegalCasesEntity legalcaseEntity) {
+        this.legalcaseEntity = legalcaseEntity;
     }
 
-    public UserEntity getUploadedBy() {
+    public ClientEntity getUploadedBy() {
         return uploadedBy;
     }
 
-    public void setUploadedBy(UserEntity uploadedBy) {
+    public void setUploadedBy(ClientEntity uploadedBy) {
         this.uploadedBy = uploadedBy;
     }
 
