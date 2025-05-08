@@ -1,7 +1,9 @@
-package com.wachichaw.Entity;
+package com.wachichaw.Resource.Entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.wachichaw.User.Entity.UserEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

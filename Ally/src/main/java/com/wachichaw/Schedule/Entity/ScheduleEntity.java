@@ -1,6 +1,8 @@
-package com.wachichaw.Entity;
+package com.wachichaw.Schedule.Entity;
 
 import java.time.LocalDate;
+
+import com.wachichaw.Lawyer.Entity.LawyerEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

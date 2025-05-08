@@ -1,4 +1,4 @@
-package com.wachichaw.Config;
+package com.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

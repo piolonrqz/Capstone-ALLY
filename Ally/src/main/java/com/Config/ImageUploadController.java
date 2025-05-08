@@ -1,4 +1,4 @@
-package com.wachichaw.Controller;
+package com.Config;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

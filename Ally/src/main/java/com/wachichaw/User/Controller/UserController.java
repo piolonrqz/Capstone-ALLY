@@ -1,12 +1,12 @@
-package com.wachichaw.Controller;
+package com.wachichaw.User.Controller;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.wachichaw.Entity.UserEntity;
-import com.wachichaw.Service.UserService;
+import com.wachichaw.User.Entity.UserEntity;
+import com.wachichaw.User.Service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

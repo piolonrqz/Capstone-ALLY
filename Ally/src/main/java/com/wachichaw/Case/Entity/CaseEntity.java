@@ -1,9 +1,13 @@
-package com.wachichaw.Entity;
+package com.wachichaw.Case.Entity;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.wachichaw.Client.Entity.ClientEntity;
+import com.wachichaw.Lawyer.Entity.LawyerEntity;
+import com.wachichaw.Message.Entity.MessageEntity;
 
 import jakarta.persistence.*;
 

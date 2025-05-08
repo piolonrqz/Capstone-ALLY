@@ -1,19 +1,18 @@
-package com.wachichaw.Entity;
+package com.wachichaw.User.Entity;
 
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 
 @Entity
 @Table(name = "User")
-public class UserEntity {
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "account_type", discriminatorType = DiscriminatorType.STRING)
+
+public abstract class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +27,7 @@ public class UserEntity {
 
     @Column(name = "password", nullable = false)
     private String password;
-
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -38,6 +37,9 @@ public class UserEntity {
 
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    private AccountType accountType;
 
     
 

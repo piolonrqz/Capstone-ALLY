@@ -1,6 +1,8 @@
-package com.wachichaw.Entity;
+package com.wachichaw.AI.Entity;
 
 import java.time.LocalDateTime;
+
+import com.wachichaw.Case.Entity.CaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
