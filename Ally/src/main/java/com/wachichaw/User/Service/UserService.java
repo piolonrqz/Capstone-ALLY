@@ -1,4 +1,4 @@
-package com.wachichaw.Service;
+package com.wachichaw.User.Service;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,9 +8,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.wachichaw.Controller.ImageUploadController;
-import com.wachichaw.Entity.UserEntity;
-import com.wachichaw.Repo.UserRepo;
+
+import com.Config.ImageUploadController;
+import com.wachichaw.User.Entity.UserEntity;
+import com.wachichaw.User.Repo.UserRepo;
 
 @Service
 public class UserService {

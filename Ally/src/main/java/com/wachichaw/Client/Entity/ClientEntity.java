@@ -1,6 +1,8 @@
-package com.wachichaw.Entity;
+package com.wachichaw.Client.Entity;
 
 import java.util.List;
+
+import com.wachichaw.Case.Entity.CaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

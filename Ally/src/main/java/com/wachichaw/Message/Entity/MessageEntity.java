@@ -1,6 +1,9 @@
-package com.wachichaw.Entity;
+package com.wachichaw.Message.Entity;
 
 import java.time.LocalDateTime;
+
+import com.wachichaw.Case.Entity.CaseEntity;
+import com.wachichaw.Client.Entity.ClientEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

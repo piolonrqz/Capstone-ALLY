@@ -1,4 +1,4 @@
-package com.wachichaw.Config;
+package com.Config;
 
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.identity.IdentityColumnSupportImpl;

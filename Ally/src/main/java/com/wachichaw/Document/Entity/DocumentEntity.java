@@ -1,6 +1,9 @@
-package com.wachichaw.Entity;
+package com.wachichaw.Document.Entity;
 
 import java.time.LocalDateTime;
+
+import com.wachichaw.Case.Entity.CaseEntity;
+import com.wachichaw.User.Entity.UserEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
