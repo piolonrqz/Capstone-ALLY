@@ -4,14 +4,25 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
+
+
 
 
 @Entity
-@Table(name = "User")
+@Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "account_type", discriminatorType = DiscriminatorType.STRING)
-
 public abstract class UserEntity {
 
     @Id
@@ -19,8 +30,11 @@ public abstract class UserEntity {
     @Column(name = "user_id")
     private int userId;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(name = "First_Name", nullable = false)
+    private String Fname;
+
+    @Column(name = "Last_Name", nullable = false)
+    private String Lname;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -32,8 +46,6 @@ public abstract class UserEntity {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "prof_pic", nullable = true)
-    private String profPic;
 
     @Column(name = "is_verified", nullable = false)
     private boolean isVerified = false;
@@ -44,17 +56,16 @@ public abstract class UserEntity {
     
 
     public UserEntity() {
-        super();
     }
 
-    public UserEntity(int userId, String name, String email, String password, LocalDateTime createdAt, String profPic, boolean isVerified) {
+    public UserEntity(int userId, String email, String password, String Fname,String Lname, LocalDateTime createdAt, boolean isVerified) {
         super();
         this.userId = userId;
-        this.name = name;
+        this.Fname = Fname;
         this.email = email;
         this.password = password;
         this.createdAt = createdAt;
-        this.profPic = profPic;
+   
         this.isVerified = isVerified;
     }
 
@@ -66,12 +77,24 @@ public abstract class UserEntity {
         this.userId = userId;
     }
 
-    public String getName() {
-        return name;
+    @JsonProperty("Fname")
+    public String getFname() {
+        return Fname;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @JsonProperty("Fname")
+    public void setFname(String Fname) {
+        this.Fname = Fname;
+    }
+
+    @JsonProperty("Lname")
+    public String getLname() {
+        return Lname;
+    }
+
+    @JsonProperty("Lname")
+    public void setLname(String Lname) {
+        this.Lname = Lname;
     }
 
     public String getEmail() {
@@ -98,19 +121,18 @@ public abstract class UserEntity {
         this.createdAt = createdAt;
     }
 
-    public String getProfPic() {
-        return profPic;
-    }
-
-    public void setProfPic(String profPic) {
-        this.profPic = profPic;
-    }
-
     public boolean isVerified() {
         return isVerified;
     }
 
     public void setVerified(boolean isVerified) {
         this.isVerified = isVerified;
+    }
+    public AccountType getAccountType() {
+        return accountType;
+    }
+    
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
     }
 }

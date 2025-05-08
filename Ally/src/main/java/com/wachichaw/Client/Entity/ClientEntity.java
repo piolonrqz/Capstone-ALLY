@@ -2,49 +2,37 @@ package com.wachichaw.Client.Entity;
 
 import java.util.List;
 
-import com.wachichaw.Case.Entity.CaseEntity;
+import com.wachichaw.Case.Entity.LegalCasesEntity;
+import com.wachichaw.User.Entity.UserEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+
 @Entity
 @Table(name = "Client")
-public class ClientEntity {
+public class ClientEntity extends UserEntity{
 
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "client_id")
-    private int clientId;
+    @Column(name = "contact_info")
+    private String contact_info;
 
     @Column(name = "location")
     private String location;
 
-    @Column(name = "pref_lang")
-    private String prefferedLang;
 
     @OneToMany(mappedBy = "client")
-    private List<CaseEntity> cases;
+    private List<LegalCasesEntity> cases;
 
-    public ClientEntity(int clientId, String location, String prefferedLang){
-        this.clientId = clientId;
+    public ClientEntity() {
+    }
+    public ClientEntity(int clientId, String location, String contact_info ){
         this.location = location;
-        this.prefferedLang = prefferedLang;
+        this.contact_info = contact_info;
     }
 
-
-    public int getClientId(){
-        return clientId;
-    }
-
-    public void setClientId(int clientId){
-        this.clientId = clientId;
-    }
 
     public String getLocation(){
         return location;
@@ -54,12 +42,12 @@ public class ClientEntity {
         this.location = location;
     }
 
-    public String getPrefferedLang(){
-        return prefferedLang;
+    public String getContactInfo(){
+        return contact_info;
     }
 
-    public void setPrefferedLang(String prefferedLang){
-        this.prefferedLang = prefferedLang;
+    public void setContactInfo(String contact_info){
+        this.contact_info = contact_info;
     }
 
 }

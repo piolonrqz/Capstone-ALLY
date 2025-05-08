@@ -2,7 +2,7 @@ package com.wachichaw.AI.Entity;
 
 import java.time.LocalDateTime;
 
-import com.wachichaw.Case.Entity.CaseEntity;
+import com.wachichaw.Case.Entity.LegalCasesEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +24,7 @@ public class ConsultationEntity {
 
     @ManyToOne
     @JoinColumn(name = "case_id", nullable = false)
-    private CaseEntity caseEntity;
+    private LegalCasesEntity legalcaseEntity;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
@@ -41,12 +41,14 @@ public class ConsultationEntity {
     @Column(name = "ai_suggested_outcome", columnDefinition = "TEXT")
     private String aiSuggestedOutcome;
 
+    public ConsultationEntity(){}
 
-    public ConsultationEntity(int consultationId, CaseEntity caseEntity, LocalDateTime startTime,
+
+    public ConsultationEntity(int consultationId, LegalCasesEntity legalcaseEntity, LocalDateTime startTime,
                               LocalDateTime endTime, String method, boolean isPreliminary,
                               String aiSuggestedOutcome) {
         this.consultationId = consultationId;
-        this.caseEntity = caseEntity;
+        this.legalcaseEntity = legalcaseEntity;
         this.startTime = startTime;
         this.endTime = endTime;
         this.method = method;
@@ -62,12 +64,12 @@ public class ConsultationEntity {
         this.consultationId = consultationId;
     }
 
-    public CaseEntity getCaseEntity() {
-        return caseEntity;
+    public LegalCasesEntity getCaseEntity() {
+        return legalcaseEntity;
     }
 
-    public void setCaseEntity(CaseEntity caseEntity) {
-        this.caseEntity = caseEntity;
+    public void setCaseEntity(LegalCasesEntity legalcaseEntity) {
+        this.legalcaseEntity = legalcaseEntity;
     }
 
     public LocalDateTime getStartTime() {

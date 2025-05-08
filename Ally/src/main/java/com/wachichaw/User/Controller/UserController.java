@@ -3,30 +3,38 @@ package com.wachichaw.User.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import com.wachichaw.Client.Entity.ClientEntity;
+import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.User.Entity.UserEntity;
 import com.wachichaw.User.Service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@RestController // Changed from @Controller to @RestController for REST APIs
-@RequestMapping("/user")
-@Tag(name = "User Controller", description = "Handles user operations such as creation, retrieval, and deletion.")
+
+@Controller
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
     private UserService userService;
-
-    public UserController() {
+    
+    public UserController(UserService userService) {
         super();
     }
 
-    @PostMapping("/save")
-    @Operation(summary = "Create a new user", description = "Saves a new user entity to the database.")
-    public UserEntity CreateUser(@RequestBody UserEntity user) {
-        return userService.CreateUser(user);
+
+    @PostMapping("/client")
+    public ClientEntity createClient(@RequestBody ClientEntity client) {
+        return userService.createClient(client.getEmail(), client.getPassword(), client.getFname(), client.getLname(), client.getContactInfo(), client.getLocation());
+    }
+
+    @PostMapping("/add")
+    public LawyerEntity createLawyer(@RequestBody LawyerEntity lawyer) {
+        return userService.createLawyer(lawyer.getEmail(), lawyer.getPassword(), lawyer.getFname(), lawyer.getLname(),lawyer.getSpecialization(), lawyer.getExperience(), lawyer.getCredentials());
     }
 
     @GetMapping("/getAll")

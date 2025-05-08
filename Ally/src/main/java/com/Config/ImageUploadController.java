@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 public class ImageUploadController {
 
 
-    private static final String EVENTS_DIR = "C:/Users/Ram Agramon/OneDrive/Desktop/Capstone-ALLY/Ally/src/main/resources/static/uploads";
+    private static final String EVENTS_DIR = "C:/Users/USER/Documents/GitHub/Capstone-ALLY/Ally/src/main/resources";
     
     private static final String prof_DIR = "D:/campusxperience/backend/src/main/resources/static/profile_pictures/";
 
