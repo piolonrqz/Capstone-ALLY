@@ -34,7 +34,7 @@ server.error.include-stacktrace=never
 # AI
 spring.ai.openai.chat.base-url=https://generativelanguage.googleapis.com
 spring.ai.openai.chat.completions-path=/v1beta/openai/chat/completions
-spring.ai.openai.api-key= AIzaSyBKAnxwUKbQdw87tccs-gLJx2vP03YHH9k
+spring.ai.openai.api-key= 
 spring.ai.openai.chat.options.model=gemini-2.0-flash
 
 
