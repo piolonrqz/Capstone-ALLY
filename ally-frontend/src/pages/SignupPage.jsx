@@ -58,14 +58,16 @@ const SignUpPage = () => {
             Register as a Lawyer
           </button>
         </div>
-      </div>
-
-      {/* Login Link */}
-      <div className="text-center mt-8">          <p className="text-neutral-600">
+      </div>      {/* Login Link */}
+      <div className="text-center mt-8">
+        <p className="text-neutral-600">
             Already have an account?{' '}
-            <a href="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+            <span 
+              onClick={() => navigate('/login')} 
+              className="text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+            >
               Login
-          </a>
+            </span>
         </p>
       </div>
     </div>

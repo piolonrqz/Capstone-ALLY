@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -35,7 +35,9 @@ const LandingPage = () => {
   ];
   return (
     <div className="bg-white min-h-screen flex flex-col">
-      {/* Header */}      
+
+
+      {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm w-full h-16 px-32 fixed top-0 left-0 right-0 z-[100] shadow-sm">
         <div className="w-full h-full flex justify-between items-center">
           <div className="flex items-center gap-2 cursor-pointer">
