@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Config.JwtUtil;
@@ -27,11 +28,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -66,17 +70,14 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
     @GetMapping("/getAll")
+    @Operation(summary = "Get all users", description = "Retrieves a list of all users.")
     public List<UserEntity> getAllUser() {
         return userService.getAllUser();
     }
 
-  
-
     @DeleteMapping("/deleteUser{userId}")
-    public String DeleteUser(@PathVariable int userId){
+    @Operation(summary = "Delete a user", description = "Deletes a user by their ID.")
+    public String DeleteUser(@PathVariable int userId) {
         return userService.deleteUser(userId);
     }
-    
-
-    
 }
