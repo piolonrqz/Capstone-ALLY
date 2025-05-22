@@ -17,7 +17,7 @@ server.port=8080
 # CHANGE this to your own database connection
 spring.datasource.url=jdbc:mysql://localhost:3306/ally
 
-
+spring.web.resources.static-locations=classpath:/static/, file:C:/Users/USER/Documents/GitHub/Capstone-ALLY/Ally/src/main/resources/static
 
 spring.datasource.username=root
 spring.datasource.password=1234

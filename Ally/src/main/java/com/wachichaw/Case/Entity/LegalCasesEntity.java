@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Message.Entity.MessageEntity;
@@ -38,10 +39,12 @@ public class LegalCasesEntity {
 
     @ManyToOne
     @JoinColumn(name = "lawyer_id")
+    @JsonBackReference
     private LawyerEntity lawyer;
 
     @ManyToOne
     @JoinColumn(name = "client_id", referencedColumnName = "user_id")
+    @JsonBackReference
     private ClientEntity client;
 
     @OneToMany(mappedBy = "legalcaseEntity", cascade = CascadeType.ALL, orphanRemoval = true)

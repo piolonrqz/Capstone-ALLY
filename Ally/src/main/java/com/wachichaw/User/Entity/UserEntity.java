@@ -65,7 +65,6 @@ public abstract class UserEntity {
         this.email = email;
         this.password = password;
         this.createdAt = createdAt;
-   
         this.isVerified = isVerified;
     }
 
