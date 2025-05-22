@@ -2,6 +2,7 @@ package com.wachichaw.Client.Entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.User.Entity.UserEntity;
 
@@ -24,6 +25,7 @@ public class ClientEntity extends UserEntity{
 
 
     @OneToMany(mappedBy = "client")
+    @JsonManagedReference  
     private List<LegalCasesEntity> cases;
 
     public ClientEntity() {

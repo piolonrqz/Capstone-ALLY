@@ -42,8 +42,11 @@ public class DocumentEntity {
 
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
+    
+    @Column(name = "status")
+    private String status;
 
-    public DocumentEntity(int document_id, LegalCasesEntity legalcaseEntity, ClientEntity uploadedBy, String documentName, String filePath, String documentType, LocalDateTime uploadedAt) {
+    public DocumentEntity(int document_id, LegalCasesEntity legalcaseEntity, ClientEntity uploadedBy, String documentName, String filePath, String documentType, LocalDateTime uploadedAt, String status) {
         this.document_id = document_id;
         this.legalcaseEntity = legalcaseEntity;
         this.uploadedBy = uploadedBy;
@@ -51,6 +54,7 @@ public class DocumentEntity {
         this.filePath = filePath;
         this.documentType = documentType;
         this.uploadedAt = uploadedAt;
+        this.status = status;
     }
 
     public DocumentEntity() {}
@@ -109,5 +113,13 @@ public class DocumentEntity {
 
     public void setUploadedAt(LocalDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
+    }
+
+    public String getStatus(){
+        return status;
+    }
+
+    public void setStatus(String status){
+        this.status = status;
     }
 }
