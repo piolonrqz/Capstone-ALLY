@@ -39,13 +39,15 @@ const LandingPage = () => {
 
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm w-full h-16 px-32 fixed top-0 left-0 right-0 z-[100] shadow-sm">
-        <div className="w-full h-full flex justify-between items-center">
-          <div className="flex items-center gap-2 cursor-pointer">
+        <div className="w-full h-full flex justify-between items-center">          <div className="flex items-center gap-2 cursor-pointer">
             <div className="flex items-center justify-center">
               <img src="/small_logo.png" alt="Logo" className="w-10 h-10" />
             </div>
             <span className="text-2xl font-bold text-blue-500">ALLY</span>
           </div>
+          <nav className="flex items-center gap-6">
+            <Link to="/lawyers" className="text-gray-600 hover:text-blue-600">Find Lawyers</Link>
+          </nav>
           <button
             onClick={() => navigate('/signup')}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium text-base"
