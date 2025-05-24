@@ -12,6 +12,7 @@ import UserManagement from './pages/UserManagement'
 import AnalyticsDashboard from './components/AnalyticsDashboard'
 import SettingsDashboard from './components/SettingsDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
+import { LawyerDirectoryPage } from './pages/LawyerDirectoryPage'
 
 function App() {
   return (
@@ -20,9 +21,9 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
-        <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />
-        <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
+        <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/lawyers" element={<LawyerDirectoryPage />} />
 
         {/* Admin Routes */}
         <Route
