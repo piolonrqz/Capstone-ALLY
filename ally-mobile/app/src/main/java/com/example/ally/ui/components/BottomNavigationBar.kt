@@ -17,12 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.ally.R
+import com.example.ally.navigation.ScreenRoutes
 
 @Composable
-fun AllyBottomNav() {
+fun AllyBottomNav(navController: NavController, currentRoute: String?) {
     Surface(
-        shadowElevation = 0.dp, // Changed from 8.dp to 0.dp to remove shadow
+        shadowElevation = 0.dp,
         color = Color.White
     ) {
         Row(
@@ -32,24 +34,53 @@ fun AllyBottomNav() {
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Order changed to match the image
-            BottomNavItem(R.drawable.ic_home, "Home", true)
-            BottomNavItem(R.drawable.ic_chat, "Chat")
-            BottomNavItem(R.drawable.ic_resources, "Resources")
-            BottomNavItem(R.drawable.ic_lawyers, "Lawyers")
-            BottomNavItem(R.drawable.ic_account, "Account")
+            BottomNavItem(
+                iconRes = R.drawable.ic_home,
+                label = "Home",
+                selected = currentRoute == ScreenRoutes.LANDING,
+                onClick = { if (currentRoute != ScreenRoutes.LANDING) navController.navigate(ScreenRoutes.LANDING) }
+            )
+            BottomNavItem(
+                iconRes = R.drawable.ic_chat,
+                label = "Chat",
+                selected = currentRoute == ScreenRoutes.CHAT,
+                onClick = { if (currentRoute != ScreenRoutes.CHAT) navController.navigate(ScreenRoutes.CHAT) }
+            )
+            BottomNavItem(
+                iconRes = R.drawable.ic_resources,
+                label = "Resources",
+                selected = currentRoute == ScreenRoutes.RESOURCES,
+                onClick = { if (currentRoute != ScreenRoutes.RESOURCES) navController.navigate(ScreenRoutes.RESOURCES) }
+            )
+            BottomNavItem(
+                iconRes = R.drawable.ic_lawyers,
+                label = "Lawyers",
+                selected = currentRoute == ScreenRoutes.LAWYERS,
+                onClick = { /* TODO: if (currentRoute != ScreenRoutes.LAWYERS) navController.navigate(ScreenRoutes.LAWYERS) */ }
+            )
+            BottomNavItem(
+                iconRes = R.drawable.ic_account,
+                label = "Account",
+                selected = currentRoute == ScreenRoutes.ACCOUNT,
+                onClick = { /* TODO: if (currentRoute != ScreenRoutes.ACCOUNT) navController.navigate(ScreenRoutes.ACCOUNT) */ }
+            )
         }
     }
 }
 
 @Composable
-fun BottomNavItem(iconRes: Int, label: String, selected: Boolean = false) {
+fun BottomNavItem(
+    iconRes: Int,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .padding(vertical = 8.dp)
-            .clickable { /* TODO: Handle navigation */ } // Make items clickable
+            .clickable(onClick = onClick)
     ) {
         Image(
             painter = painterResource(id = iconRes),

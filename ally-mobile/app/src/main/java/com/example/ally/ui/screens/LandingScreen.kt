@@ -19,11 +19,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.ally.R
-import com.example.ally.ui.components.AllyBottomNav
+import com.example.ally.navigation.ScreenRoutes
 
 @Composable
-fun LandingScreen() {
+fun LandingScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -57,24 +58,26 @@ fun LandingScreen() {
             iconRes = R.drawable.ic_chat,
             title = "ALLY AI Assistant",
             description = "Get preliminary legal guidance through our AI Assistant.",
-            buttonText = "Start Chat"
+            buttonText = "Start Chat",
+            onClick = { navController.navigate(ScreenRoutes.CHAT) }
         )
         Spacer(modifier = Modifier.height(16.dp))
         LandingCard(
             iconRes = R.drawable.ic_resources,
             title = "Legal Resources",
-            description = "Get preliminary legal guidance through our AI Assistant.",
-            buttonText = "Browse Resources"
+            description = "Explore articles and information on various legal topics.",
+            buttonText = "Browse Resources",
+            onClick = { navController.navigate(ScreenRoutes.RESOURCES)  }
         )
         Spacer(modifier = Modifier.height(16.dp))
         LandingCard(
             iconRes = R.drawable.ic_lawyers,
             title = "Find a Lawyer",
-            description = "Get preliminary legal guidance through our AI Assistant.",
-            buttonText = "Search Lawyers"
+            description = "Connect with legal professionals for expert advice.",
+            buttonText = "Search Lawyers",
+            onClick = { /* TODO: navController.navigate(ScreenRoutes.LAWYERS) */ }
         )
         Spacer(modifier = Modifier.weight(1f))
-        AllyBottomNav()
     }
 }
 
@@ -83,7 +86,8 @@ fun LandingCard(
     iconRes: Int,
     title: String,
     description: String,
-    buttonText: String
+    buttonText: String,
+    onClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -91,7 +95,7 @@ fun LandingCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clickable { /* TODO: Add navigation or action */ }
+            .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
