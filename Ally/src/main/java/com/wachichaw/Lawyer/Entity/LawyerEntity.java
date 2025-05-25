@@ -2,6 +2,7 @@ package com.wachichaw.Lawyer.Entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.User.Entity.AccountType;
 import com.wachichaw.User.Entity.UserEntity;
@@ -29,6 +30,7 @@ public class LawyerEntity extends UserEntity{
     private Boolean credentials_verified = false;
 
     @OneToMany(mappedBy = "lawyer")
+    @JsonManagedReference  
     private List<LegalCasesEntity> legalcaseEntity;
 
     public LawyerEntity(){
@@ -67,5 +69,12 @@ public class LawyerEntity extends UserEntity{
 
     public void setCredentials(String credentials) {
         this.credentials = credentials;
+    }
+    public boolean getCredentialsVerified() {
+        return credentials_verified;
+    }
+
+    public void setCredentialsVerified(Boolean credentials_verified) {
+        this.credentials_verified = credentials_verified;
     }
 }

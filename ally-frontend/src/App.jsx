@@ -1,34 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
+import LandingPage from './pages/LandingPage'
+import SignUpPage from './pages/SignupPage'
+import ClientRegistrationForm from './components/ClientRegistrationForm'
+import LawyerRegistrationForm from './components/LawyerRegistrationForm'
+import VerifyLawyer from './components/VerifyLawyer'
+import Login from './components/Login'
+import Admin from './pages/Admin'
+import AdminDashboard from './components/AdminDashboard'
+import UserManagement from './pages/UserManagement'
+import AnalyticsDashboard from './components/AnalyticsDashboard'
+import SettingsDashboard from './components/SettingsDashboard'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/signup/client" element={<ClientRegistrationForm />} />
+        <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />
+        <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <Admin />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="analytics" element={<AnalyticsDashboard />} />
+          <Route path="settings" element={<SettingsDashboard />} />
+        </Route>
+      </Routes>
+    </Router>
   )
 }
 
