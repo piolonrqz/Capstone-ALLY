@@ -138,7 +138,7 @@ BottomNavItem(
 )
 ```
 
-### 5. Add Screen Icon (if needed)
+### 5. Screen Icon 
 
 **Location:** `app/src/main/res/drawable/`
 
@@ -150,7 +150,6 @@ Available icons in the project:
 - `ic_account.xml` - Account
 - `ic_arrow_right.xml` - Navigation arrow
 
-You can also use SVG exports from Figma located in `app/figma_svg_exports/` if needed.
 
 ## Screen Design Patterns
 
@@ -174,7 +173,6 @@ fun ScreenName(navController: NavController) {
 
 ### Common UI Components
 - Use `Color.White` for background
-- Standard padding: `24.dp`
 - Use Material 3 components (`Button`, `Text`, `Card`, etc.)
 - Follow existing color scheme from `ui/theme/Color.kt`
 
@@ -192,7 +190,7 @@ When adding a new screen, ensure you've updated these files:
 - [ ] `MainActivity.kt` - Add composable route to NavHost
 - [ ] `MainActivity.kt` - Update Scaffold bottomBar condition (if needed)
 - [ ] `ui/components/BottomNavigationBar.kt` - Update navigation logic (if applicable)
-- [ ] Add/verify icon exists in `res/drawable/` (if needed)
+- [ ] Verify icon exists in `res/drawable/` (if needed)
 
 ## Code Quality Guidelines
 
@@ -213,29 +211,12 @@ Follow this order:
 - Use `remember` for simple UI state
 - Consider `ViewModel` for complex business logic (add dependency if needed)
 
-## Additional Suggestions
 
-### 1. Error Handling
-Consider adding a common error handling pattern for API calls or data loading.
-
-### 2. Loading States
-Implement consistent loading indicators across screens.
-
-### 3. Common Components
-Create reusable components in `ui/components/` for:
-- Custom buttons
 - Card layouts
 - Loading indicators
 - Error states
 
-### 4. Theming
-Utilize the existing theme system in `ui/theme/` for consistent styling.
 
-### 5. Testing
-Consider adding unit tests for screen logic and UI tests for navigation flows.
-
-### 6. Accessibility
-Add content descriptions and semantic properties for better accessibility.
 
 ## Example: Adding Resources Screen
 

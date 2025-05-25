@@ -6,5 +6,6 @@ object ScreenRoutes {
     const val RESOURCES = "resources"
     const val LAWYERS = "lawyers"
     const val ACCOUNT = "account"
+    const val LIBRARY_SEARCH = "library_search"
     // Add other routes here as needed
 }

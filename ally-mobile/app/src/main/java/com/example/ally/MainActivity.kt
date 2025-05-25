@@ -22,6 +22,7 @@ import com.example.ally.ui.theme.AllyTheme
 import com.example.ally.ui.screens.LandingScreen
 import com.example.ally.ui.screens.ChatScreen
 import com.example.ally.ui.screens.ResourcesScreen
+import com.example.ally.ui.screens.LibrarySearchScreen
 import com.example.ally.ui.components.AllyBottomNav
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +55,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(ScreenRoutes.RESOURCES) {
                             ResourcesScreen(navController = navController)
+                        }
+                        composable(ScreenRoutes.LIBRARY_SEARCH) {
+                            LibrarySearchScreen(navController = navController)
                         }
                         // Add other composables for other screens here
                         // composable(ScreenRoutes.LAWYERS) { LawyersScreen(navController) }

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.ally.R
+import com.example.ally.navigation.ScreenRoutes
 
 data class LegalResource(
     val id: String,
@@ -104,7 +105,6 @@ fun ResourcesScreen(navController: NavController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-//                    .padding(3.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextField(
@@ -125,8 +125,7 @@ fun ResourcesScreen(navController: NavController) {
                         unfocusedIndicatorColor = Color.Transparent
                     )
                 )
-                
-                IconButton(onClick = { /* TODO: Implement search */ }) {
+                  IconButton(onClick = { navController.navigate(ScreenRoutes.LIBRARY_SEARCH) }) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
