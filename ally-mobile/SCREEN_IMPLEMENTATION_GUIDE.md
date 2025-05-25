@@ -150,6 +150,7 @@ Available icons in the project:
 - `ic_account.xml` - Account
 - `ic_arrow_right.xml` - Navigation arrow
 
+Aside from these icons always use materials icons.
 
 ## Screen Design Patterns
 
@@ -173,6 +174,7 @@ fun ScreenName(navController: NavController) {
 
 ### Common UI Components
 - Use `Color.White` for background
+- Standard padding: `24.dp`
 - Use Material 3 components (`Button`, `Text`, `Card`, etc.)
 - Follow existing color scheme from `ui/theme/Color.kt`
 

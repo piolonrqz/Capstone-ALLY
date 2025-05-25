@@ -56,7 +56,7 @@ fun AllyBottomNav(navController: NavController, currentRoute: String?) {
                 iconRes = R.drawable.ic_lawyers,
                 label = "Lawyers",
                 selected = currentRoute == ScreenRoutes.LAWYERS,
-                onClick = { /* TODO: if (currentRoute != ScreenRoutes.LAWYERS) navController.navigate(ScreenRoutes.LAWYERS) */ }
+                onClick = { if (currentRoute != ScreenRoutes.LAWYERS) navController.navigate(ScreenRoutes.LAWYERS) }
             )
             BottomNavItem(
                 iconRes = R.drawable.ic_account,
