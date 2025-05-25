@@ -24,6 +24,7 @@ import com.example.ally.ui.screens.ChatScreen
 import com.example.ally.ui.screens.ResourcesScreen
 import com.example.ally.ui.screens.LibrarySearchScreen
 import com.example.ally.ui.screens.LawyersScreen
+import com.example.ally.ui.screens.LawyerProfileScreen
 import com.example.ally.ui.components.AllyBottomNav
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +63,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(ScreenRoutes.LAWYERS) {
                             LawyersScreen(navController = navController)
+                        }
+                        composable(ScreenRoutes.LAWYER_PROFILE) {
+                            LawyerProfileScreen(navController = navController)
                         }
                         // Add other composables for other screens here
                         // composable(ScreenRoutes.ACCOUNT) { AccountScreen(navController) }

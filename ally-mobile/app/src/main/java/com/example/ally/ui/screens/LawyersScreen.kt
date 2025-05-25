@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.ally.R
+import com.example.ally.navigation.ScreenRoutes
 
 data class Lawyer(
     val name: String,
@@ -227,14 +228,14 @@ fun LawyersScreen(navController: NavController) {
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             items(lawyers) { lawyer ->
-                LawyerCard(lawyer = lawyer)
+                LawyerCard(lawyer = lawyer, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun LawyerCard(lawyer: Lawyer) {
+fun LawyerCard(lawyer: Lawyer, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -397,9 +398,8 @@ fun LawyerCard(lawyer: Lawyer) {
                         color = Color(0xFF424242)
                     )
                 }
-                
-                Button(
-                    onClick = { /* Navigate to profile */ },
+                  Button(
+                    onClick = { navController.navigate(ScreenRoutes.LAWYER_PROFILE) },
                     modifier = Modifier
                         .height(34.dp),
                     shape = RoundedCornerShape(5.dp),
