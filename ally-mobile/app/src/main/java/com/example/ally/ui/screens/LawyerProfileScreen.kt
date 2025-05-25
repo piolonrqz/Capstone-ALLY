@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.ally.R
+import com.example.ally.navigation.ScreenRoutes
 
 @Composable
 fun LawyerProfileScreen(navController: NavController) {
@@ -160,7 +161,7 @@ fun LawyerProfileScreen(navController: NavController) {
                                         Color(0xFF16A34A),
                                         RoundedCornerShape(15.dp)
                                     )
-                                    .padding(horizontal = 6.dp, vertical = 7.dp)
+                                    .padding(horizontal = 18.dp, vertical = 7.dp)
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically
@@ -468,7 +469,7 @@ fun LawyerProfileScreen(navController: NavController) {
                 .padding(17.dp)
         ) {
             Button(
-                onClick = { /* TODO: Implement consultation request */ },
+                onClick = { navController.navigate(ScreenRoutes.ACCOUNT) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(38.dp),
