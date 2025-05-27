@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, Eye, Trash2, X } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 
 const DocumentSubmission = () => {
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
   const fileInputRef = useRef(null);
 
   // Mock initial documents for demonstration
@@ -71,62 +73,124 @@ const DocumentSubmission = () => {
   const handleFiles = async (files) => {
     setIsUploading(true);
     
-    // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const newDocuments = files.map((file, index) => ({
-      id: Date.now() + index,
-      name: file.name,
-      type: getFileType(file.name),
-      size: formatFileSize(file.size),
-      uploaded: new Date().toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-      })
-    }));
+    try {
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const newDocuments = files.map((file, index) => ({
+        id: Date.now() + index,
+        name: file.name,
+        type: getFileType(file.name),
+        size: formatFileSize(file.size),
+        uploaded: new Date().toLocaleDateString('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric'
+        })
+      }));
 
-    setUploadedDocuments(prev => [...prev, ...newDocuments]);
-    setIsUploading(false);
-    
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      setUploadedDocuments(prev => [...prev, ...newDocuments]);
+      
+      // Show success toast
+      toast.success(
+        files.length > 1 
+          ? `${files.length} documents uploaded successfully` 
+          : `${files[0].name} uploaded successfully`
+      );
+    } catch (error) {
+      // Show error toast
+      toast.error('Failed to upload documents. Please try again.');
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   // Delete document
   const handleDelete = (id) => {
     setUploadedDocuments(prev => prev.filter(doc => doc.id !== id));
+    toast.success('Document deleted successfully');
   };
 
-  // View document (mock action)
+  // View document
   const handleView = (document) => {
-    alert(`Opening ${document.name}`);
+    setSelectedDocument(document);
+  };
+
+  // Close document viewer
+  const handleCloseViewer = () => {
+    setSelectedDocument(null);
   };
 
   // Use mock documents if no documents uploaded (for demo purposes)
   const documentsToShow = uploadedDocuments.length > 0 ? uploadedDocuments : mockDocuments;
 
   return (
-    <div className="min-h-screen p-4 bg-pink-100">
-      <div className="max-w-4xl mx-auto">
-        {/* Module Header */}
-        <div className="px-4 py-2 text-white bg-gray-800 rounded-t-lg">
-          <span className="font-medium">Module 4</span>
+    <div className="min-h-screen p-4 bg-gray-50">
+      <Toaster 
+        position="top-right"
+        expand={false}
+        richColors
+      />
+      
+      {/* Document Viewer Modal */}
+      {selectedDocument && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="relative w-full max-w-4xl p-6 bg-white rounded-lg">
+            <button
+              onClick={handleCloseViewer}
+              className="absolute p-1 text-gray-500 transition-colors rounded-full hover:bg-gray-100 top-4 right-4"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold">{selectedDocument.name}</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {selectedDocument.type.toUpperCase()} • {selectedDocument.size} • Uploaded on {selectedDocument.uploaded}
+              </p>
+            </div>
+            
+            <div className="p-4 rounded-lg bg-gray-50">
+              {selectedDocument.type === 'pdf' ? (
+                <iframe
+                  src={`${selectedDocument.url}#view=FitH`}
+                  className="w-full min-h-[600px] border-0"
+                  title={selectedDocument.name}
+                />
+              ) : selectedDocument.type === 'jpg' || selectedDocument.type === 'jpeg' || selectedDocument.type === 'png' ? (
+                <img
+                  src={selectedDocument.url}
+                  alt={selectedDocument.name}
+                  className="max-w-full mx-auto"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <FileText className="w-16 h-16 mb-4 text-gray-400" />
+                  <p className="mb-2 text-gray-600">Preview not available for this file type</p>
+                  <a
+                    href={selectedDocument.url}
+                    download={selectedDocument.name}
+                    className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    Download File
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        
-        <div className="px-4 py-2 bg-pink-200">
-          <span className="text-gray-700">document upload</span>
-        </div>
+      )}
 
-        <div className="p-6 bg-white rounded-b-lg">
-          <h2 className="mb-6 text-xl font-bold">Document Submission</h2>
+      <div className="max-w-4xl mx-auto mt-16">
+        <div className="p-6 bg-white rounded-lg shadow-sm">
+          <h2 className="mb-6 text-2xl font-bold text-gray-900">Document Upload</h2>
 
           {/* Upload Section */}
           <div className="mb-8">
-            <h3 className="mb-4 font-medium">Upload Document</h3>
-            
             {/* Drag & Drop Zone */}
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -188,7 +252,7 @@ const DocumentSubmission = () => {
 
           {/* Documents Table */}
           <div>
-            <h3 className="mb-4 font-medium">Your Documents</h3>
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">Your Documents</h3>
             
             <div className="overflow-x-auto">
               <table className="w-full border border-gray-200 rounded-lg">
