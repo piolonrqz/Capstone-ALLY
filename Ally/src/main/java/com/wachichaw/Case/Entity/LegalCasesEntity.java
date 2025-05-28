@@ -1,5 +1,6 @@
 package com.wachichaw.Case.Entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,13 +22,13 @@ public class LegalCasesEntity {
     @Column(name = "case_id")
     private int caseId;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = true)
     private String title;
 
-    @Column(name = "case_no", nullable = false, unique = true)
+    @Column(name = "case_no", nullable = true, unique = true)
     private long caseNumber;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = true)
     private String description;
 
     @CreationTimestamp
@@ -39,12 +40,12 @@ public class LegalCasesEntity {
 
     @ManyToOne
     @JoinColumn(name = "lawyer_id")
-    @JsonBackReference
+    @JsonBackReference(value = "lawyer-case")
     private LawyerEntity lawyer;
 
     @ManyToOne
     @JoinColumn(name = "client_id", referencedColumnName = "user_id")
-    @JsonBackReference
+    @JsonBackReference(value = "client-case")
     private ClientEntity client;
 
     @OneToMany(mappedBy = "legalcaseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -133,4 +134,6 @@ public class LegalCasesEntity {
     public void setMessages(List<MessageEntity> messages) {
         this.messages = messages;
     }
+
+ 
 }

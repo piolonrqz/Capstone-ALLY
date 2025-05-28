@@ -3,16 +3,16 @@ import { useState } from "react";
 export default function ClientRegistrationForm() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    fName: "",
+    lName: "",
     email: "",
     password: "",
     confirmPassword: "",
     phoneNumber: "",
     address: "",
     city: "",
-    state: "",
-    zipCode: "",
+    province: "",
+    zip: "",
     agreeToTerms: false
   });
   const [errors, setErrors] = useState({});
@@ -36,8 +36,8 @@ export default function ClientRegistrationForm() {
   const validateStep1 = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.fName.trim()) newErrors.fName = "First name is required";
+    if (!formData.lName.trim()) newErrors.lName = "Last name is required";
     
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
@@ -65,8 +65,8 @@ export default function ClientRegistrationForm() {
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
     if (!formData.address.trim()) newErrors.address = "Address is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
-    if (!formData.state.trim()) newErrors.state = "State is required";
-    if (!formData.zipCode.trim()) newErrors.zipCode = "ZIP code is required";
+    if (!formData.province.trim()) newErrors.province = "Province is required";
+    if (!formData.zip.trim()) newErrors.zip = "ZIP code is required";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms";
     
     setErrors(newErrors);
@@ -83,13 +83,34 @@ export default function ClientRegistrationForm() {
     setStep(1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep2()) {
-      // Here you would typically send the data to your backend
-      console.log("Form submitted with:", formData);
-      // Show success message or redirect user
+        try{
+         const body = {
+  email: formData.email,
+  password: formData.password,
+  Fname: formData.fName,   
+  Lname: formData.lName,   
+  phoneNumber: formData.phoneNumber,
+  address: formData.address,
+  city: formData.city,
+  province: formData.province,
+  zip: formData.zip
+};
+
+console.log("Submitting form with b:", body);
+        await fetch("http://localhost:8080/users/Client", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(body)
+        })
+        console.log("Form submitted with:", body);
       alert("Registration successful!");
+      }
+      catch (error) {
+        console.error("Error submitting form:", error);
+      }
     }
   };
   return (    
@@ -121,24 +142,24 @@ export default function ClientRegistrationForm() {
                 <div className="w-1/2">
                   <input
                     type="text"
-                    name="firstName"
+                    name="fName"
                     placeholder="First Name"
-                    className={`w-full p-3 border rounded-lg ${errors.firstName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
-                    value={formData.firstName}
+                    className={`w-full p-3 border rounded-lg ${errors.fName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
+                    value={formData.fName}
                     onChange={handleChange}
                   />
-                  {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+                  {errors.fName && <p className="text-red-500 text-xs mt-1">{errors.fName}</p>}
                 </div>
                 <div className="w-1/2">
                   <input
                     type="text"
-                    name="lastName"
+                    name="lName"
                     placeholder="Last Name"
-                    className={`w-full p-3 border rounded-lg ${errors.lastName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
-                    value={formData.lastName}
+                    className={`w-full p-3 border rounded-lg ${errors.lName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
+                    value={formData.lName}
                     onChange={handleChange}
                   />
-                  {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+                  {errors.lName && <p className="text-red-500 text-xs mt-1">{errors.lName}</p>}
                 </div>
               </div>
               
@@ -233,26 +254,26 @@ export default function ClientRegistrationForm() {
                 <div className="w-1/2">
                   <input
                     type="text"
-                    name="state"
-                    placeholder="State"
-                    className={`w-full p-2 border rounded ${errors.state ? 'border-red-500' : 'border-gray-300'}`}
-                    value={formData.state}
+                    name="province"
+                    placeholder="Province"
+                    className={`w-full p-2 border rounded ${errors.province ? 'border-red-500' : 'border-gray-300'}`}
+                    value={formData.province}
                     onChange={handleChange}
                   />
-                  {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
+                  {errors.province && <p className="text-red-500 text-xs mt-1">{errors.province}</p>}
                 </div>
               </div>
               
               <div>
                 <input
                   type="text"
-                  name="zipCode"
+                  name="zip"
                   placeholder="Zip Code"
-                  className={`w-full p-2 border rounded ${errors.zipCode ? 'border-red-500' : 'border-gray-300'}`}
-                  value={formData.zipCode}
+                  className={`w-full p-2 border rounded ${errors.zip ? 'border-red-500' : 'border-gray-300'}`}
+                  value={formData.zip}
                   onChange={handleChange}
                 />
-                {errors.zipCode && <p className="text-red-500 text-xs mt-1">{errors.zipCode}</p>}
+                {errors.zip && <p className="text-red-500 text-xs mt-1">{errors.zip}</p>}
               </div>
               
               <div className="flex items-center mt-4">

@@ -37,24 +37,33 @@ public class UserService {
     }
 
 
-    public ClientEntity createClient(String email, String pass, String Fname, String Lname, String contact_info, String location) {
+    public ClientEntity createClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip) {
         ClientEntity client = new ClientEntity();
         client.setEmail(email);
         client.setPassword(passwordEncoder.encode(pass));
         client.setFname(Fname);
         client.setLname(Lname);
-        client.setContactInfo(contact_info);
-        client.setLocation(location);
+        client.setPhoneNumber(phoneNumber);
+        client.setAddress(address);
+        client.setCity(city);
+        client.setProvince(province);
+        client.setZip(zip);
         client.setAccountType(AccountType.CLIENT);  
         return userRepo.save(client);
     }
 
-    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, String specialization, String experience, String credentials) {
+    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials) {
         LawyerEntity lawyer = new LawyerEntity();
         lawyer.setEmail(email);
         lawyer.setPassword(passwordEncoder.encode(pass));
         lawyer.setFname(Fname);
         lawyer.setLname(Lname);
+        lawyer.setPhoneNumber(phoneNumber);
+        lawyer.setAddress(address);
+        lawyer.setCity(city);
+        lawyer.setProvince(province);
+        lawyer.setZip(zip);
+        lawyer.setBarNumber(barNumber);
         lawyer.setSpecialization(specialization);
         lawyer.setExperience(experience);
         lawyer.setCredentials(credentials); 
