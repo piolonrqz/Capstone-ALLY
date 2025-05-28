@@ -41,6 +41,21 @@ public abstract class UserEntity {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "phone_number", nullable = true)
+    private Long phoneNumber;
+
+    @Column(name = "address", nullable = true)
+    private String address;
+
+    @Column(name = "city", nullable = true)
+    private String city;
+
+    @Column(name = "province", nullable = true)
+    private String province;
+
+    @Column(name = "zip", nullable = true)
+    private String zip;
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -58,7 +73,7 @@ public abstract class UserEntity {
     public UserEntity() {
     }
 
-    public UserEntity(int userId, String email, String password, String Fname,String Lname, LocalDateTime createdAt, boolean isVerified) {
+    public UserEntity(int userId, String email, String password, String Fname,String Lname, LocalDateTime createdAt, boolean isVerified, Long phoneNumber, String address, String city, String province, String zip) {
         super();
         this.userId = userId;
         this.Fname = Fname;
@@ -66,6 +81,11 @@ public abstract class UserEntity {
         this.password = password;
         this.createdAt = createdAt;
         this.isVerified = isVerified;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.city = city;
+        this.province = province;
+        this.zip = zip;
     }
 
     public int getUserId() {
@@ -134,4 +154,36 @@ public abstract class UserEntity {
     public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
     }
+
+    public Long getPhoneNumber() {
+        return phoneNumber;
+    }
+    public void setPhoneNumber(Long phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+    public String getAddress() {
+        return address;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+    public String getCity() {
+        return city;
+    }
+    public void setCity(String city) {
+        this.city = city;
+    }
+    public String getProvince() {
+        return province;
+    }
+    public void setProvince(String province) {
+        this.province = province;
+    }
+    public String getZip() {
+        return zip;
+    }
+    public void setZip(String zip) {
+        this.zip = zip;
+    }
+    
 }

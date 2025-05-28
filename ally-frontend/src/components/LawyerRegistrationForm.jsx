@@ -28,7 +28,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
     otherPracticeArea: "",
     yearsOfExperience: "",
     professionalBio: "",
-    credentials: [],
+    credentials: null,
     agreeToTerms: false
   });
   const [errors, setErrors] = useState({});
@@ -106,7 +106,6 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
     
     if (!formData.prcNumber.trim()) newErrors.prcNumber = "Bar Number is required";
     if (!formData.yearsOfExperience.trim()) newErrors.yearsOfExperience = "Years of experience is required";
-    if (!formData.professionalBio.trim()) newErrors.professionalBio = "Professional bio is required";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms";
     
     setErrors(newErrors);
@@ -133,12 +132,37 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
     e.preventDefault();
     if (validateStep3()) {
       try {
-        // Here you would typically send the data to your backend
-        console.log("Form submitted with:", formData);
-        // Simulate backend call
+        const body = new FormData();
+        body.append("email", formData.email);
+        body.append("password", formData.password);
+        body.append("Fname", formData.firstName);             
+        body.append("Lname", formData.lastName);               
+        body.append("phoneNumber", formData.phoneNumber);      
+        body.append("address", formData.address);
+        body.append("city", formData.city);
+        body.append("province", formData.state);              
+        body.append("zip", formData.zipCode);                  
+        body.append("barNumber", formData.prcNumber);          
+        body.append("experience", formData.yearsOfExperience);
+
+
+        const practiceAreas = formData.practiceAreas;
+
+        Object.keys(practiceAreas).forEach(area => {
+       if (practiceAreas[area]) {
+    body.append("specialization", area);
+  }
+});
+        body.append("credentials", formData.credentials); 
+
+        fetch("http://localhost:8080/users/Lawyer", {
+        method: "POST",
+        body: body 
+      })
         await new Promise(resolve => setTimeout(resolve, 1000));
-        // Redirect to verify lawyer page with email
-        navigate('/signup/lawyer/verify-lawyer', { state: { email: formData.email } });
+        console.log("Form submitted with:", body);
+      alert("Registration successful!");
+        // navigate('/signup/lawyer/verify-lawyer', { state: { email: formData.email } });
       } catch (error) {
         console.error('Error submitting form:', error);
       }
@@ -542,18 +566,6 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-start text-gray-700 mb-1">Professional Bio</label>
-                <textarea
-                  name="professionalBio"
-                  rows="5"
-                  className={`w-full p-2 border rounded ${errors.professionalBio ? 'border-red-500' : 'border-gray-300'}`}
-                  value={formData.professionalBio}
-                  onChange={handleChange}
-                ></textarea>
-                {errors.professionalBio && <p className="text-red-500 text-xs mt-1">{errors.professionalBio}</p>}
-              </div>
-              
-              <div>
                 <label className="block text-sm font-medium text-start text-gray-700 mb-1">Credentials & Certifications</label>
                 <div className="border border-gray-300 border-dashed rounded p-6 text-center">
                   <div className="flex justify-center mb-4">
@@ -563,19 +575,23 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   </div>
                   <p className="text-gray-600 mb-2">Drag and drop files here or</p>
                   <label className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-600">
-                    Browse Files
-                    <input
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          credentials: [...formData.credentials, ...e.target.files]
-                        });
-                      }}
-                    />
-                  </label>
+                         Browse Files
+                           <input
+                            type="file"
+                            className="hidden"
+                              onChange={(e) => {
+                                  setFormData({
+                                          ...formData,  
+                                            credentials: e.target.files[0]
+                                              });
+                                            }}
+                                          />
+                                          </label>
+                                  {formData.credentials && (
+                                        <p className="mt-2 text-xs text-gray-700">
+                                        Selected file: {formData.credentials.name}
+                                              </p>
+                                )}
                   <p className="text-xs text-gray-500 mt-2">PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB each)</p>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 package com.wachichaw.Lawyer.Entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -7,9 +8,11 @@ import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.User.Entity.AccountType;
 import com.wachichaw.User.Entity.UserEntity;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -17,44 +20,60 @@ import jakarta.persistence.Table;
 @Table(name = "Lawyer")
 public class LawyerEntity extends UserEntity{
 
-    @Column(name = "specialization")
-    private String specialization;
+    @Column(name = "Bar_number", nullable = true)
+    private String barNumber;
+
+    @ElementCollection
+    @CollectionTable(name = "lawyer_specializations", joinColumns = @JoinColumn(name = "lawyer_id"))
+@   Column(name = "specialization")
+    private List<String> specialization = new ArrayList<>();
 
     @Column(name = "experience")
     private String experience;
 
-    @Column(name = "credentials")
+    @Column(name = "credentials", nullable = true)
     private String credentials;
 
     @Column(name = "credentials_verified", nullable = true)
     private Boolean credentials_verified = false;
 
     @OneToMany(mappedBy = "lawyer")
-    @JsonManagedReference  
+    @JsonManagedReference(value = "lawyer-case")
     private List<LegalCasesEntity> legalcaseEntity;
 
     public LawyerEntity(){
     }
 
 
-    public LawyerEntity(int userId, String email, String password, String Fname, String Lname,
-                    String specialization, String experience, String credentials,
-                    String profPic, boolean isVerified, AccountType accountType) {
-    super(userId, email, password, Fname, Lname, null, isVerified);
-    this.setAccountType(accountType); 
+  public LawyerEntity(
+    int userId, String email, String password, String Fname, String Lname,
+    Long phoneNumber, String address, String city, String province, String zip,
+    String barNumber,
+    List<String> specialization, String experience, String credentials,
+    boolean isVerified, AccountType accountType 
+) {
+    super(userId, email, password, Fname, Lname, null, isVerified, phoneNumber, address, city, province, zip);
+    this.setAccountType(accountType);
+    this.barNumber = barNumber;
     this.specialization = specialization;
     this.experience = experience;
     this.credentials = credentials;
 }
 
-    public String getSpecialization() {
-        return specialization;
-    }
+public String getBarNumber() {
+    return barNumber;
+}
+public void setBarNumber(String barNumber) {
+    this.barNumber = barNumber;
+}
 
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
-    }
+  public List<String> getSpecialization() {
+    return specialization;
+}
 
+public void setSpecialization(List<String> specialization) {
+    this.specialization = specialization;
+}
     public String getExperience() {
         return experience;
     }

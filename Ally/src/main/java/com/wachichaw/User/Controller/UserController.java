@@ -1,14 +1,16 @@
 package com.wachichaw.User.Controller;
 
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Config.JwtUtil;
@@ -19,16 +21,10 @@ import com.wachichaw.User.Repo.UserRepo;
 import com.wachichaw.User.Service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.MediaType;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 
@@ -46,13 +42,59 @@ public class UserController {
    
     @PostMapping("/Client")
     public ClientEntity createClient(@RequestBody ClientEntity client) {
-        return userService.createClient(client.getEmail(), client.getPassword(), client.getFname(), client.getLname(), client.getContactInfo(), client.getLocation());
+        return userService.createClient(client.getEmail(), client.getPassword(), client.getFname(), client.getLname(), 
+                                        client.getPhoneNumber(), client.getAddress(), client.getCity(), 
+                                        client.getProvince(), client.getZip());
     }
 
-    @PostMapping("/Lawyer")
-    public LawyerEntity createLawyer(@RequestBody LawyerEntity lawyer) {
-        return userService.createLawyer(lawyer.getEmail(), lawyer.getPassword(), lawyer.getFname(), lawyer.getLname(),lawyer.getSpecialization(), lawyer.getExperience(), lawyer.getCredentials());
-    }
+    @PostMapping(value = "/Lawyer", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LawyerEntity> createLawyer(
+    @RequestParam("email") String email,
+    @RequestParam("password") String password,
+    @RequestParam("Fname") String fname,
+    @RequestParam("Lname") String lname,
+    @RequestParam("phoneNumber") Long phoneNumber,
+    @RequestParam("address") String address,
+    @RequestParam("city") String city,
+    @RequestParam("province") String province,
+    @RequestParam("zip") String zip,
+    @RequestParam("barNumber") String barNumber,
+    @RequestParam("specialization") List<String> specialization,
+    @RequestParam("experience") String experience,
+    @RequestParam("credentials") MultipartFile credentialsFile
+) throws java.io.IOException {
+
+
+    String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/credentials";
+    Files.createDirectories(Paths.get(uploadDir)); // Ensure directory exists
+
+    String uniqueFileName = UUID.randomUUID() + "_" + credentialsFile.getOriginalFilename();
+    Path filePath = Paths.get(uploadDir, uniqueFileName);
+    Files.copy(credentialsFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+    // Save the relative path to DB
+    String relativePath = "/static/credentials/" + uniqueFileName;
+
+    LawyerEntity lawyer = userService.createLawyer(
+        email,
+        password,
+        fname,
+        lname,
+        phoneNumber,
+        address,
+        city,
+        province,
+        zip,
+        barNumber,
+        specialization,
+        experience,
+        relativePath 
+    );
+     
+
+    return ResponseEntity.ok(lawyer);
+}
+
 
     @PostMapping("/login")
     @Operation(summary = "Login a user")

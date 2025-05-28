@@ -16,40 +16,11 @@ import jakarta.persistence.Table;
 @Table(name = "Client")
 public class ClientEntity extends UserEntity{
 
-    
-    @Column(name = "contact_info")
-    private String contact_info;
-
-    @Column(name = "location")
-    private String location;
-
-
     @OneToMany(mappedBy = "client")
-    @JsonManagedReference  
+    @JsonManagedReference(value = "client-case")
     private List<LegalCasesEntity> cases;
 
     public ClientEntity() {
     }
-    public ClientEntity(int clientId, String location, String contact_info ){
-        this.location = location;
-        this.contact_info = contact_info;
-    }
-
-
-    public String getLocation(){
-        return location;
-    }
-
-    public void setLocation(String location){
-        this.location = location;
-    }
-
-    public String getContactInfo(){
-        return contact_info;
-    }
-
-    public void setContactInfo(String contact_info){
-        this.contact_info = contact_info;
-    }
-
+    
 }
