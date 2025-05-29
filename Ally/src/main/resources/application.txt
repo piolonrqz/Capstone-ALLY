@@ -14,13 +14,10 @@ spring.application.name=ally
 
 server.port=8080
 
-# CHANGE this to your own database connection
-spring.datasource.url=jdbc:mysql://localhost:3306/ally
-
-spring.web.resources.static-locations=classpath:/static/, file:C:/Users/USER/Documents/GitHub/Capstone-ALLY/Ally/src/main/resources/static
-
+# Railway Database Configuration
+spring.datasource.url=jdbc:mysql://shortline.proxy.rlwy.net:34153/railway
 spring.datasource.username=root
-spring.datasource.password=1234
+spring.datasource.password=kOWGxOjnBYeizKpONdSNcffVEDXBAhLR
 
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 logging.level.org.springframework.security=DEBUG
@@ -30,11 +27,8 @@ spring.jpa.show-sql=true
 
 server.error.include-stacktrace=never
 
-
-# AI
+# AI - Gemini Flash 2.0
 spring.ai.openai.chat.base-url=https://generativelanguage.googleapis.com
 spring.ai.openai.chat.completions-path=/v1beta/openai/chat/completions
-spring.ai.openai.api-key= 
+spring.ai.openai.api-key= AIzaSyBKAnxwUKbQdw87tccs-gLJx2vP03YHH9k
 spring.ai.openai.chat.options.model=gemini-2.0-flash
-
-
