@@ -1,67 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SearchPanel } from '../components/SearchPanel';
 import { LawyerProfile } from '../components/LawyerProfile';
 import { AIMatching } from '../components/AIMatching';
-
-// Mock lawyer data
-const lawyers = [
-  {
-    id: 1,
-    name: 'Sarah Johnson',
-    specialty: 'Family Law',
-    location: 'Manila',
-    rating: 4.8,
-    experience: '15 years',
-    caseType: 'Divorce',
-    fee: '₱5,000/hour',
-    image: 'SJ',
-    about: 'Specialized in family law with over 15 years of experience handling divorce, custody, and child support cases.',
-    education: 'University of the Philippines College of Law',
-    areas: ['Divorce', 'Civil Custody', 'Alimony', 'Prenuptial Agreements']
-  },
-  {
-    id: 2,
-    name: 'Miguel Santos',
-    specialty: 'Criminal Law',
-    location: 'Quezon City',
-    rating: 4.9,
-    experience: '20 years',
-    caseType: 'Criminal Defense',
-    fee: '₱6,000/hour',
-    image: 'MS',
-    about: 'Expert criminal defense attorney with extensive trial experience and a track record of successful cases.',
-    education: 'Ateneo Law School',
-    areas: ['Criminal Defense', 'White Collar Crime', 'Appeals', 'Drug Cases']
-  },
-  {
-    id: 3,
-    name: 'Anna Reyes',
-    specialty: 'Corporate Law',
-    location: 'Makati',
-    rating: 4.7,
-    experience: '12 years',
-    caseType: 'Business Law',
-    fee: '₱4,500/hour',
-    image: 'AR',
-    about: 'Specializing in corporate law, mergers and acquisitions, and business formation.',
-    education: 'San Beda College of Law',
-    areas: ['Corporate Law', 'Mergers & Acquisitions', 'Business Formation', 'Contracts']
-  },
-  {
-    id: 4,
-    name: 'James Tan',
-    specialty: 'Immigration Law',
-    location: 'Pasig',
-    rating: 4.6,
-    experience: '10 years',
-    caseType: 'Immigration',
-    fee: '₱4,000/hour',
-    image: 'JT',
-    about: 'Dedicated to helping clients navigate complex immigration processes and requirements.',
-    education: 'Far Eastern University Institute of Law',
-    areas: ['Immigration', 'Visa Applications', 'Citizenship', 'Deportation Defense']
-  }
-];
 
 export const LawyerDirectoryPage = () => {
   const [activeView, setActiveView] = useState('search');
@@ -73,6 +13,49 @@ export const LawyerDirectoryPage = () => {
     availability: 'Any Day',
     rating: 'Any Rating'
   });
+  const [fetchedLawyers, setFetchedLawyers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchVerifiedLawyers = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8080/lawyers/verified');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        // Assuming the API returns an array of lawyer objects
+        // And we need to map them to the structure expected by LawyerCard and LawyerProfile
+        const transformedData = data.map(lawyer => ({
+          id: lawyer.userId, // Assuming 'userId' from backend maps to 'id'
+          name: `${lawyer.Fname} ${lawyer.Lname}`, // Combine Fname and Lname
+          specialty: lawyer.specialization && lawyer.specialization.length > 0 ? lawyer.specialization.join(', ') : 'Not specified', // Join specializations or provide default
+          location: `${lawyer.city}, ${lawyer.province}`, // Combine city and province
+          rating: lawyer.rating || 0, // Provide default if not present
+          experience: lawyer.experience ? `${lawyer.experience} years` : 'N/A',
+          // caseType: 'N/A', // This field is not directly available from the backend snippet
+          fee: lawyer.consultationFee ? `₱${lawyer.consultationFee}/hour` : 'N/A', // Assuming consultationFee exists
+          image: `${lawyer.Fname ? lawyer.Fname[0] : ''}${lawyer.Lname ? lawyer.Lname[0] : ''}`.toUpperCase(), // Initials for image
+          about: lawyer.bio || 'No biography available.', // Assuming bio exists
+          education: lawyer.education || 'Not specified', // Assuming education exists
+          areas: lawyer.specialization || [], // Assuming specialization is an array
+          // Add other fields as necessary, mapping from backend lawyer entity
+        }));
+        setFetchedLawyers(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch verified lawyers:", err);
+        setError(err.message);
+        setFetchedLawyers([]); // Set to empty array on error to avoid issues with map
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVerifiedLawyers();
+  }, []);
 
   const handleLawyerSelect = (lawyer) => {
     setSelectedLawyer(lawyer);
@@ -122,12 +105,12 @@ export const LawyerDirectoryPage = () => {
                 setSearchQuery={setSearchQuery}
                 filters={filters}
                 setFilters={setFilters}
-                lawyers={lawyers}
+                lawyers={fetchedLawyers} // Use fetchedLawyers
                 onLawyerSelect={handleLawyerSelect}
               />
             ) : (
               <AIMatching 
-                lawyers={lawyers}
+                lawyers={fetchedLawyers} // Use fetchedLawyers
                 onLawyerSelect={handleLawyerSelect}
               />
             )}

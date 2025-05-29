@@ -21,7 +21,7 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Intege
     List<ScheduleEntity> findByClient(ClientEntity client);
 
     // Find all schedules for a specific lawyer by ID
-    List<ScheduleEntity> findByLawyerLawyerId(Long lawyerId);
+    List<ScheduleEntity> findByLawyerUserId(Long lawyerId);
 
     // Find all schedules for a specific client by ID
     List<ScheduleEntity> findByClientUserId(Long clientId);
@@ -45,7 +45,7 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Intege
     );
 
     // Find schedules by lawyer within a date range (alternative with query)
-    @Query("SELECT s FROM ScheduleEntity s WHERE s.lawyer.lawyerId = :lawyerId " +
+    @Query("SELECT s FROM ScheduleEntity s WHERE s.lawyer.userId = :lawyerId " +
            "AND s.bookingStartTime >= :startTime AND s.bookingEndTime <= :endTime")
     List<ScheduleEntity> findByLawyerAndDateRange(
             @Param("lawyerId") Long lawyerId,
@@ -54,7 +54,7 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Intege
     );
 
     // Find upcoming schedules for a lawyer (next 30 days) by lawyer ID
-    @Query("SELECT s FROM ScheduleEntity s WHERE s.lawyer.lawyerId = :lawyerId " +
+    @Query("SELECT s FROM ScheduleEntity s WHERE s.lawyer.userId = :lawyerId " +
            "AND s.bookingStartTime >= :now AND s.bookingStartTime <= :futureDate " +
            "ORDER BY s.bookingStartTime ASC")
     List<ScheduleEntity> findUpcomingSchedulesForLawyer(
