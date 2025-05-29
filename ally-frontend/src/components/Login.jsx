@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,12 +24,17 @@ const Login = () => {
 
       const data = await response.json();
       localStorage.setItem('token', data.token); 
-      localStorage.setItem('role', data.role);
+      localStorage.setItem('role', data.accountType);
       console.log('Login response:', data);
       console.log('Login successful:', data);
 
-      // TODO: Store token, redirect, etc.
+      
       alert('Login successful!');
+       if (data.accountType === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/'); 
+      }
     } catch (error) {
       console.error('Login failed:', error);
       alert('Login failed. Please check your credentials.');
