@@ -15,6 +15,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { LawyerDirectoryPage } from './pages/LawyerDirectoryPage'
 import DocumentSubmission from './components/DocumentSubmission'
 import AccountSettings from './components/AccountSettings'
+import ChatContainer from './components/ChatContainer'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/lawyers" element={<LawyerDirectoryPage />} />
         <Route path="/documents" element={<DocumentSubmission />} />
         <Route path="/settings" element={<AccountSettings />} />
+        <Route path="/chat" element={<ChatContainer />} />
 
         {/* Admin Routes */}
         <Route

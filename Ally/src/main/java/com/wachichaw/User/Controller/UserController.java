@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,8 @@ import com.wachichaw.Admin.Service.AdminService;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Config.JwtUtil;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
+import com.wachichaw.Lawyer.Service.LawyerService;
+import com.wachichaw.User.Entity.AccountType;
 import com.wachichaw.User.Entity.LoginRequest;
 import com.wachichaw.User.Entity.UserEntity;
 import com.wachichaw.User.Repo.UserRepo;
@@ -151,4 +154,122 @@ public class UserController {
     public String DeleteUser(@PathVariable int userId) {
         return userService.deleteUser(userId);
     }
+    
+    @Autowired
+    private LawyerService lawyerService;
+
+    @GetMapping("/search")
+    @Operation(summary = "Search and filter lawyers", description = "Filter lawyers by specialization, location, and other criteria")
+    public ResponseEntity<List<LawyerEntity>> searchLawyers(
+            @RequestParam(required = false) String specialization,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String province,
+            @RequestParam(required = false) String experience,
+            @RequestParam(required = false) String name) {
+        
+        // Get all lawyers from the database
+        List<LawyerEntity> allLawyers = userRepo.findAll().stream()
+                .filter(user -> user.getAccountType() == AccountType.LAWYER)
+                .map(user -> (LawyerEntity) user)
+                .collect(Collectors.toList());
+        
+        // Apply filters
+        List<LawyerEntity> filteredLawyers = allLawyers.stream()
+                .filter(lawyer -> {
+                    boolean matches = true;
+                    
+                    // Filter by specialization
+                    if (specialization != null && !specialization.trim().isEmpty() 
+                        && !specialization.equalsIgnoreCase("All Specialties")) {
+                        matches = matches && lawyer.getSpecialization() != null 
+                                && lawyer.getSpecialization().stream()
+                                    .anyMatch(spec -> spec.toLowerCase().contains(specialization.toLowerCase()));
+                    }
+                    
+                    // Filter by city
+                    if (city != null && !city.trim().isEmpty() 
+                        && !city.equalsIgnoreCase("All Locations")) {
+                        matches = matches && lawyer.getCity() != null 
+                                && lawyer.getCity().toLowerCase().contains(city.toLowerCase());
+                    }
+                    
+                    // Filter by province
+                    if (province != null && !province.trim().isEmpty() 
+                        && !province.equalsIgnoreCase("All Locations")) {
+                        matches = matches && lawyer.getProvince() != null 
+                                && lawyer.getProvince().toLowerCase().contains(province.toLowerCase());
+                    }
+                    
+                    // Filter by experience
+                    if (experience != null && !experience.trim().isEmpty()) {
+                        matches = matches && lawyer.getExperience() != null 
+                                && lawyer.getExperience().toLowerCase().contains(experience.toLowerCase());
+                    }
+                    
+                    // Filter by name (first name or last name)
+                    if (name != null && !name.trim().isEmpty()) {
+                        matches = matches && ((lawyer.getFname() != null 
+                                && lawyer.getFname().toLowerCase().contains(name.toLowerCase()))
+                                || (lawyer.getLname() != null 
+                                && lawyer.getLname().toLowerCase().contains(name.toLowerCase())));
+                    }
+                    
+                    return matches;
+                })
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(filteredLawyers);
+    }
+    
+    @GetMapping("/specializations")
+    @Operation(summary = "Get all unique specializations", description = "Returns all unique specializations available")
+    public ResponseEntity<List<String>> getAllSpecializations() {
+        List<String> specializations = userRepo.findAll().stream()
+                .filter(user -> user.getAccountType() == AccountType.LAWYER)
+                .map(user -> (LawyerEntity) user)
+                .flatMap(lawyer -> lawyer.getSpecialization() != null ? 
+                        lawyer.getSpecialization().stream() : java.util.stream.Stream.empty())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(specializations);
+    }
+    
+    @GetMapping("/locations")
+    @Operation(summary = "Get all unique locations", description = "Returns all unique cities and provinces")
+    public ResponseEntity<List<String>> getAllLocations() {
+        List<String> locations = userRepo.findAll().stream()
+                .filter(user -> user.getAccountType() == AccountType.LAWYER)
+                .map(user -> (LawyerEntity) user)
+                .map(lawyer -> {
+                    String location = "";
+                    if (lawyer.getCity() != null && !lawyer.getCity().trim().isEmpty()) {
+                        location += lawyer.getCity();
+                    }
+                    if (lawyer.getProvince() != null && !lawyer.getProvince().trim().isEmpty()) {
+                        if (!location.isEmpty()) location += ", ";
+                        location += lawyer.getProvince();
+                    }
+                    return location;
+                })
+                .filter(location -> !location.trim().isEmpty())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(locations);
+    }
+    
+    @GetMapping("/all")
+    @Operation(summary = "Get all lawyers", description = "Returns all lawyers in the system")
+    public ResponseEntity<List<LawyerEntity>> getAllLawyers() {
+        List<LawyerEntity> lawyers = userRepo.findAll().stream()
+                .filter(user -> user.getAccountType() == AccountType.LAWYER)
+                .map(user -> (LawyerEntity) user)
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(lawyers);
+    }
+
 }
