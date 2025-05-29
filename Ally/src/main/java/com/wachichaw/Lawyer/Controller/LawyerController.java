@@ -20,4 +20,10 @@ public class LawyerController {
         List<LawyerEntity> unverifiedLawyers = lawyerRepository.findByCredentialsVerified(false);
         return ResponseEntity.ok(unverifiedLawyers);
     }
+
+    @GetMapping("/verified")
+    public ResponseEntity<List<LawyerEntity>> getVerifiedLawyers() {
+        List<LawyerEntity> verifiedLawyers = lawyerRepository.findByCredentialsVerified(true);
+        return ResponseEntity.ok(verifiedLawyers);
+    }
 }
