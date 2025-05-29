@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Shield, Users, FileOutput, Trash2, Upload, Download } from 'lucide-react';
 import Section from './shared/Section';
@@ -6,12 +6,51 @@ import InputField from './shared/InputField';
 import Button from './shared/Button';
 
 
+
 const LawyerSettings = () => {
   const [profile, setProfile] = useState({
-    name: 'John Doe',
-    title: 'Attorney',
-    location: 'New York, NY'
   });
+  const token = localStorage.getItem('token');
+  const userID = 12
+
+useEffect(() => {
+  fetch(`http://localhost:8080/users/getUser/${userID}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(res => res.json())
+    .then(data => {
+
+      // Update the profile state with the fetched data
+      setProfile({
+        name: `${data.Fname} ${data.Lname}`,
+      });
+      console.log('Profile data:', data);
+
+      // You can also update personalInfo or address if needed
+      setPersonalInfo(prev => ({
+        ...prev,
+        firstName: data.Fname,
+        lastName: data.Lname,
+        email: data.email,
+        phone: data.phoneNumber || '',
+        experience: data.experience || '',
+        barNumber: data.barNumber || '',
+        address: data.address || '',
+        province: data.province || '',
+        city: data.city || '',
+        zipCode: data.zip || '',
+        city: data.city || '',
+        credentials: data.credentials || [],
+      }));
+    })
+    .catch(error => {
+      console.error('Failed to fetch user:', error);
+    });
+}, []);
+
 
   const [personalInfo, setPersonalInfo] = useState({
     firstName: 'John',
@@ -34,7 +73,7 @@ const LawyerSettings = () => {
 
   const [documents] = useState([
     { name: 'Bar_Certification.pdf', uploaded: 'May 1, 2024', status: 'verified' },
-    { name: 'License.jpg', uploaded: 'May 1, 2024', status: 'pending' }
+  
   ]);
   const location = useLocation();
   const path = location.pathname;
@@ -115,7 +154,7 @@ const LawyerSettings = () => {
               <InputField label="First Name" value={personalInfo.lastName} />
               <InputField label="Email address" value={personalInfo.email} />
               <InputField label="Phone" value={personalInfo.phone} />
-              <InputField label="Bio" value={personalInfo.bio} />
+              
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
                 <input
@@ -124,7 +163,6 @@ const LawyerSettings = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <InputField label="SSN Number" value={personalInfo.ssn} />
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">Bar Number</label>
                 <div className="flex items-center space-x-2">
@@ -143,33 +181,26 @@ const LawyerSettings = () => {
           {/* Address */}
           <Section title="Address" onEdit={() => {}}>
             <div className="grid grid-cols-2 gap-6">
-              <InputField label="Address Line 1" value={address.line1} />
-              <InputField label="Country" value={address.country} />
-              <InputField label="ZIP Code" value={address.zipCode} />
-              <InputField label="City/State" value={address.cityState} />
+              <InputField label="Address Line 1" value={personalInfo.address} />
+              <InputField label="Country" value={personalInfo.province} />
+              <InputField label="ZIP Code" value={personalInfo.zipCode} />
+              <InputField label="City/State" value={personalInfo.city} />
             </div>
           </Section>
 
           {/* Credentials & Documents */}
           <Section title="Credentials & Documents" onEdit={() => {}}>
             <div className="space-y-4">
-              {documents.map((doc, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center justify-center w-10 h-10 rounded bg-blue-50">
                       <Upload className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">{doc.name}</p>
-                      <p className="text-sm text-gray-500">Uploaded on {doc.uploaded}</p>
+                      <p className="font-medium text-gray-800">{personalInfo.credentials}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      doc.status === 'verified' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {doc.status}
-                    </span>
+                    
                     <Button variant="secondary" size="sm">
                       <Download className="w-4 h-4" />
                     </Button>
@@ -177,8 +208,8 @@ const LawyerSettings = () => {
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-              ))}
+                
+        
               <Button variant="primary" className="w-full">
                 <Upload className="w-4 h-4 mr-2" />
                 Add Document
