@@ -71,43 +71,62 @@ const DocumentSubmission = () => {
 
   // Process uploaded files
   const handleFiles = async (files) => {
-    setIsUploading(true);
-    
-    try {
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const newDocuments = files.map((file, index) => ({
-        id: Date.now() + index,
-        name: file.name,
-        type: getFileType(file.name),
+  setIsUploading(true);
+
+  try {
+    const clientId = 5; // Replace with actual client ID
+    const caseId = 2;   // Replace with actual case ID
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("caseId", caseId);
+      formData.append("documentName", file.name);
+      formData.append("documentType", getFileType(file.name));
+      formData.append("status", "submitted"); // Or dynamic status if needed
+
+      const response = await fetch(
+        `http://localhost:8080/Docs/documents/upload/${clientId}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Upload failed for " + file.name);
+      }
+
+      const data = await response.json();
+
+      const uploadedDoc = {
+        id: data.id,
+        name: data.documentName,
+        type: getFileType(data.documentName),
         size: formatFileSize(file.size),
         uploaded: new Date().toLocaleDateString('en-US', {
           month: '2-digit',
           day: '2-digit',
           year: 'numeric'
-        })
-      }));
+        }),
+        url: data.filePath, 
+      };
 
-      setUploadedDocuments(prev => [...prev, ...newDocuments]);
-      
-      // Show success toast
-      toast.success(
-        files.length > 1 
-          ? `${files.length} documents uploaded successfully` 
-          : `${files[0].name} uploaded successfully`
-      );
-    } catch (error) {
-      // Show error toast
-      toast.error('Failed to upload documents. Please try again.');
-    } finally {
-      setIsUploading(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setUploadedDocuments(prev => [...prev, uploadedDoc]);
+
+      toast.success(`${file.name} uploaded successfully`);
     }
-  };
+
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to upload documents. Please try again.');
+  } finally {
+    setIsUploading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+};
 
   // Delete document
   const handleDelete = (id) => {
