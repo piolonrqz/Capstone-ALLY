@@ -35,7 +35,7 @@ public class LawyerEntity extends UserEntity{
     private String credentials;
 
     @Column(name = "credentials_verified", nullable = true)
-    private Boolean credentials_verified = false;
+    private Boolean credentialsVerified = false;
 
     @OneToMany(mappedBy = "lawyer")
     @JsonManagedReference(value = "lawyer-case")
@@ -90,10 +90,10 @@ public void setSpecialization(List<String> specialization) {
         this.credentials = credentials;
     }
     public boolean getCredentialsVerified() {
-        return credentials_verified;
+        return credentialsVerified;
     }
 
-    public void setCredentialsVerified(Boolean credentials_verified) {
-        this.credentials_verified = credentials_verified;
+    public void setCredentialsVerified(Boolean credentialsVerified) {
+        this.credentialsVerified = credentialsVerified;
     }
 }

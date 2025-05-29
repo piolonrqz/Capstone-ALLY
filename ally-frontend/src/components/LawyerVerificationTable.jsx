@@ -1,39 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const LawyerVerificationTable = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [filter, setFilter] = useState('All Requests');
-  
-  // Sample data
-  const [verificationRequests, setVerificationRequests] = useState([
-    {
-      id: 1,
-      name: 'Sarah Chen',
-      email: 'sarah.chen@example.com',
-      barNumber: 'CA87654321',
-      practiceAreas: ['Family Law', 'Immigration'],
-      submittedDate: '2025-05-10',
-      status: 'approved'
-    },
-    {
-      id: 2,
-      name: 'Michael Rodriguez',
-      email: 'michael@example.com',
-      barNumber: 'TX12345678',
-      practiceAreas: ['Criminal Defense', 'Civil Rights'],
-      submittedDate: '2025-05-10',
-      status: 'pending'
-    }
-  ]);
+  const [verificationRequests, setVerificationRequests] = useState([]);
+      const token = localStorage.getItem('token');
 
-  const handleApprove = (id) => {
+
+  useEffect(() => {
+    fetch('http://localhost:8080/lawyers/unverified', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(data => {
+        // Map backend data to your table format
+        const mapped = data.map(lawyer => ({  
+          id: lawyer.userId,
+          name: `${lawyer.Fname} ${lawyer.Lname}`,
+          email: lawyer.email,
+          barNumber: lawyer.barNumber,
+          practiceAreas: lawyer.specialization || [], // adapt if practiceAreas is differently named
+          submittedDate: lawyer.createdAt || '',
+          status: 'pending', // since these are unverified lawyers, status starts as pending
+        }));
+        setVerificationRequests(mapped);
+      })
+      .catch(error => {
+        console.error('Failed to fetch unverified lawyers:', error);
+      });
+  }, []);
+
+  // Approve and Reject handlers stay the same
+ const handleApprove = async (id) => {
+  try {
+    const response = await fetch(`http://localhost:8080/admins/lawyers/verify/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to verify lawyer');
+    }
+
     setVerificationRequests(requests =>
       requests.map(request =>
         request.id === id ? { ...request, status: 'approved' } : request
       )
     );
-  };
-
+  } catch (error) {
+    console.error(error);
+    alert('Could not verify lawyer. Please try again later.');
+  }
+};
   const handleReject = (id) => {
     setVerificationRequests(requests =>
       requests.map(request =>
@@ -48,6 +75,12 @@ const LawyerVerificationTable = () => {
     setFilter(option);
     setDropdownOpen(false);
   };
+
+  // Filter requests based on selected filter
+  const filteredRequests = verificationRequests.filter(request => {
+    if (filter === 'All Requests') return true;
+    return request.status.toLowerCase() === filter.toLowerCase();
+  });
 
   return (
     <div className="bg-white shadow-sm rounded-lg border border-gray-200">
@@ -90,7 +123,7 @@ const LawyerVerificationTable = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {verificationRequests.map((request) => (
+              {filteredRequests.map((request) => (
                 <tr key={request.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div>
@@ -140,6 +173,13 @@ const LawyerVerificationTable = () => {
                   </td>
                 </tr>
               ))}
+              {filteredRequests.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="text-center py-4 text-gray-500">
+                    No requests found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

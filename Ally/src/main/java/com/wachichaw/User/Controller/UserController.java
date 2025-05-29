@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wachichaw.Admin.Entity.AdminEntity;
+import com.wachichaw.Admin.Service.AdminService;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Config.JwtUtil;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
@@ -35,6 +37,8 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
+    private AdminService adminService;
+    @Autowired
     private UserRepo userRepo;
     @Autowired
     private JwtUtil jwtUtil;
@@ -45,6 +49,13 @@ public class UserController {
         return userService.createClient(client.getEmail(), client.getPassword(), client.getFname(), client.getLname(), 
                                         client.getPhoneNumber(), client.getAddress(), client.getCity(), 
                                         client.getProvince(), client.getZip());
+    }
+
+    @PostMapping("/Admin")
+    public AdminEntity createAdmin(@RequestBody AdminEntity admin) {
+        return userService.createAdmin(admin.getEmail(), admin.getPassword(), admin.getFname(), admin.getLname(), 
+                                        admin.getPhoneNumber(), admin.getAddress(), admin.getCity(), 
+                                        admin.getProvince(), admin.getZip());
     }
 
     @PostMapping(value = "/Lawyer", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

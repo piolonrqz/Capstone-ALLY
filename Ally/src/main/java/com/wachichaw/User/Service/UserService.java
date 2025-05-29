@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.wachichaw.Admin.Entity.AdminEntity;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Config.JwtUtil;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
@@ -36,6 +37,21 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public AdminEntity createAdmin(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip) {
+        AdminEntity admin = new AdminEntity();
+        admin.setEmail(email);
+        admin.setPassword(passwordEncoder.encode(pass));
+        admin.setFname(Fname);
+        admin.setLname(Lname);
+        admin.setPhoneNumber(phoneNumber);
+        admin.setAddress(address);
+        admin.setCity(city);
+        admin.setProvince(province);
+        admin.setZip(zip);
+        admin.setAccountType(AccountType.ADMIN);  
+        admin.setDepartment("General"); 
+        return userRepo.save(admin);
+    }
 
     public ClientEntity createClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip) {
         ClientEntity client = new ClientEntity();
