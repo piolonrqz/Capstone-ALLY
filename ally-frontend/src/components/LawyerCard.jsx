@@ -19,7 +19,7 @@ export const LawyerCard = ({ lawyer, onClick }) => (
           <MapPin className="w-3 h-3 mr-1" />
           {lawyer.location}
         </p>
-        <p className="mt-2 text-sm text-gray-700">{lawyer.experience} of experience handling {lawyer.caseType.toLowerCase()}</p>
+        <p className="mt-2 text-sm text-gray-700">{lawyer.experience} of experience handling {(lawyer.specialty || 'various cases').toLowerCase()}</p>
         <div className="flex items-center justify-between mt-3">
           <span className="font-semibold text-blue-600">{lawyer.fee} case</span>
           <button className="px-4 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">

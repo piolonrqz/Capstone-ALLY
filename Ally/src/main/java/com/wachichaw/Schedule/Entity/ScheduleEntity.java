@@ -1,8 +1,9 @@
 package com.wachichaw.Schedule.Entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
+import com.wachichaw.Client.Entity.ClientEntity; 
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,18 +27,27 @@ public class ScheduleEntity {
     @JoinColumn(name = "lawyer_id", nullable = false)
     private LawyerEntity lawyer;
 
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+    @Column(name = "booking_start_time", nullable = false) // Modified field and annotation
+    private LocalDateTime bookingStartTime; // Modified field
+
+    @Column(name = "booking_end_time", nullable = false) // Added field and annotation
+    private LocalDateTime bookingEndTime; // Added field
+
+    @ManyToOne // Added annotation
+    @JoinColumn(name = "client_id", nullable = false) // Added annotation
+    private ClientEntity client; // Added field
 
     @Column(name = "is_booked", nullable = false)
     private boolean isBooked;
 
     public ScheduleEntity() {}
 
-    public ScheduleEntity(int scheduleId, LawyerEntity lawyer, LocalDate date, boolean isBooked) {
+    public ScheduleEntity(int scheduleId, LawyerEntity lawyer, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, ClientEntity client, boolean isBooked) {
         this.scheduleId = scheduleId;
         this.lawyer = lawyer;
-        this.date = date;
+        this.bookingStartTime = bookingStartTime;
+        this.bookingEndTime = bookingEndTime;
+        this.client = client;
         this.isBooked = isBooked;
     }
 
@@ -57,19 +67,35 @@ public class ScheduleEntity {
         this.lawyer = lawyer;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDateTime getBookingStartTime() {
+        return bookingStartTime;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setBookingStartTime(LocalDateTime bookingStartTime) {
+        this.bookingStartTime = bookingStartTime;
+    }
+
+    public LocalDateTime getBookingEndTime() {
+        return bookingEndTime;
+    }
+
+    public void setBookingEndTime(LocalDateTime bookingEndTime) {
+        this.bookingEndTime = bookingEndTime;
+    }
+
+    public ClientEntity getClient() {
+        return client;
+    }
+
+    public void setClient(ClientEntity client) {
+        this.client = client;
     }
 
     public boolean isBooked() {
         return isBooked;
     }
 
-    public void setBooked(boolean isBooked) {
-        this.isBooked = isBooked;
+    public void setBooked(boolean booked) {
+        isBooked = booked;
     }
 }

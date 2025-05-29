@@ -5,10 +5,12 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -124,11 +126,27 @@ public class UserController {
         response.put("email", email);
         response.put("accountType", accountType);
         return ResponseEntity.ok(response);
-    }
+    }    
     @GetMapping("/getAll")
     @Operation(summary = "Get all users", description = "Retrieves a list of all users.")
     public List<UserEntity> getAllUser() {
         return userService.getAllUser();
+    }
+
+    @GetMapping("/getUser/{userId}")
+    @Operation(summary = "Get a user by ID", description = "Retrieves a specific user by their ID.")
+    public ResponseEntity<?> getUserById(@PathVariable int userId) {
+        try {
+            Optional<UserEntity> user = userService.getUserById(userId);
+            if (user.isPresent()) {
+                return ResponseEntity.ok(user.get());
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve user");
+        }
     }
 
     @DeleteMapping("/deleteUser{userId}")
