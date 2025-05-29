@@ -26,12 +26,10 @@ public class ScheduleService {
 
     public ScheduleService(ScheduleRepository scheduleRepository) {
         this.scheduleRepository = scheduleRepository;
-    }
-
-    /**
+    }    /**
      * Create a new appointment booking
      */
-    public ScheduleEntity createAppointment(int clientId, int lawyerId, LocalDateTime startTime, LocalDateTime endTime) {
+    public ScheduleEntity createAppointment(int clientId, int lawyerId, LocalDateTime startTime) {
         // Validate client exists
         ClientEntity client = clientRepo.findById(clientId)
                 .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
@@ -40,27 +38,24 @@ public class ScheduleService {
         LawyerEntity lawyer = lawyerRepo.findById(lawyerId)
                 .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
 
-        // Check for scheduling conflicts
-        if (hasSchedulingConflict(lawyer, startTime, endTime)) {
-            throw new RuntimeException("Lawyer is not available at the requested time slot");
-        }
-
         // Validate booking time (must be in the future)
         if (startTime.isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Cannot book appointments in the past");
         }
 
-        // Validate end time is after start time
-        if (endTime.isBefore(startTime) || endTime.equals(startTime)) {
-            throw new RuntimeException("End time must be after start time");
-        }
+        // Calculate end time (1-hour consultation)
+        LocalDateTime endTime = startTime.plusHours(1);
 
-        // Create and save the schedule
+        // Check for scheduling conflicts
+        if (hasSchedulingConflict(lawyer, startTime, endTime)) {
+            throw new RuntimeException("Lawyer is not available at the requested time slot");
+        }        // Create and save the schedule
         ScheduleEntity schedule = new ScheduleEntity();
         schedule.setClient(client);
         schedule.setLawyer(lawyer);
         schedule.setBookingStartTime(startTime);
         schedule.setBookingEndTime(endTime);
+        schedule.setBooked(true); // Set is_booked to true for new appointments
 
         return scheduleRepository.save(schedule);
     }

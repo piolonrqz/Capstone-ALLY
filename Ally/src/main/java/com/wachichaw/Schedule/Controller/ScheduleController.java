@@ -5,6 +5,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors; // Added for mapping to DTO
+
+import com.wachichaw.Schedule.DTO.ScheduleResponseDTO; // Added DTO import
+import com.wachichaw.Schedule.DTO.UserSummaryDTO; // Added DTO import
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,21 +38,43 @@ public class ScheduleController {    @Autowired
     /**
      * Create a new appointment booking
      * POST /schedules/book
-     */
-    @PostMapping("/book")
+     */    @PostMapping("/book")
     public ResponseEntity<?> createAppointment(@RequestBody BookingRequest request) {
         try {
             LocalDateTime startTime = parseDateTime(request.getStartTime());
-            LocalDateTime endTime = parseDateTime(request.getEndTime());
 
             ScheduleEntity schedule = scheduleService.createAppointment(
                 request.getClientId(),
                 request.getLawyerId(),
-                startTime,
-                endTime
+                startTime
             );
 
-            return ResponseEntity.ok(schedule);
+            // Convert ScheduleEntity to ScheduleResponseDTO
+            UserSummaryDTO clientDTO = new UserSummaryDTO(
+                schedule.getClient().getUserId(), 
+                schedule.getClient().getFname(), 
+                schedule.getClient().getLname(), 
+                schedule.getClient().getEmail(),
+                schedule.getClient().getPhoneNumber()
+            );
+            UserSummaryDTO lawyerDTO = new UserSummaryDTO(
+                schedule.getLawyer().getUserId(), 
+                schedule.getLawyer().getFname(), 
+                schedule.getLawyer().getLname(), 
+                schedule.getLawyer().getEmail(),
+                schedule.getLawyer().getPhoneNumber()
+            );
+
+            ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO(
+                schedule.getScheduleId(),
+                lawyerDTO,
+                clientDTO,
+                schedule.getBookingStartTime(),
+                schedule.getBookingEndTime(),
+                schedule.isBooked()
+            );
+
+            return ResponseEntity.ok(scheduleResponseDTO); // Return DTO
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
         } catch (RuntimeException e) {
@@ -70,7 +96,10 @@ public class ScheduleController {    @Autowired
                 .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
 
             List<ScheduleEntity> schedules = scheduleService.getSchedulesForLawyer(lawyer);
-            return ResponseEntity.ok(schedules);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -90,7 +119,10 @@ public class ScheduleController {    @Autowired
                 .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
 
             List<ScheduleEntity> schedules = scheduleService.getSchedulesForClient(client);
-            return ResponseEntity.ok(schedules);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -110,7 +142,10 @@ public class ScheduleController {    @Autowired
                 .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
 
             List<ScheduleEntity> schedules = scheduleService.getUpcomingSchedulesForLawyer(lawyer);
-            return ResponseEntity.ok(schedules);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -130,7 +165,10 @@ public class ScheduleController {    @Autowired
                 .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
 
             List<ScheduleEntity> schedules = scheduleService.getUpcomingSchedulesForClient(client);
-            return ResponseEntity.ok(schedules);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -156,7 +194,10 @@ public class ScheduleController {    @Autowired
             LocalDateTime endDate = parseDateTime(end);
 
             List<ScheduleEntity> schedules = scheduleService.getLawyerScheduleInRange(lawyer, startDate, endDate);
-            return ResponseEntity.ok(schedules);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
         } catch (RuntimeException e) {
@@ -227,7 +268,7 @@ public class ScheduleController {    @Autowired
             LocalDateTime newEndTime = parseDateTime(request.getNewEndTime());
 
             ScheduleEntity schedule = scheduleService.rescheduleAppointment(scheduleId, newStartTime, newEndTime);
-            return ResponseEntity.ok(schedule);
+            return ResponseEntity.ok(convertToScheduleResponseDTO(schedule)); // Return DTO
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
         } catch (RuntimeException e) {
@@ -245,9 +286,10 @@ public class ScheduleController {    @Autowired
     @GetMapping("/{scheduleId}")
     public ResponseEntity<?> getScheduleById(@PathVariable Integer scheduleId) {
         try {
-            Optional<ScheduleEntity> schedule = scheduleService.findScheduleById(scheduleId);
-            if (schedule.isPresent()) {
-                return ResponseEntity.ok(schedule.get());
+            Optional<ScheduleEntity> scheduleOptional = scheduleService.findScheduleById(scheduleId);
+            if (scheduleOptional.isPresent()) {
+                ScheduleEntity schedule = scheduleOptional.get();
+                return ResponseEntity.ok(convertToScheduleResponseDTO(schedule)); // Return DTO
             } else {
                 return ResponseEntity.notFound().build();
             }
@@ -265,7 +307,10 @@ public class ScheduleController {    @Autowired
     public ResponseEntity<?> getAllSchedules() {
         try {
             List<ScheduleEntity> schedules = scheduleService.getAllSchedules();
-            return ResponseEntity.ok(schedules);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve all schedules");
@@ -280,12 +325,37 @@ public class ScheduleController {    @Autowired
         return LocalDateTime.parse(dateTimeStr, formatter);
     }
 
+    // Helper method to convert ScheduleEntity to ScheduleResponseDTO
+    private ScheduleResponseDTO convertToScheduleResponseDTO(ScheduleEntity schedule) {
+        UserSummaryDTO clientDTO = new UserSummaryDTO(
+            schedule.getClient().getUserId(),
+            schedule.getClient().getFname(),
+            schedule.getClient().getLname(),
+            schedule.getClient().getEmail(),
+            schedule.getClient().getPhoneNumber()
+        );
+        UserSummaryDTO lawyerDTO = new UserSummaryDTO(
+            schedule.getLawyer().getUserId(),
+            schedule.getLawyer().getFname(),
+            schedule.getLawyer().getLname(),
+            schedule.getLawyer().getEmail(),
+            schedule.getLawyer().getPhoneNumber()
+        );
+        return new ScheduleResponseDTO(
+            schedule.getScheduleId(),
+            lawyerDTO,
+            clientDTO,
+            schedule.getBookingStartTime(),
+            schedule.getBookingEndTime(),
+            schedule.isBooked()
+        );
+    }
+
     // DTOs for request/response
     public static class BookingRequest {
         private int clientId;
         private int lawyerId;
         private String startTime;
-        private String endTime;
 
         // Getters and setters
         public int getClientId() { return clientId; }
@@ -296,9 +366,6 @@ public class ScheduleController {    @Autowired
         
         public String getStartTime() { return startTime; }
         public void setStartTime(String startTime) { this.startTime = startTime; }
-        
-        public String getEndTime() { return endTime; }
-        public void setEndTime(String endTime) { this.endTime = endTime; }
     }
 
     public static class RescheduleRequest {

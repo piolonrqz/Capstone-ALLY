@@ -37,14 +37,18 @@ public class ScheduleEntity {
     @JoinColumn(name = "client_id", nullable = false) // Added annotation
     private ClientEntity client; // Added field
 
+    @Column(name = "is_booked", nullable = false)
+    private boolean isBooked;
+
     public ScheduleEntity() {}
 
-    public ScheduleEntity(int scheduleId, LawyerEntity lawyer, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, ClientEntity client) {
+    public ScheduleEntity(int scheduleId, LawyerEntity lawyer, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, ClientEntity client, boolean isBooked) {
         this.scheduleId = scheduleId;
         this.lawyer = lawyer;
         this.bookingStartTime = bookingStartTime;
         this.bookingEndTime = bookingEndTime;
         this.client = client;
+        this.isBooked = isBooked;
     }
 
     public int getScheduleId() {
@@ -85,5 +89,13 @@ public class ScheduleEntity {
 
     public void setClient(ClientEntity client) {
         this.client = client;
+    }
+
+    public boolean isBooked() {
+        return isBooked;
+    }
+
+    public void setBooked(boolean booked) {
+        isBooked = booked;
     }
 }
