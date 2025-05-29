@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SearchPanel } from '../components/SearchPanel';
 import { LawyerProfile } from '../components/LawyerProfile';
 import { AIMatching } from '../components/AIMatching';
+import { AppointmentsList } from '../components/AppointmentsList';
 
 export const LawyerDirectoryPage = () => {
   const [activeView, setActiveView] = useState('search');
@@ -74,8 +75,7 @@ export const LawyerDirectoryPage = () => {
         <div className="p-8 bg-white shadow-sm rounded-xl">
           <h1 className="mb-3 text-2xl font-bold text-gray-900">Find the Right Lawyer for Your Case</h1>
           <p className="mb-8 text-gray-600">Search our network of verified legal professionals or let our AI match you with the perfect attorney</p>
-          
-          <div className="flex mb-8">
+            <div className="flex mb-8">
             <button 
               className={`flex-1 py-2 px-4 rounded-l-lg font-medium transition-colors ${
                 activeView === 'search' 
@@ -87,7 +87,7 @@ export const LawyerDirectoryPage = () => {
               Search Lawyers
             </button>
             <button 
-              className={`flex-1 py-2 px-4 rounded-r-lg font-medium transition-colors ${
+              className={`flex-1 py-2 px-4 font-medium transition-colors ${
                 activeView === 'ai-matching' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -96,8 +96,17 @@ export const LawyerDirectoryPage = () => {
             >
               AI Matching
             </button>
-          </div>
-
+            <button 
+              className={`flex-1 py-2 px-4 rounded-r-lg font-medium transition-colors ${
+                activeView === 'appointments' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              onClick={() => setActiveView('appointments')}
+            >
+              View Appointments
+            </button>
+          </div>          
           <div className="transition-opacity duration-200 ease-in-out">
             {activeView === 'search' ? (
               <SearchPanel 
@@ -108,11 +117,13 @@ export const LawyerDirectoryPage = () => {
                 lawyers={fetchedLawyers} // Use fetchedLawyers
                 onLawyerSelect={handleLawyerSelect}
               />
-            ) : (
+            ) : activeView === 'ai-matching' ? (
               <AIMatching 
                 lawyers={fetchedLawyers} // Use fetchedLawyers
                 onLawyerSelect={handleLawyerSelect}
               />
+            ) : (
+              <AppointmentsList />
             )}
           </div>
         </div>

@@ -1,44 +1,166 @@
-import { useState } from 'react';
-import { X, Clock, Calendar as CalendarIcon, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Clock, Calendar as CalendarIcon, User, Loader2 } from 'lucide-react';
 import { Calendar } from './ui/calendar';
+import { scheduleService } from '../services/scheduleService.jsx';
+import { getAuthData, fetchUserDetails } from '../utils/auth.jsx';
 
 export const BookingModal = ({ lawyer, isOpen, onClose }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
-  const [clientName, setClientName] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
   const [consultationType, setConsultationType] = useState('in-person');
   const [notes, setNotes] = useState('');
-
-  // Available time slots
-  const timeSlots = [
+  const [isLoading, setIsLoading] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [error, setError] = useState('');
+  const [userDetails, setUserDetails] = useState(null);
+  const [loadingUserDetails, setLoadingUserDetails] = useState(false);
+  // Available time slots (these will be filtered based on lawyer availability)
+  const allTimeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
     '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'
   ];
 
-  const handleBooking = (e) => {
+  // Load user details when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadUserDetails();
+    }
+  }, [isOpen]);
+
+  const loadUserDetails = async () => {
+    setLoadingUserDetails(true);
+    setError('');
+    
+    try {
+      const authData = getAuthData();
+      if (!authData) {
+        setError('You must be logged in to book a consultation');
+        return;
+      }
+
+      // Try to get user details from backend
+      try {
+        const details = await fetchUserDetails(authData.userId);
+        setUserDetails(details);
+      } catch (fetchError) {
+        console.warn('Could not fetch full user details, using auth data:', fetchError);
+        // Fallback to basic auth data
+        setUserDetails({
+          id: authData.userId,
+          email: authData.email,
+          fullName: 'User', // Fallback name
+          firstName: 'User',
+          lastName: '',
+          accountType: authData.accountType
+        });
+      }
+    } catch (error) {
+      console.error('Error loading user details:', error);
+      setError('Failed to load user information');
+    } finally {
+      setLoadingUserDetails(false);
+    }
+  };
+  // Check availability when date changes
+  useEffect(() => {
+    if (selectedDate && lawyer?.id) {
+      checkAvailabilityForDate();
+    } else {
+      setAvailableSlots(allTimeSlots);
+    }
+  }, [selectedDate, lawyer?.id]);
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedDate(null);
+      setSelectedTime('');
+      setConsultationType('in-person');
+      setNotes('');
+      setError('');
+      setAvailableSlots(allTimeSlots);
+    }
+  }, [isOpen]);
+
+  const checkAvailabilityForDate = async () => {
+    if (!selectedDate || !lawyer?.id) return;
+    
+    setIsCheckingAvailability(true);
+    setError('');
+    
+    try {
+      // Check availability for each time slot
+      const availabilityPromises = allTimeSlots.map(async (timeSlot) => {
+        try {
+          const availability = await scheduleService.checkAvailability(lawyer.id, selectedDate, timeSlot);
+          return { timeSlot, available: availability.available };
+        } catch (error) {
+          console.error(`Error checking availability for ${timeSlot}:`, error);
+          return { timeSlot, available: false };
+        }
+      });
+      
+      const availabilityResults = await Promise.all(availabilityPromises);
+      const available = availabilityResults
+        .filter(result => result.available)
+        .map(result => result.timeSlot);
+      
+      setAvailableSlots(available);
+      
+      // Clear selected time if it's no longer available
+      if (selectedTime && !available.includes(selectedTime)) {
+        setSelectedTime('');
+      }
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      setError('Failed to check availability. Please try again.');
+      setAvailableSlots(allTimeSlots); // Fallback to all slots
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+  const handleBooking = async (e) => {
     e.preventDefault();
     
-    if (!selectedDate || !selectedTime || !clientName || !clientEmail) {
-      alert('Please fill in all required fields');
+    if (!selectedDate || !selectedTime) {
+      setError('Please select a date and time');
       return;
     }
 
-    // Here you would typically send the booking data to your backend
-    const bookingData = {
-      lawyerId: lawyer.id,
-      lawyerName: lawyer.name,
-      clientName,
-      clientEmail,
-      date: selectedDate,
-      time: selectedTime,
-      type: consultationType,
-      notes
-    };
+    if (!userDetails) {
+      setError('User information not available. Please try refreshing the page.');
+      return;
+    }
 
-    console.log('Booking submitted:', bookingData);
-    alert('Consultation booked successfully!');
-    onClose();
+    if (!lawyer?.id) {
+      setError('Invalid lawyer information');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const bookingData = {
+        lawyerId: lawyer.id,
+        clientId: userDetails.id,
+        date: selectedDate,
+        time: selectedTime,
+        consultationType,
+        notes
+      };
+
+      const result = await scheduleService.createAppointment(bookingData);
+      
+      console.log('Appointment created successfully:', result);
+      alert('Consultation booked successfully!');
+      onClose();
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      setError(error.message || 'Failed to book consultation. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isDateDisabled = (date) => {
@@ -88,62 +210,72 @@ export const BookingModal = ({ lawyer, isOpen, onClose }) => {
                       className="w-full"
                     />
                   </div>
-                </div>
-
-                {/* Time Slots Section */}
+                </div>                {/* Time Slots Section */}
                 <div>
                   <label className="block mb-3 text-sm font-medium text-gray-700">
                     <Clock className="inline w-4 h-4 mr-2" />
                     Select Time
+                    {isCheckingAvailability && (
+                      <Loader2 className="inline w-4 h-4 ml-2 animate-spin" />
+                    )}
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {timeSlots.map((time) => (
-                      <button
-                        key={time}
-                        type="button"
-                        onClick={() => setSelectedTime(time)}
-                        className={`p-2 text-sm border rounded-lg transition-colors ${
-                          selectedTime === time
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                        }`}
-                      >
-                        {time}
-                      </button>
-                    ))}
+                  {!selectedDate ? (
+                    <div className="p-4 text-center text-gray-500 border border-gray-200 rounded-lg">
+                      Please select a date first
+                    </div>
+                  ) : isCheckingAvailability ? (
+                    <div className="p-4 text-center text-gray-500 border border-gray-200 rounded-lg">
+                      <Loader2 className="w-6 h-6 mx-auto mb-2 animate-spin" />
+                      Checking availability...
+                    </div>
+                  ) : availableSlots.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500 border border-gray-200 rounded-lg">
+                      No available time slots for this date
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {availableSlots.map((time) => (
+                        <button
+                          key={time}
+                          type="button"
+                          onClick={() => setSelectedTime(time)}
+                          className={`p-2 text-sm border rounded-lg transition-colors ${
+                            selectedTime === time
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                          }`}
+                        >
+                          {time}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>              {/* Client Information - Show authenticated user's details */}
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <h4 className="flex items-center mb-3 text-sm font-medium text-gray-700">
+                  <User className="w-4 h-4 mr-2" />
+                  Your Information
+                </h4>
+                {loadingUserDetails ? (
+                  <div className="flex items-center text-gray-500">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Loading your information...
                   </div>
-                </div>
-              </div>
-
-              {/* Client Information */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    <User className="inline w-4 h-4 mr-2" />
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    value={clientEmail}
-                    onChange={(e) => setClientEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
+                ) : userDetails ? (
+                  <div className="grid gap-2 md:grid-cols-2">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Name:</span>
+                      <p className="text-gray-900">{userDetails.fullName}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Email:</span>
+                      <p className="text-gray-900">{userDetails.email}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-red-600">Unable to load user information</p>
+                )}
               </div>
 
               {/* Consultation Type */}
@@ -196,14 +328,26 @@ export const BookingModal = ({ lawyer, isOpen, onClose }) => {
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Briefly describe your legal matter or any specific questions you have..."
-                />
-              </div>
+                />              </div>
 
-              {/* Booking Summary */}
-              {selectedDate && selectedTime && (
+              {/* Error Display */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex">
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-red-800">Error</h3>
+                      <div className="mt-2 text-sm text-red-700">
+                        <p>{error}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}              {/* Booking Summary */}
+              {selectedDate && selectedTime && userDetails && (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <h4 className="font-semibold text-blue-900">Booking Summary</h4>
                   <div className="mt-2 text-sm text-blue-800">
+                    <p><strong>Client:</strong> {userDetails.fullName}</p>
                     <p><strong>Lawyer:</strong> {lawyer.name}</p>
                     <p><strong>Date:</strong> {selectedDate.toLocaleDateString()}</p>
                     <p><strong>Time:</strong> {selectedTime}</p>
@@ -211,22 +355,28 @@ export const BookingModal = ({ lawyer, isOpen, onClose }) => {
                     <p><strong>Fee:</strong> {lawyer.fee}</p>
                   </div>
                 </div>
-              )}
-
-              {/* Action Buttons */}
+              )}{/* Action Buttons */}
               <div className="flex space-x-4">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  disabled={isLoading}
+                  className="flex-1 px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
-                </button>
-                <button
+                </button>                <button
                   type="submit"
-                  className="flex-1 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                  disabled={isLoading || !selectedDate || !selectedTime || !userDetails || loadingUserDetails}
+                  className="flex-1 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                  Book Consultation
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Booking...
+                    </>
+                  ) : (
+                    'Book Consultation'
+                  )}
                 </button>
               </div>
             </form>
