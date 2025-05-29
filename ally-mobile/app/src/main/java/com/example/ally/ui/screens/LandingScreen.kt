@@ -67,7 +67,7 @@ fun LandingScreen(navController: NavController) {
             title = "Legal Resources",
             description = "Explore articles and information on various legal topics.",
             buttonText = "Browse Resources",
-            onClick = { navController.navigate(ScreenRoutes.RESOURCES)  }
+            onClick = { navController.navigate(ScreenRoutes.RESOURCES) }
         )
         Spacer(modifier = Modifier.height(16.dp))
         LandingCard(
@@ -75,7 +75,7 @@ fun LandingScreen(navController: NavController) {
             title = "Find a Lawyer",
             description = "Connect with legal professionals for expert advice.",
             buttonText = "Search Lawyers",
-            onClick = { /* TODO: navController.navigate(ScreenRoutes.LAWYERS) */ }
+            onClick = { navController.navigate(ScreenRoutes.LAWYERS) }
         )
         Spacer(modifier = Modifier.weight(1f))
     }

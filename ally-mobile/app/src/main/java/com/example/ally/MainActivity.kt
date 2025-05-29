@@ -22,6 +22,10 @@ import com.example.ally.ui.theme.AllyTheme
 import com.example.ally.ui.screens.LandingScreen
 import com.example.ally.ui.screens.ChatScreen
 import com.example.ally.ui.screens.ResourcesScreen
+import com.example.ally.ui.screens.LibrarySearchScreen
+import com.example.ally.ui.screens.LawyersScreen
+import com.example.ally.ui.screens.LawyerProfileScreen
+import com.example.ally.ui.screens.AccountScreen
 import com.example.ally.ui.components.AllyBottomNav
 
 class MainActivity : ComponentActivity() {
@@ -37,7 +41,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),                    bottomBar = {
                         // Show bottom nav only on screens that need it
-                        if (currentRoute == ScreenRoutes.LANDING || currentRoute == ScreenRoutes.CHAT || currentRoute == ScreenRoutes.RESOURCES) { // Add other relevant routes
+                        if (currentRoute == ScreenRoutes.LANDING || currentRoute == ScreenRoutes.CHAT || currentRoute == ScreenRoutes.RESOURCES || currentRoute == ScreenRoutes.LAWYERS || currentRoute == ScreenRoutes.ACCOUNT) { // Add other relevant routes
                             AllyBottomNav(navController = navController, currentRoute = currentRoute)
                         }
                     }
@@ -54,10 +58,20 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(ScreenRoutes.RESOURCES) {
                             ResourcesScreen(navController = navController)
+                        }                        
+                        composable(ScreenRoutes.LIBRARY_SEARCH) {
+                            LibrarySearchScreen(navController = navController)
+                        }
+                        composable(ScreenRoutes.LAWYERS) {
+                            LawyersScreen(navController = navController)
+                        }                        
+                        composable(ScreenRoutes.LAWYER_PROFILE) {
+                            LawyerProfileScreen(navController = navController)
+                        }
+                        composable(ScreenRoutes.ACCOUNT) {
+                            AccountScreen(navController = navController)
                         }
                         // Add other composables for other screens here
-                        // composable(ScreenRoutes.LAWYERS) { LawyersScreen(navController) }
-                        // composable(ScreenRoutes.ACCOUNT) { AccountScreen(navController) }
                     }
                 }
             }
