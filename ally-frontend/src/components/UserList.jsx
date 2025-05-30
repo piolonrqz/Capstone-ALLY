@@ -7,9 +7,10 @@ const UserList = ({ users, selectedUserId, onSelectUser }) => {
     const debouncedSearch = useDebounce(searchTerm, 300);
 
     useEffect(() => {
-        // Filter users based on search term
         const filtered = users.filter(user => 
-            user.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+            user.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+            (user.specialization && user.specialization.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
+            (user.caseType && user.caseType.toLowerCase().includes(debouncedSearch.toLowerCase()))
         );
         setFilteredUsers(filtered);
     }, [debouncedSearch, users]);
@@ -24,14 +25,14 @@ const UserList = ({ users, selectedUserId, onSelectUser }) => {
                         type="text"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search users..."
+                        placeholder="Search by name or specialization..."
                         className="w-full p-2 text-sm bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
             </div>
 
             {/* User List */}
-            <div className="overflow-y-auto" style={{ height: 'calc(100vh - 89px)' }}>
+            <div className="overflow-y-auto" style={{ height: 'calc(100vh - 180px)' }}>
                 {filteredUsers.length === 0 ? (
                     <div className="p-4 text-center text-gray-500">
                         No users found
@@ -53,12 +54,15 @@ const UserList = ({ users, selectedUserId, onSelectUser }) => {
                             <div className="flex-1 min-w-0 ml-3">
                                 <div className="flex items-center justify-between">
                                     <h3 className="font-semibold truncate">{user.name}</h3>
-                                    <span className="text-xs text-gray-500">
-                                        {user.lastActive || 'Just now'}
+                                    <span className="text-xs text-blue-500 capitalize">
+                                        {user.role}
                                     </span>
                                 </div>
                                 <p className="text-sm text-gray-500 truncate">
-                                    {user.lastMessage || 'No messages yet'}
+                                    {user.specialization || user.caseType}
+                                </p>
+                                <p className="text-xs text-gray-400 truncate">
+                                    {user.lastMessage}
                                 </p>
                             </div>
                         </div>
