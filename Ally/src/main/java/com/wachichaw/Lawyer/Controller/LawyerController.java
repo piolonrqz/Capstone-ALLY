@@ -28,4 +28,9 @@ public class LawyerController {
         return ResponseEntity.ok(unverifiedLawyers);
     }
 
-}   
+    @GetMapping("/verified")
+    public ResponseEntity<List<LawyerEntity>> getVerifiedLawyers() {
+        List<LawyerEntity> verifiedLawyers = lawyerRepository.findByCredentialsVerified(true);
+        return ResponseEntity.ok(verifiedLawyers);
+    }
+}

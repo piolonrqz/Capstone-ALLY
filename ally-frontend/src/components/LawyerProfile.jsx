@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import { Star, MapPin, MessageCircle, X } from 'lucide-react';
+import { BookingModal } from './BookingModal';
 
-export const LawyerProfile = ({ lawyer, onClose }) => (
+export const LawyerProfile = ({ lawyer, onClose }) => {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
+  return (
   <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
       <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose}></div>
@@ -66,19 +71,26 @@ export const LawyerProfile = ({ lawyer, onClose }) => (
                 </span>
               ))}
             </div>
-          </div>
-
-          <div className="flex space-x-4">
+          </div>          <div className="flex space-x-4">
             <button className="flex items-center justify-center flex-1 px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
               <MessageCircle className="w-4 h-4 mr-2" />
               Message
             </button>
-            <button className="flex-1 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+            <button 
+              onClick={() => setIsBookingModalOpen(true)}
+              className="flex-1 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
               Schedule Consultation
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </div>    {/* Booking Modal */}
+    <BookingModal
+      lawyer={lawyer}
+      isOpen={isBookingModalOpen}
+      onClose={() => setIsBookingModalOpen(false)}
+    />
   </div>
 );
+};
