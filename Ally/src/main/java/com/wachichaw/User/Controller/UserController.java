@@ -267,6 +267,7 @@ public class UserController {
         List<LawyerEntity> lawyers = userRepo.findAll().stream()
                 .filter(user -> user.getAccountType() == AccountType.LAWYER)
                 .map(user -> (LawyerEntity) user)
+                .filter(lawyer -> lawyer.getCredentialsVerified() == true)
                 .collect(Collectors.toList());
         
         return ResponseEntity.ok(lawyers);
