@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Logo from './Logo';
 
 const VerifyLawyer = () => {
   const [verificationCode, setVerificationCode] = useState('');
@@ -35,10 +36,10 @@ const VerifyLawyer = () => {
     // Implement resend code logic
     alert('Verification code resent!');
   };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white border border-gray-200 shadow-md rounded-2xl">        <div className="mb-6 text-center">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 font-['Poppins'] relative">
+      <Logo />
+      <div className="w-full max-w-md p-8 bg-white border border-gray-200 shadow-md rounded-2xl"><div className="mb-6 text-center">
           <h2 className="text-2xl font-bold text-gray-800">Verify Your Email</h2>
           <p className="mt-2 text-gray-600">We've sent a verification code to {maskedEmail}</p>
         </div>
