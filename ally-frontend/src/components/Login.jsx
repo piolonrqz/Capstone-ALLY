@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from './Logo';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -39,13 +40,16 @@ const Login = () => {
       console.error('Login failed:', error);
       alert('Login failed. Please check your credentials.');
     }
-  };
-
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
-      <div className="w-full max-w-2xl p-8 bg-gray-200 border rounded-lg shadow-lg">
-        <h2 className="mb-1 text-2xl font-bold text-center">Log in To ALLY</h2>
-        <p className="mb-6 text-center text-gray-600">Enter your credentials to access your account</p>
+  };  return (    
+    <div className="flex items-center justify-center min-h-screen bg-blue-50 font-['Poppins'] relative">
+      {/* Logo in upper left corner */}      <div className="absolute flex items-center gap-2 top-4 left-4">
+        <img src="/small_logo.png" alt="ALLY Logo" className="w-12 h-12" />
+        <h1 className="text-4xl font-bold text-blue-600">ALLY</h1>
+      </div>
+      
+      <div className="w-full max-w-2xl p-8 bg-white border rounded-lg shadow-lg">
+        <h2 className="mb-1 text-4xl font-semibold text-center font-['Poppins']">Log in To ALLY</h2>
+        <p className="mb-6 text-center text-gray-600 font-['Poppins']">Enter your credentials to access your account</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

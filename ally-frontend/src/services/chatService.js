@@ -9,12 +9,47 @@ import {
     updateDoc,
     deleteDoc,
     getDocs,
-    serverTimestamp
+    serverTimestamp,
+    runTransaction,
+    setDoc
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
+// Function to fetch user data from backend
+export const fetchUserDetails = async (userId) => {
+    try {
+        const response = await fetch(`http://localhost:8080/users/getUser/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch user details');
+        }
+
+        const userData = await response.json();
+        return {
+            id: userData.userId,
+            name: `${userData.Fname} ${userData.Lname}`,
+            email: userData.email,
+            role: userData.accountType.toLowerCase(),
+        };
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        throw error;
+    }
+};
+
 export const sendMessage = async (senderId, receiverId, content, senderRole) => {
     try {
+        // Fetch sender and receiver details
+        const [sender, receiver] = await Promise.all([
+            fetchUserDetails(senderId),
+            fetchUserDetails(receiverId)
+        ]);
+
         // Check for existing chatroom between lawyer and client
         const chatroomRef = collection(db, 'chatroom');
         const chatroomQuery = query(
@@ -124,24 +159,50 @@ export const subscribeToMessages = (senderId, receiverId, callback) => {
 
 export const fetchUsers = async (currentUser) => {
     try {
+        // First get all users from backend
+        const response = await fetch('http://localhost:8080/users/getAll', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch users');
+        }
+
+        const allUsers = await response.json();
+        
+        // Filter users based on role (lawyers can only chat with clients and vice versa)
+        const filteredUsers = allUsers.filter(user => {
+            if (currentUser.accountType.toLowerCase() === 'lawyer') {
+                return user.accountType.toLowerCase() === 'client';
+            } else if (currentUser.accountType.toLowerCase() === 'client') {
+                return user.accountType.toLowerCase() === 'lawyer';
+            }
+            return false;
+        });
+
+        // Then get chat history from Firebase
         const roomsRef = collection(db, 'chatroom');
         const roomQuery = query(
             roomsRef,
-            where('participants', 'array-contains', currentUser.id)
+            where('participants', 'array-contains', currentUser.id.toString())
         );
         const roomSnapshot = await getDocs(roomQuery);
 
         const conversations = roomSnapshot.docs.map(doc => {
             const data = doc.data();
             const otherParticipantId = data.participants.find(id => id !== currentUser.id);
-            const otherParticipantDetails = data.participantDetails[otherParticipantId];
-
+            const otherParticipantDetails = data.participantDetails[otherParticipantId];            const otherUser = filteredUsers.find(user => user.userId.toString() === otherParticipantId);
+            
             return {
                 id: otherParticipantId,
+                name: otherUser ? `${otherUser.Fname} ${otherUser.Lname}` : 'Unknown User',
                 chatroomId: doc.id,
                 lastMessage: data.lastMessage,
                 lastMessageTimestamp: data.lastMessageTimestamp,
-                role: otherParticipantDetails?.role,
+                role: otherUser ? otherUser.accountType.toLowerCase() : otherParticipantDetails?.role,
                 unread: data.participantDetails[currentUser.id]?.lastRead < data.lastMessageTimestamp
             };
         });
