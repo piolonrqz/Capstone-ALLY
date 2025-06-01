@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ClientRegistrationForm() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fName: "",
@@ -106,22 +108,24 @@ console.log("Submitting form with b:", body);
           body: JSON.stringify(body)
         })
         console.log("Form submitted with:", body);
-      alert("Registration successful!");
+      alert("Registration successful! Please login.");
+      navigate('/login');
       }
       catch (error) {
         console.error("Error submitting form:", error);
+        alert('Registration failed. Please try again.');
       }
     }
   };
   return (    
-    <div className="flex justify-center items-center min-h-screen w-full bg-white overflow-hidden">
-      <div className="bg-stone-100 border-stone-300 p-12 rounded-xl shadow-lg w-full max-w-4xl mx-auto font-inter">
-        <h2 className="text-3xl font-bold text-center mb-3 text-neutral-900">Register as a Client</h2>
-        <p className="text-center text-neutral-600 text-base mb-8">Create your account to find legal help</p>
+    <div className="flex items-center justify-center w-full min-h-screen overflow-hidden bg-white">
+      <div className="w-full max-w-4xl p-12 mx-auto shadow-lg bg-stone-100 border-stone-300 rounded-xl font-inter">
+        <h2 className="mb-3 text-3xl font-bold text-center text-neutral-900">Register as a Client</h2>
+        <p className="mb-8 text-base text-center text-neutral-600">Create your account to find legal help</p>
         
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="h-1 w-full bg-gray-200 rounded">
+          <div className="w-full h-1 bg-gray-200 rounded">
             <div 
               className="h-1 bg-blue-500 rounded" 
               style={{ width: step === 1 ? '50%' : '100%' }}
@@ -148,7 +152,7 @@ console.log("Submitting form with b:", body);
                     value={formData.fName}
                     onChange={handleChange}
                   />
-                  {errors.fName && <p className="text-red-500 text-xs mt-1">{errors.fName}</p>}
+                  {errors.fName && <p className="mt-1 text-xs text-red-500">{errors.fName}</p>}
                 </div>
                 <div className="w-1/2">
                   <input
@@ -159,7 +163,7 @@ console.log("Submitting form with b:", body);
                     value={formData.lName}
                     onChange={handleChange}
                   />
-                  {errors.lName && <p className="text-red-500 text-xs mt-1">{errors.lName}</p>}
+                  {errors.lName && <p className="mt-1 text-xs text-red-500">{errors.lName}</p>}
                 </div>
               </div>
               
@@ -172,7 +176,7 @@ console.log("Submitting form with b:", body);
                   value={formData.email}
                   onChange={handleChange}
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
               
               <div>
@@ -184,8 +188,8 @@ console.log("Submitting form with b:", body);
                   value={formData.password}
                   onChange={handleChange}
                 />
-                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-                <p className="text-gray-400 text-xs mt-1">Password must be at least 8 characters long</p>
+                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                <p className="mt-1 text-xs text-gray-400">Password must be at least 8 characters long</p>
               </div>
               
               <div>
@@ -197,13 +201,13 @@ console.log("Submitting form with b:", body);
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
-                {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
               </div>
               
               <div className="flex justify-end mt-6">
                 <button
                   type="button"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
                   onClick={handleContinue}
                 >
                   Continue →
@@ -214,7 +218,7 @@ console.log("Submitting form with b:", body);
             /* Step 2: Additional Details */
             <div className="space-y-4">
               <div>                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">+63</span>
+                  <span className="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">+63</span>
                   <input
                     type="tel"
                     name="phoneNumber"
@@ -224,7 +228,7 @@ console.log("Submitting form with b:", body);
                     onChange={handleChange}
                   />
                 </div>
-                {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
+                {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber}</p>}
               </div>
               
               <div>
@@ -236,7 +240,7 @@ console.log("Submitting form with b:", body);
                   value={formData.address}
                   onChange={handleChange}
                 />
-                {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+                {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address}</p>}
               </div>
               
               <div className="flex gap-4">
@@ -249,7 +253,7 @@ console.log("Submitting form with b:", body);
                     value={formData.city}
                     onChange={handleChange}
                   />
-                  {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                  {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
                 </div>
                 <div className="w-1/2">
                   <input
@@ -260,7 +264,7 @@ console.log("Submitting form with b:", body);
                     value={formData.province}
                     onChange={handleChange}
                   />
-                  {errors.province && <p className="text-red-500 text-xs mt-1">{errors.province}</p>}
+                  {errors.province && <p className="mt-1 text-xs text-red-500">{errors.province}</p>}
                 </div>
               </div>
               
@@ -273,7 +277,7 @@ console.log("Submitting form with b:", body);
                   value={formData.zip}
                   onChange={handleChange}
                 />
-                {errors.zip && <p className="text-red-500 text-xs mt-1">{errors.zip}</p>}
+                {errors.zip && <p className="mt-1 text-xs text-red-500">{errors.zip}</p>}
               </div>
               
               <div className="flex items-center mt-4">
@@ -289,19 +293,19 @@ console.log("Submitting form with b:", body);
                   I agree to the <a href="#" className="text-blue-500">Terms of Service</a> and <a href="#" className="text-blue-500">Privacy Policy</a>
                 </label>
               </div>
-              {errors.agreeToTerms && <p className="text-red-500 text-xs">{errors.agreeToTerms}</p>}
+              {errors.agreeToTerms && <p className="text-xs text-red-500">{errors.agreeToTerms}</p>}
               
               <div className="flex justify-between mt-6">
                 <button
                   type="button"
-                  className="border border-gray-300 text-gray-600 px-4 py-2 rounded flex items-center"
+                  className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded"
                   onClick={handleBack}
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
                   onClick={handleSubmit}
                 >
                   Register →
@@ -310,8 +314,8 @@ console.log("Submitting form with b:", body);
             </div>
           )}
           
-          <div className="text-center mt-6 text-sm text-gray-600">
-            Already have an account? <a href="#" className="text-blue-500">Login</a>
+          <div className="mt-6 text-sm text-center text-gray-600">
+            Already have an account? <a href="/login" className="text-blue-500">Login</a>
           </div>
         </form>
       </div>

@@ -11,7 +11,7 @@ const LawyerSettings = () => {
   const [profile, setProfile] = useState({
   });
   const token = localStorage.getItem('token');
-  const userID = 12
+  const userID = 2
 
 useEffect(() => {
   fetch(`http://localhost:8080/users/getUser/${userID}`, {
@@ -42,7 +42,6 @@ useEffect(() => {
         province: data.province || '',
         city: data.city || '',
         zipCode: data.zip || '',
-        city: data.city || '',
         credentials: data.credentials || [],
       }));
     })

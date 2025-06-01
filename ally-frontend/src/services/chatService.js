@@ -8,16 +8,14 @@ import {
     doc,
     updateDoc,
     deleteDoc,
-    runTransaction,
-    serverTimestamp,
-    setDoc,
-    getDocs
+    getDocs,
+    serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
-export const sendMessage = async (senderId, receiverId, content) => {
+export const sendMessage = async (senderId, receiverId, content, senderRole) => {
     try {
-        // First check if a chatroom exists between these users
+        // Check for existing chatroom between lawyer and client
         const chatroomRef = collection(db, 'chatroom');
         const chatroomQuery = query(
             chatroomRef,
@@ -33,34 +31,46 @@ export const sendMessage = async (senderId, receiverId, content) => {
         if (existingChatroom) {
             chatroomId = existingChatroom.id;
         } else {
-            // Create new chatroom if it doesn't exist
+            // Create new chatroom for lawyer-client pair
             const newChatroomRef = await addDoc(chatroomRef, {
                 participants: [senderId, receiverId],
                 createdAt: serverTimestamp(),
                 lastMessage: content,
-                lastMessageTimestamp: serverTimestamp()
+                lastMessageTimestamp: serverTimestamp(),
+                participantDetails: {
+                    [senderId]: { 
+                        lastRead: serverTimestamp(),
+                        role: senderRole
+                    },
+                    [receiverId]: { 
+                        lastRead: null,
+                        role: senderRole === 'lawyer' ? 'client' : 'lawyer'
+                    }
+                }
             });
             chatroomId = newChatroomRef.id;
         }
 
-        // Add message to the messages subcollection of the chatroom
+        // Add message to messages subcollection
         const messagesRef = collection(db, `chatroom/${chatroomId}/messages`);
-        await addDoc(messagesRef, {
+        const messageDoc = await addDoc(messagesRef, {
             senderId,
             receiverId,
             content,
             timestamp: serverTimestamp(),
-            isEdited: false
+            isEdited: false,
+            senderRole: senderRole
         });
 
-        // Update chatroom's last message
+        // Update chatroom's last message info
         const chatroomDocRef = doc(db, 'chatroom', chatroomId);
         await updateDoc(chatroomDocRef, {
             lastMessage: content,
-            lastMessageTimestamp: serverTimestamp()
+            lastMessageTimestamp: serverTimestamp(),
+            [`participantDetails.${senderId}.lastRead`]: serverTimestamp()
         });
 
-        return true;
+        return { success: true, chatroomId };
     } catch (error) {
         console.error('Error sending message:', error);
         throw error;
@@ -68,20 +78,18 @@ export const sendMessage = async (senderId, receiverId, content) => {
 };
 
 export const subscribeToMessages = (senderId, receiverId, callback) => {
-    console.log('Subscribing to messages:', { senderId, receiverId });
-    
-    // First find the chatroom
-    const chatroomRef = collection(db, 'chatroom');
-    const chatroomQuery = query(
-        chatroomRef,
+    // Find chatroom between lawyer and client
+    const roomsRef = collection(db, 'chatroom');
+    const roomQuery = query(
+        roomsRef,
         where('participants', 'array-contains', senderId)
     );
 
     let messagesUnsubscribe = null;
 
-    // Create a subscription to watch for the correct chatroom and its messages
-    const chatroomUnsubscribe = onSnapshot(chatroomQuery, (chatroomSnapshot) => {
-        const chatroom = chatroomSnapshot.docs.find(doc => 
+    // Subscribe to chatroom changes
+    const chatroomUnsubscribe = onSnapshot(roomQuery, (snapshot) => {
+        const chatroom = snapshot.docs.find(doc => 
             doc.data().participants.includes(receiverId)
         );
 
@@ -90,33 +98,60 @@ export const subscribeToMessages = (senderId, receiverId, callback) => {
             return;
         }
 
-        // Cleanup previous messages subscription if it exists
         if (messagesUnsubscribe) {
             messagesUnsubscribe();
         }
 
-        // Subscribe to the messages subcollection of this chatroom
+        // Subscribe to messages in this chatroom
         const messagesRef = collection(db, `chatroom/${chatroom.id}/messages`);
         const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-        messagesUnsubscribe = onSnapshot(q, (querySnapshot) => {
-            const messages = querySnapshot.docs.map(doc => ({
+        messagesUnsubscribe = onSnapshot(q, (messagesSnapshot) => {
+            const messages = messagesSnapshot.docs.map(doc => ({
                 id: doc.id,
-                ...doc.data()
+                ...doc.data(),
+                timestamp: doc.data().timestamp?.toDate()
             }));
             callback({ messages, chatroomId: chatroom.id });
-        }, (error) => {            console.error('Error subscribing to messages:', error);
-            callback({ messages: [], chatroomId: chatroom.id });
         });
     });
 
-    // Return a cleanup function that handles both subscriptions
     return () => {
+        if (messagesUnsubscribe) messagesUnsubscribe();
         chatroomUnsubscribe();
-        if (messagesUnsubscribe) {
-            messagesUnsubscribe();
-        }
     };
+};
+
+export const fetchUsers = async (currentUser) => {
+    try {
+        const roomsRef = collection(db, 'chatroom');
+        const roomQuery = query(
+            roomsRef,
+            where('participants', 'array-contains', currentUser.id)
+        );
+        const roomSnapshot = await getDocs(roomQuery);
+
+        const conversations = roomSnapshot.docs.map(doc => {
+            const data = doc.data();
+            const otherParticipantId = data.participants.find(id => id !== currentUser.id);
+            const otherParticipantDetails = data.participantDetails[otherParticipantId];
+
+            return {
+                id: otherParticipantId,
+                chatroomId: doc.id,
+                lastMessage: data.lastMessage,
+                lastMessageTimestamp: data.lastMessageTimestamp,
+                role: otherParticipantDetails?.role,
+                unread: data.participantDetails[currentUser.id]?.lastRead < data.lastMessageTimestamp
+            };
+        });
+
+        return conversations;
+
+    } catch (error) {
+        console.error('Error fetching conversations:', error);
+        throw error;
+    }
 };
 
 export const editMessage = async (chatroomId, messageId, newContent) => {
@@ -231,24 +266,15 @@ export const initializeUserInChat = async (chatId, userId, initialStatus = 'acti
     }
 };
 
-export const fetchUsers = async (userType = null) => {
+export const markChatAsRead = async (chatroomId, userId) => {
     try {
-        const usersRef = collection(db, 'users');
-        let q = usersRef;
-        
-        // If userType is specified (e.g., 'lawyer' or 'client'), filter by it
-        if (userType) {
-            q = query(usersRef, where('userType', '==', userType));
-        }
-        
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            lastMessage: '' // You can implement last message fetching later
-        }));
+        const chatroomRef = doc(db, 'chatroom', chatroomId);
+        await updateDoc(chatroomRef, {
+            [`participantDetails.${userId}.lastRead`]: serverTimestamp()
+        });
+        return true;
     } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error marking chat as read:', error);
         throw error;
     }
 };

@@ -37,13 +37,13 @@ const VerifyLawyer = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8 border border-gray-200">        <div className="text-center mb-6">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="w-full max-w-md p-8 bg-white border border-gray-200 shadow-md rounded-2xl">        <div className="mb-6 text-center">
           <h2 className="text-2xl font-bold text-gray-800">Verify Your Email</h2>
-          <p className="text-gray-600 mt-2">We've sent a verification code to {maskedEmail}</p>
+          <p className="mt-2 text-gray-600">We've sent a verification code to {maskedEmail}</p>
         </div>
           <div>
-          <div className="mb-4 flex flex-col items-center">
+          <div className="flex flex-col items-center mb-4">
             <div className="flex justify-start w-[330px] mb-3">
               <label className="text-sm font-medium text-gray-700">
                 Verification Code
@@ -55,7 +55,7 @@ const VerifyLawyer = () => {
                   key={index}
                   type="text"
                   maxLength={1}
-                  className="w-12 h-12 text-center text-xl font-semibold border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-12 h-12 text-xl font-semibold text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={verificationCode[index] || ''}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -97,12 +97,12 @@ const VerifyLawyer = () => {
             </button>
           </div>
         </div>
-          <div className="text-center mt-4">
+          <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Didn't receive a code?{' '}
             <span
               onClick={handleResendCode}
-              className="text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+              className="font-medium text-blue-600 cursor-pointer hover:text-blue-800"
             >
               Resend code
             </span>
