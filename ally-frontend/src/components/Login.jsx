@@ -42,10 +42,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-2xl p-8 bg-gray-200 rounded-lg shadow-lg border">
-        <h2 className="text-2xl font-bold text-center mb-1">Log in To ALLY</h2>
-        <p className="text-center text-gray-600 mb-6">Enter your credentials to access your account</p>
+    <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="w-full max-w-2xl p-8 bg-gray-200 border rounded-lg shadow-lg">
+        <h2 className="mb-1 text-2xl font-bold text-center">Log in To ALLY</h2>
+        <p className="mb-6 text-center text-gray-600">Enter your credentials to access your account</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -56,12 +56,12 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your.email@example.com"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
               <a href="#" className="text-sm text-blue-500 hover:underline">Forgot password?</a>
             </div>
@@ -71,7 +71,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="********"
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="block w-full px-4 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -79,24 +79,41 @@ const Login = () => {
             <input
               id="remember"
               type="checkbox"
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded"
             />
-            <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="remember" className="block ml-2 text-sm text-gray-900">
               Remember me
             </label>
           </div>
 
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
+            className="w-full px-4 py-2 font-semibold text-white transition bg-blue-600 rounded-md hover:bg-blue-700"
           >
             Log in
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don’t have an account? <a href="#" className="text-blue-500 hover:underline">Sign up</a>
-        </p>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account? 
+          </p>
+          <div className="mt-2 space-x-4">
+            <button
+              onClick={() => navigate('/signup/client')}
+              className="text-sm text-blue-500 hover:underline"
+            >
+              Register as Client
+            </button>
+            <span className="text-gray-500">or</span>
+            <button
+              onClick={() => navigate('/signup/lawyer')}
+              className="text-sm text-blue-500 hover:underline"
+            >
+              Register as Lawyer
+            </button>
+          </div>
+        </div>
 
         <div className="flex items-center my-6">
           <hr className="flex-grow border-t border-gray-300" />
@@ -105,11 +122,8 @@ const Login = () => {
         </div>
 
         <div className="flex space-x-4">
-          <button className="w-full py-2 border border-gray-300 rounded-md hover:bg-gray-100">
+          <button className="block w-1/2 py-2 mx-auto hover:bg-gray-100">
             Google
-          </button>
-          <button className="w-full py-2 border border-gray-300 rounded-md hover:bg-gray-100">
-            LinkedIn
           </button>
         </div>
       </div>

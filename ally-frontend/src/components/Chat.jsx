@@ -120,9 +120,12 @@ const Chat = ({ currentUserId, receiverId }) => {
                                         />
                                     ) : (
                                         <>
-                                            <p className="whitespace-pre-wrap">{message.content}</p>
-                                            <div className="mt-1 text-xs opacity-75">
-                                                {message.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            <p className="whitespace-pre-wrap">{message.content}</p>                                            <div className="mt-1 text-xs opacity-75">                                                {message.timestamp?.toDate 
+                                                    ? message.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                    : message.timestamp instanceof Date 
+                                                        ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                        : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                }
                                                 {message.isEdited && ' · Edited'}
                                             </div>
                                         </>

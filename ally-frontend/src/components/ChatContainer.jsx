@@ -90,8 +90,7 @@ const ChatContainer = () => {
         setLoading(true); // Reload user list
     };
 
-    return (
-        <div className="flex w-full h-screen bg-white">
+    return (        <div className="flex w-full h-screen overflow-hidden bg-white">
             <div className="flex flex-col">
                 <div className="p-4 border-b">
                     <div className="mb-4">
@@ -102,7 +101,7 @@ const ChatContainer = () => {
                     </div>
                     <button 
                         onClick={switchUserRole}
-                        className="w-full px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                        className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
                     >
                         Switch to {currentUser.role === 'lawyer' ? 'Client' : 'Lawyer'} View
                     </button>

@@ -171,7 +171,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
   
   return (    
   
-  <div className="flex justify-center items-center min-h-screen bg-white">
+  <div className="flex items-center justify-center min-h-screen bg-white">
       <div className={`bg-stone-100 p-8 rounded-lg shadow-sm mx-4 ${
         step === 3 
           ? 'w-[1200px] max-w-[70%]' 
@@ -179,12 +179,12 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
             ? 'w-[900px] min-h-[800px]' 
             : 'w-[836px] h-[735px]'
       }`}>
-        <h2 className="text-2xl font-bold text-center mb-2 py-2">Register as a Lawyer</h2>
-        <p className="text-center text-gray-600 text-sm mb-6 py-2">Create your professional account to connect with clients</p>
+        <h2 className="py-2 mb-2 text-2xl font-bold text-center">Register as a Lawyer</h2>
+        <p className="py-2 mb-6 text-sm text-center text-gray-600">Create your professional account to connect with clients</p>
         
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="h-2 w-full bg-gray-200 rounded-full">
+          <div className="w-full h-2 bg-gray-200 rounded-full">
             <div 
               className="h-2 bg-blue-500 rounded-full" 
               style={{ width: step === 1 ? '33%' : step === 2 ? '66%' : '100%' }}
@@ -202,7 +202,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
             <div className="space-y-6">
               <div className="flex gap-6">
                 <div className="w-1/2">
-                  <label htmlFor="firstName" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                  <label htmlFor="firstName" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                     First Name
                   </label>
                   <input
@@ -213,10 +213,10 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                     value={formData.firstName}
                     onChange={handleChange}
                   />
-                  {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
+                  {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
                 </div>
                 <div className="w-1/2">
-                  <label htmlFor="lastName" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                  <label htmlFor="lastName" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                     Last Name
                   </label>
                   <input
@@ -227,12 +227,12 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                     value={formData.lastName}
                     onChange={handleChange}
                   />
-                  {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
+                  {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
                 </div>
               </div>
               
               <div>
-                <label htmlFor="email" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                <label htmlFor="email" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Email
                 </label>
                 <input
@@ -243,11 +243,11 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   value={formData.email}
                   onChange={handleChange}
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
               </div>
               
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-start text-gray-700 mb-1 py-2">
+                <label htmlFor="password" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Password
                 </label>
                 <input
@@ -258,12 +258,12 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   value={formData.password}
                   onChange={handleChange}
                 />
-                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-                <p className="text-gray-400 text-xs text-start mt-1">Password must be at least 8 characters long</p>
+                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                <p className="mt-1 text-xs text-gray-400 text-start">Password must be at least 8 characters long</p>
               </div>
               
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                <label htmlFor="confirmPassword" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Confirm Password
                 </label>
                 <input
@@ -274,13 +274,13 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
-                {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
               </div>
               
               <div className="flex justify-end mt-6">
                 <button
                   type="button"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                  className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
                   onClick={handleContinue}
                 >
                   Continue →
@@ -292,12 +292,12 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
             <div className="space-y-4">
               {/* Profile Photo Upload */}
               <div className="flex items-center gap-6 mb-6">
-                <div className="w-32 h-32 rounded-full bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                <div className="flex items-center justify-center w-32 h-32 overflow-hidden bg-gray-200 border-2 border-gray-300 border-dashed rounded-full">
                   {formData.profilePhoto ? (
                     <img 
                       src={URL.createObjectURL(formData.profilePhoto)} 
                       alt="Profile" 
-                      className="w-full h-full object-cover"
+                      className="object-cover w-full h-full"
                     />
                   ) : (
                     <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -306,7 +306,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   )}
                 </div>
                 <div>
-                  <label className="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-600 inline-block">
+                  <label className="inline-block px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
                     Upload Photo
                     <input
                       type="file"
@@ -325,15 +325,15 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                       }}
                     />
                   </label>
-                  <p className="text-xs text-gray-500 mt-2">JPEG, PNG or GIF, max 5MB</p>
+                  <p className="mt-2 text-xs text-gray-500">JPEG, PNG or GIF, max 5MB</p>
                 </div>
               </div>
 
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                <label htmlFor="phoneNumber" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Phone Number
                 </label>                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">+63</span>
+                  <span className="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">+63</span>
                   <input
                     id="phoneNumber"
                     type="tel"
@@ -344,11 +344,11 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                     onChange={handleChange}
                   />
                 </div>
-                {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
+                {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber}</p>}
               </div>
               
               <div>
-                <label htmlFor="address" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                <label htmlFor="address" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Address
                 </label>
                 <input
@@ -359,13 +359,13 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   value={formData.address}
                   onChange={handleChange}
                 />
-                {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
+                {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address}</p>}
               </div>
               
               <div className="space-y-4">
                 <div className="flex gap-4">
                   <div className="w-1/2">
-                    <label htmlFor="city" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                    <label htmlFor="city" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                       City
                     </label>
                     <input
@@ -376,10 +376,10 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                       value={formData.city}
                       onChange={handleChange}
                     />
-                    {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                    {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
                   </div>
                   <div className="w-1/2">
-                    <label htmlFor="state" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                    <label htmlFor="state" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                       State
                     </label>
                     <input
@@ -390,12 +390,12 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                       value={formData.state}
                       onChange={handleChange}
                     />
-                    {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
+                    {errors.state && <p className="mt-1 text-xs text-red-500">{errors.state}</p>}
                   </div>
                 </div>
                 
                 <div>
-                  <label htmlFor="zipCode" className="block text-sm text-start font-medium text-gray-700 mb-1 py-2">
+                  <label htmlFor="zipCode" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                     ZIP Code
                   </label>
                   <input
@@ -406,21 +406,21 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                     value={formData.zipCode}
                     onChange={handleChange}
                   />
-                  {errors.zipCode && <p className="text-red-500 text-xs mt-1">{errors.zipCode}</p>}
+                  {errors.zipCode && <p className="mt-1 text-xs text-red-500">{errors.zipCode}</p>}
                 </div>
               </div>
               
               <div className="flex justify-between mt-6">
                 <button
                   type="button"
-                  className="border border-gray-300 text-gray-600 bg-gray-50 px-4 py-2 rounded-lg flex items-center"
+                  className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded-lg bg-gray-50"
                   onClick={handleBack}
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                  className="px-4 py-2 text-white bg-blue-500 rounded-lg"
                   onClick={handleContinue}
                 >
                   Continue →
@@ -431,7 +431,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
             /* Step 3: Professional Information - Matches the image design */
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-start font-medium text-gray-700 mb-1">Bar Number</label>
+                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Bar Number</label>
                 <input
                   type="text"
                   name="prcNumber"
@@ -439,18 +439,18 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   value={formData.prcNumber}
                   onChange={handleChange}
                 />
-                {errors.prcNumber && <p className="text-red-500 text-xs mt-1">{errors.prcNumber}</p>}
+                {errors.prcNumber && <p className="mt-1 text-xs text-red-500">{errors.prcNumber}</p>}
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-start text-gray-700 mb-1">Practice Areas</label>                <div className="border border-gray-300 rounded p-3">
+                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Practice Areas</label>                <div className="p-3 border border-gray-300 rounded">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center">
                       <input
                         type="checkbox"
                         id="familyLaw"
                         name="practiceAreas.familyLaw"
-                        className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                         checked={formData.practiceAreas.familyLaw}
                         onChange={handleChange}
                       />
@@ -463,7 +463,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                         type="checkbox"
                         id="criminalDefense"
                         name="practiceAreas.criminalDefense"
-                        className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                         checked={formData.practiceAreas.criminalDefense}
                         onChange={handleChange}
                       />
@@ -476,7 +476,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                         type="checkbox"
                         id="realEstate"
                         name="practiceAreas.realEstate"
-                        className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                         checked={formData.practiceAreas.realEstate}
                         onChange={handleChange}
                       />
@@ -489,7 +489,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                         type="checkbox"
                         id="businessLaw"
                         name="practiceAreas.businessLaw"
-                        className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                         checked={formData.practiceAreas.businessLaw}
                         onChange={handleChange}
                       />
@@ -502,7 +502,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                         type="checkbox"
                         id="personalInjury"
                         name="practiceAreas.personalInjury"
-                        className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                         checked={formData.practiceAreas.personalInjury}
                         onChange={handleChange}
                       />
@@ -515,7 +515,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                         type="checkbox"
                         id="estatePlanning"
                         name="practiceAreas.estatePlanning"
-                        className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                         checked={formData.practiceAreas.estatePlanning}
                         onChange={handleChange}
                       />
@@ -528,7 +528,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                         type="checkbox"
                         id="immigration"
                         name="practiceAreas.immigration"
-                        className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                         checked={formData.practiceAreas.immigration}
                         onChange={handleChange}
                       />
@@ -537,7 +537,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                       </label>
                     </div>                  </div>
                   <div className="mt-4">
-                    <label htmlFor="otherPracticeArea" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="otherPracticeArea" className="block mb-2 text-sm font-medium text-gray-700">
                       Others (specify)
                     </label>
                     <input
@@ -554,7 +554,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-start text-gray-700 mb-1">Years of Experience</label>
+                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Years of Experience</label>
                 <input
                   type="number"
                   name="yearsOfExperience"
@@ -562,19 +562,19 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   value={formData.yearsOfExperience}
                   onChange={handleChange}
                 />
-                {errors.yearsOfExperience && <p className="text-red-500 text-xs mt-1">{errors.yearsOfExperience}</p>}
+                {errors.yearsOfExperience && <p className="mt-1 text-xs text-red-500">{errors.yearsOfExperience}</p>}
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-start text-gray-700 mb-1">Credentials & Certifications</label>
-                <div className="border border-gray-300 border-dashed rounded p-6 text-center">
+                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Credentials & Certifications</label>
+                <div className="p-6 text-center border border-gray-300 border-dashed rounded">
                   <div className="flex justify-center mb-4">
                     <svg className="w-12 h-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                     </svg>
                   </div>
-                  <p className="text-gray-600 mb-2">Drag and drop files here or</p>
-                  <label className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-600">
+                  <p className="mb-2 text-gray-600">Drag and drop files here or</p>
+                  <label className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600">
                          Browse Files
                            <input
                             type="file"
@@ -592,7 +592,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                                         Selected file: {formData.credentials.name}
                                               </p>
                                 )}
-                  <p className="text-xs text-gray-500 mt-2">PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB each)</p>
+                  <p className="mt-2 text-xs text-gray-500">PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB each)</p>
                 </div>
               </div>
               
@@ -601,7 +601,7 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   type="checkbox"
                   id="agreeToTerms"
                   name="agreeToTerms"
-                  className="h-4 w-4 text-blue-500 border-gray-300 rounded"
+                  className="w-4 h-4 text-blue-500 border-gray-300 rounded"
                   checked={formData.agreeToTerms}
                   onChange={handleChange}
                 />
@@ -609,18 +609,18 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
                   I agree to the <a href="#" className="text-blue-500">Terms of Service</a> and <a href="#" className="text-blue-500">Privacy Policy</a>
                 </label>
               </div>
-              {errors.agreeToTerms && <p className="text-red-500 text-xs">{errors.agreeToTerms}</p>}
+              {errors.agreeToTerms && <p className="text-xs text-red-500">{errors.agreeToTerms}</p>}
               
               <div className="flex justify-between mt-6">
                 <button
                   type="button"
-                  className="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg"
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg"
                   onClick={handleBack}
                 >
                   ← Back
                 </button>                <button
                   type="submit"
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                  className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
                 >
                   Submit Application
                 </button>
@@ -629,9 +629,9 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
           )}
           
           {step === 3 && (
-            <div className="text-center pt-6 border-t mt-8">
-              <p className="text-gray-600 text-sm">
-                Already have an account? <a href="#" className="text-blue-500">Login</a>
+            <div className="pt-6 mt-8 text-center border-t">
+              <p className="text-sm text-gray-600">
+                Already have an account? <a href="/login" className="text-blue-500">Login</a>
               </p>
             </div>
           )}
