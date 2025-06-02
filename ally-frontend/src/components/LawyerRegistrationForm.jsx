@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Logo from './Logo';
 
-export default function LawyerRegistrationForm() {  const [step, setStep] = useState(1); // Start with step 1 for proper form flow
+export default function LawyerRegistrationForm() {const [step, setStep] = useState(1); // Start with step 1 for proper form flow
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -168,10 +169,9 @@ export default function LawyerRegistrationForm() {  const [step, setStep] = useS
       }
     }
   };
-  
-  return (    
-  
+    return (    
   <div className="flex items-center justify-center min-h-screen bg-white">
+      <Logo />
       <div className={`bg-stone-100 p-8 rounded-lg shadow-sm mx-4 ${
         step === 3 
           ? 'w-[1200px] max-w-[70%]' 
