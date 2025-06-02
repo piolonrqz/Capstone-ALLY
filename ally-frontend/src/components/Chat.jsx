@@ -5,15 +5,17 @@ import {
     subscribeToMessages, 
     editMessage, 
     deleteMessage,
-    handleMessageStatus 
+    handleMessageStatus,
+    fetchUserDetails
 } from '../services/chatService';
 
-const Chat = ({ currentUserId, receiverId }) => {
+const Chat = ({ currentUserId, receiverId, currentUserRole }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [editingMessage, setEditingMessage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [chatroomId, setChatroomId] = useState(null);
+    const [receiver, setReceiver] = useState(null);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -31,13 +33,27 @@ const Chat = ({ currentUserId, receiverId }) => {
         return () => unsubscribe(); // Cleanup subscription on unmount
     }, [currentUserId, receiverId]);
 
-    const handleSend = async (e) => {
+    useEffect(() => {
+        const fetchReceiverDetails = async () => {
+            try {
+                const receiverData = await fetchUserDetails(receiverId);
+                setReceiver(receiverData);
+            } catch (error) {
+                console.error('Error fetching receiver details:', error);
+                toast.error('Failed to load contact information');
+            }
+        };
+
+        if (receiverId) {
+            fetchReceiverDetails();
+        }
+    }, [receiverId]);    const handleSend = async (e) => {
         e.preventDefault();
         if (!newMessage.trim() || isLoading) return;
 
         setIsLoading(true);
         try {
-            await sendMessage(currentUserId, receiverId, newMessage.trim());
+            await sendMessage(currentUserId, receiverId, newMessage.trim(), currentUserRole);
             setNewMessage('');
             toast.success('Message sent!');
         } catch (error) {
@@ -120,9 +136,12 @@ const Chat = ({ currentUserId, receiverId }) => {
                                         />
                                     ) : (
                                         <>
-                                            <p className="whitespace-pre-wrap">{message.content}</p>
-                                            <div className="mt-1 text-xs opacity-75">
-                                                {message.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            <p className="whitespace-pre-wrap">{message.content}</p>                                            <div className="mt-1 text-xs opacity-75">                                                {message.timestamp?.toDate 
+                                                    ? message.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                    : message.timestamp instanceof Date 
+                                                        ? message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                        : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                }
                                                 {message.isEdited && ' · Edited'}
                                             </div>
                                         </>

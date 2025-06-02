@@ -83,19 +83,19 @@ const LawyerVerificationTable = () => {
   });
 
   return (
-    <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-4">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="p-2 sm:p-4">
+        <div className="flex flex-col items-start justify-between gap-2 mb-4 sm:flex-row sm:items-center">
           <h2 className="text-lg font-semibold">Verification Requests</h2>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <button
               onClick={toggleDropdown}
-              className="px-3 py-1.5 border rounded-md flex items-center text-sm"
+              className="w-full sm:w-auto px-3 py-1.5 border rounded-md flex items-center justify-between text-sm"
             >
               {filter} <span className="ml-2">▼</span>
             </button>
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg border z-10">
+              <div className="absolute right-0 z-10 w-full mt-2 bg-white border rounded-md shadow-lg sm:w-40">
                 <div className="py-1">
                   {['All Requests', 'Pending', 'Approved', 'Rejected'].map((option) => (
                     <button
@@ -111,77 +111,84 @@ const LawyerVerificationTable = () => {
             )}
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Bar Number</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Practice Areas</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredRequests.map((request) => (
-                <tr key={request.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div>
-                      <div className="text-sm font-medium">{request.name}</div>
-                      <div className="text-xs text-gray-500">{request.email}</div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm">{request.barNumber}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
-                      {request.practiceAreas.map((area) => (
-                        <span
-                          key={area}
-                          className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800"
-                        >
-                          {area}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 text-xs rounded-full ${
-                      request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                      request.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {request.status === 'pending' && (
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleApprove(request.id)}
-                          className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleReject(request.id)}
-                          className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filteredRequests.length === 0 && (
+
+        <div className="-mx-4 overflow-x-auto sm:mx-0">
+          <div className="inline-block min-w-full align-middle">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-500">
-                    No requests found.
-                  </td>
+                  <th scope="col" className="px-2 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase sm:px-4">Name</th>
+                  <th scope="col" className="hidden px-2 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase sm:px-4 sm:table-cell">Bar Number</th>
+                  <th scope="col" className="hidden px-2 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase sm:px-4 md:table-cell">Practice Areas</th>
+                  <th scope="col" className="px-2 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase sm:px-4">Status</th>
+                  <th scope="col" className="px-2 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase sm:px-4">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredRequests.map((request) => (
+                  <tr key={request.id} className="hover:bg-gray-50">
+                    <td className="px-2 py-3 sm:px-4">
+                      <div>
+                        <div className="text-sm font-medium">{request.name}</div>
+                        <div className="text-xs text-gray-500">{request.email}</div>
+                        {/* Show bar number on mobile as it's hidden in table header */}
+                        <div className="mt-1 text-xs text-gray-500 sm:hidden">
+                          Bar: {request.barNumber}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="hidden px-2 py-3 text-sm sm:px-4 sm:table-cell">{request.barNumber}</td>
+                    <td className="hidden px-2 py-3 sm:px-4 md:table-cell">
+                      <div className="flex flex-wrap gap-1">
+                        {request.practiceAreas.map((area) => (
+                          <span
+                            key={area}
+                            className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800"
+                          >
+                            {area}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-2 py-3 sm:px-4">
+                      <span className={`inline-flex px-2 py-0.5 text-xs rounded-full ${
+                        request.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        request.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-2 py-3 sm:px-4">
+                      {request.status === 'pending' && (
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <button
+                            onClick={() => handleApprove(request.id)}
+                            className="w-full px-2 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600 sm:w-auto"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleReject(request.id)}
+                            className="w-full px-2 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 sm:w-auto"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {filteredRequests.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-center text-gray-500">
+                      No requests found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

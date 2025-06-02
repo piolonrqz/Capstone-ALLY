@@ -6,19 +6,13 @@ import { toast } from 'react-toastify';
 const ChatContainer = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [currentUser, setCurrentUser] = useState({
-        id: 'lawyer123',
-        name: 'John Doe',
-        role: 'lawyer',
-        specialization: 'Criminal Law'
-    });
-
-    useEffect(() => {
+    const [loading, setLoading] = useState(true);    const [currentUser, setCurrentUser] = useState(null);    useEffect(() => {
         const initializeChat = async () => {
             try {
                 await loadUsers();
-                toast.success(`Welcome ${currentUser.name}!`);
+                if (currentUser) {
+                    toast.success(`Welcome ${currentUser.name}!`);
+                }
             } catch (error) {
                 console.error('Error setting up chat:', error);
                 toast.error('Error loading chat data');
@@ -28,43 +22,42 @@ const ChatContainer = () => {
         };
 
         initializeChat();
-    }, [currentUser.name]);
-
-    const loadUsers = async () => {
+    }, [currentUser]);const loadUsers = async () => {
         try {
-            // Simulate different user lists based on current user's role
-            const testUsers = currentUser.role === 'lawyer' ? [
-                { 
-                    id: 'client1', 
-                    name: 'Sarah Johnson',
-                    role: 'client',
-                    lastMessage: 'I need help with my case',
-                    caseType: 'Family Law'
-                },
-                { 
-                    id: 'client2', 
-                    name: 'Michael Chen',
-                    role: 'client',
-                    lastMessage: 'When can we schedule a meeting?',
-                    caseType: 'Criminal Law'
+            if (!currentUser) {
+                const userId = localStorage.getItem('userId');
+                const token = localStorage.getItem('token');
+                const role = localStorage.getItem('role');
+                
+                if (!userId || !token || !role) {
+                    throw new Error('User not authenticated');
                 }
-            ] : [
-                { 
-                    id: 'lawyer123', 
-                    name: 'John Doe',
-                    role: 'lawyer',
-                    lastMessage: 'I\'ll review your case',
-                    specialization: 'Criminal Law'
-                },
-                { 
-                    id: 'lawyer456', 
-                    name: 'Emma Wilson',
-                    role: 'lawyer',
-                    lastMessage: 'Let me help you with that',
-                    specialization: 'Family Law'
+                
+                // Fetch current user details
+                const response = await fetch(`http://localhost:8080/users/getUser/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user details');
                 }
-            ];
-            setUsers(testUsers);
+                
+                const userData = await response.json();
+                setCurrentUser({
+                    id: userData.userId.toString(),
+                    name: `${userData.Fname} ${userData.Lname}`,
+                    role: userData.accountType.toLowerCase(),
+                    accountType: userData.accountType
+                });
+                return;
+            }
+
+            // Fetch chat users using the chat service
+            const conversations = await fetchUsers(currentUser);
+            setUsers(conversations);
         } catch (error) {
             console.error('Error loading users:', error);
             toast.error('Failed to load users');
@@ -90,8 +83,7 @@ const ChatContainer = () => {
         setLoading(true); // Reload user list
     };
 
-    return (
-        <div className="flex w-full h-screen bg-white">
+    return (        <div className="flex w-full h-screen overflow-hidden bg-white">
             <div className="flex flex-col">
                 <div className="p-4 border-b">
                     <div className="mb-4">
@@ -102,7 +94,7 @@ const ChatContainer = () => {
                     </div>
                     <button 
                         onClick={switchUserRole}
-                        className="w-full px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                        className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
                     >
                         Switch to {currentUser.role === 'lawyer' ? 'Client' : 'Lawyer'} View
                     </button>
