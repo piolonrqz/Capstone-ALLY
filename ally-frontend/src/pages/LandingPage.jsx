@@ -76,7 +76,7 @@ const LandingPage = () => {
             {/* Buttons */}
             <div className="flex justify-center gap-6 mb-12">
               <button
-                onClick={() => navigate('/signup/client')}
+                onClick={() => navigate('/lawyers')}
                 className="bg-[#1A6EFF] text-white px-8 py-5 rounded-lg text-2xl font-normal hover:bg-blue-700 transition-colors"
               >
                 Get Legal Help Now
@@ -145,29 +145,41 @@ const LandingPage = () => {
               <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
                 Learn More
               </button>
-            </div>
+            </div>              
             <div className="flex-1 relative">
-              <div className="bg-[#B9DEFF] p-4 rounded-[18px] shadow-lg h-[296px] relative">
-                <div className="bg-white shadow-lg rounded-[18px] p-4 h-full relative overflow-hidden">
-                  {/* Mock UI Elements */}
-                  <div className="absolute top-8 left-8 right-8">
-                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-4 rounded text-base font-medium text-center mb-4">
-                      Legal Question Form
-                    </div>
-                    <div className="bg-[#1A6EFF] text-white px-12 py-4 rounded text-base font-medium text-center mb-6">
-                      Get Started
-                    </div>
-                    <div className="space-y-3 mb-6">
-                      <div className="bg-[#BBBBBB] h-3 rounded w-3/4"></div>
-                      <div className="bg-[#BBBBBB] h-3 rounded w-1/2"></div>
-                    </div>
-                    <div className="bg-[#1A6EFF] p-2 rounded-lg w-fit">
-                      <div className="w-4 h-4 bg-[#1A6EFF] rounded flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-white" strokeWidth={2} />
-                      </div>
+              <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
+                <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
+                  {/* Top Icon */}
+                  <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-white" strokeWidth={2} />
                     </div>
                   </div>
-                  <img src="/ally_logo.svg" alt="ALLY" className="absolute bottom-8 right-8 w-16 h-6 brightness-0 invert" />
+                  
+                  {/* Top Right Logo */}
+                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  
+                  {/* Mock Content Lines */}
+                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                    <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
+                    <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
+                  </div>
+                  
+                  {/* Blue Button */}
+                  <div className="absolute top-32 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                      Legal Question Form
+                    </div>
+                  </div>
+                  
+                  {/* Get Started Button */}
+                  <div className="absolute top-48 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                      Get Started
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Text */}
                   <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
                     Anonymous & Secure
                   </p>
@@ -180,30 +192,41 @@ const LandingPage = () => {
                 </div>
               </div>
             </div>
-          </div>          {/* Step 2 */}
-          <div className="flex items-center gap-20 mb-20">
-            <div className="flex-1 relative">
-              <div className="bg-[#B9DEFF] p-4 rounded-[18px] shadow-lg h-[296px] relative">
-                <div className="bg-white shadow-lg rounded-[18px] p-4 h-full relative overflow-hidden">
-                  {/* Mock UI Elements */}
-                  <div className="absolute top-8 left-8 right-8">
-                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-4 rounded text-base font-medium text-center mb-4">
-                      Expert Matching
-                    </div>
-                    <div className="bg-[#1A6EFF] text-white px-12 py-4 rounded text-base font-medium text-center mb-6">
-                      Get Started
-                    </div>
-                    <div className="space-y-3 mb-6">
-                      <div className="bg-[#BBBBBB] h-3 rounded w-3/4"></div>
-                      <div className="bg-[#BBBBBB] h-3 rounded w-1/2"></div>
-                    </div>
-                    <div className="bg-[#1A6EFF] p-2 rounded-lg w-fit">
-                      <div className="w-4 h-4 flex items-center justify-center">
-                        <Users className="w-4 h-4 text-white" strokeWidth={2} />
-                      </div>
+          </div>          
+          {/* Step 2 */}          <div className="flex items-center gap-20 mb-20">            <div className="flex-1 relative">
+              <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
+                <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
+                  {/* Top Icon */}
+                  <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" strokeWidth={2} />
                     </div>
                   </div>
-                  <img src="/ally_logo.svg" alt="ALLY" className="absolute bottom-8 right-8 w-16 h-6 brightness-0 invert" />
+                  
+                  {/* Top Right Logo */}
+                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  
+                  {/* Mock Content Lines */}
+                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                    <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
+                    <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
+                  </div>
+                  
+                  {/* Blue Button */}
+                  <div className="absolute top-32 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                      Expert Matching
+                    </div>
+                  </div>
+                  
+                  {/* Get Started Button */}
+                  <div className="absolute top-48 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                      Get Started
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Text */}
                   <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
                     AI-Powered Selection
                   </p>
@@ -255,29 +278,40 @@ const LandingPage = () => {
               <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
                 Learn More
               </button>
-            </div>
-            <div className="flex-1 relative">
-              <div className="bg-[#B9DEFF] p-4 rounded-[18px] shadow-lg h-[296px] relative">
-                <div className="bg-white shadow-lg rounded-[18px] p-4 h-full relative overflow-hidden">
-                  {/* Mock UI Elements */}
-                  <div className="absolute top-8 left-8 right-8">
-                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-4 rounded text-base font-medium text-center mb-4">
-                      Secure Chat
-                    </div>
-                    <div className="bg-[#1A6EFF] text-white px-12 py-4 rounded text-base font-medium text-center mb-6">
-                      Get Started
-                    </div>
-                    <div className="space-y-3 mb-6">
-                      <div className="bg-[#BBBBBB] h-3 rounded w-3/4"></div>
-                      <div className="bg-[#BBBBBB] h-3 rounded w-1/2"></div>
-                    </div>
-                    <div className="bg-[#1A6EFF] p-2 rounded-lg w-fit">
-                      <div className="w-4 h-4 flex items-center justify-center">
-                        <Clock className="w-4 h-4 text-white" strokeWidth={2} />
-                      </div>
+            </div>            <div className="flex-1 relative">
+              <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
+                <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
+                  {/* Top Icon */}
+                  <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-white" strokeWidth={2} />
                     </div>
                   </div>
-                  <img src="/ally_logo.svg" alt="ALLY" className="absolute bottom-8 right-8 w-16 h-6 brightness-0 invert" />
+                  
+                  {/* Top Right Logo */}
+                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  
+                  {/* Mock Content Lines */}
+                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                    <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
+                    <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
+                  </div>
+                  
+                  {/* Blue Button */}
+                  <div className="absolute top-32 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                      Secure Chat
+                    </div>
+                  </div>
+                  
+                  {/* Get Started Button */}
+                  <div className="absolute top-48 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                      Get Started
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Text */}
                   <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
                     Direct Communication
                   </p>
