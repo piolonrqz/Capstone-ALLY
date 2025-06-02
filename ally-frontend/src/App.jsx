@@ -16,11 +16,14 @@ import { LawyerDirectoryPage } from './pages/LawyerDirectoryPage'
 import DocumentSubmission from './components/DocumentSubmission'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
+import NavigationBar from './components/NavigationBar'
 
 function App() {
   return (
     <Router>
-      <Routes>
+      <NavigationBar />
+      <div className="pt-[104px]">
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
@@ -44,9 +47,9 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="analytics" element={<AnalyticsDashboard />} />
-          <Route path="settings" element={<SettingsDashboard />} />
-        </Route>
+          <Route path="settings" element={<SettingsDashboard />} />        </Route>
       </Routes>
+      </div>
     </Router>
   )
 }
