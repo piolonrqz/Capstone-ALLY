@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { getAuthData, isAuthenticated, logout, fetchUserDetails } from '../utils/auth.jsx';
+import { shouldHideNavigation } from '../utils/navigation.js';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -39,13 +40,14 @@ const NavigationBar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    };  }, []);
 
-  // Don't show nav bar on admin routes
-  if (location.pathname.startsWith('/admin')) {
+  // Don't show nav bar on specific routes
+  if (shouldHideNavigation(location.pathname)) {
     return null;
-  }  const handleAuthAction = () => {
+  }
+
+  const handleAuthAction = () => {
     if (!isLoggedIn) {
       navigate('/signup');
     }
