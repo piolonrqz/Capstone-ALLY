@@ -8,47 +8,122 @@ import Button from './shared/Button';
 
 
 const LawyerSettings = () => {
-  const [profile, setProfile] = useState({
-  });
+  const [profile, setProfile] = useState({});
+  const [profilePicture, setProfilePicture] = useState(null);
   const token = localStorage.getItem('token');
-  const userID = 2
+  const userID = 2;
 
-useEffect(() => {
-  fetch(`http://localhost:8080/users/getUser/${userID}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  })
-    .then(res => res.json())
-    .then(data => {
+  const practiceAreas = [
+    { id: 1, name: 'Family Law' },
+    { id: 2, name: 'Criminal Defense' },
+    { id: 3, name: 'Real Estate' },
+    { id: 4, name: 'Business Law' },
+    { id: 5, name: 'Personal Injury' },
+    { id: 6, name: 'Estate Planning' },
+    { id: 7, name: 'Immigration' }
+  ];
 
-      // Update the profile state with the fetched data
-      setProfile({
-        name: `${data.Fname} ${data.Lname}`,
-      });
-      console.log('Profile data:', data);
+  const [selectedAreas, setSelectedAreas] = useState([]);
 
-      // You can also update personalInfo or address if needed
-      setPersonalInfo(prev => ({
-        ...prev,
-        firstName: data.Fname,
-        lastName: data.Lname,
-        email: data.email,
-        phone: data.phoneNumber || '',
-        experience: data.experience || '',
-        barNumber: data.barNumber || '',
-        address: data.address || '',
-        province: data.province || '',
-        zipCode: data.zip || '',
-        credentials: data.credentials || [],
-      }));
+  useEffect(() => {
+    fetch(`http://localhost:8080/users/getUser/${userID}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     })
-    .catch(error => {
-      console.error('Failed to fetch user:', error);
-    });
-}, []);
+      .then(res => res.json())
+      .then(data => {
+        setProfile({
+          name: `${data.Fname} ${data.Lname}`,
+        });
+        setProfilePicture(data.profilePhoto);
+        setSelectedAreas(data.specialization || []);
 
+        setPersonalInfo(prev => ({
+          ...prev,
+          firstName: data.Fname,
+          lastName: data.Lname,
+          email: data.email,
+          phone: data.phoneNumber || '',
+          experience: data.experience || '',
+          barNumber: data.barNumber || '',
+          address: data.address || '',
+          province: data.province || '',
+          city: data.city || '',
+          zipCode: data.zip || '',
+          credentials: data.credentials || [],
+        }));
+      })
+      .catch(error => {
+        console.error('Failed to fetch user:', error);
+      });
+  }, []);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
+      const formData = new FormData();
+      formData.append('profilePhoto', file);
+
+      fetch(`http://localhost:8080/users/updatePhoto/${userID}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        setProfilePicture(data.profilePhoto);
+      })
+      .catch(error => {
+        console.error('Failed to update photo:', error);
+      });
+    } else {
+      alert('File size should not exceed 5MB');
+    }
+  };
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('Fname', personalInfo.firstName);
+    formData.append('Lname', personalInfo.lastName);
+    formData.append('email', personalInfo.email);
+    formData.append('phoneNumber', personalInfo.phone);
+
+    try {
+      await fetch(`http://localhost:8080/users/updateUser/${userID}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData
+      });
+      alert('Profile updated successfully');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      alert('Failed to update profile');
+    }
+  };
+
+  const handlePracticeAreasUpdate = async () => {
+    try {
+      await fetch(`http://localhost:8080/users/updateSpecialization/${userID}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ specialization: selectedAreas })
+      });
+      alert('Practice areas updated successfully');
+    } catch (error) {
+      console.error('Failed to update practice areas:', error);
+      alert('Failed to update practice areas');
+    }
+  };
 
   const [personalInfo, setPersonalInfo] = useState({
     firstName: 'John',
@@ -91,7 +166,7 @@ useEffect(() => {
       </div>
 
       {/* Sidebar - Hidden on mobile by default */}
-      <aside className="fixed top-0 left-0 z-40 flex-col hidden w-64 h-screen md:flex bg-white shadow-lg">
+      <aside className="fixed top-0 left-0 z-40 flex-col hidden w-64 h-screen bg-white shadow-lg md:flex">
         <div className="p-6 border-b border-gray-200">
           <Link to="/">
             <img src="/small_logo.png" alt="ALLY Logo" className="h-8" />
@@ -150,18 +225,28 @@ useEffect(() => {
             {/* Profile Settings Card */}
             <div className="p-6 bg-white rounded-lg shadow-sm">
               <h2 className="mb-4 text-lg font-semibold">Profile</h2>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleProfileUpdate}>
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Profile Picture
                   </label>
                   <div className="flex items-center space-x-4">
                     <div className="w-16 h-16 overflow-hidden rounded-full">
-                      <img src={profilePicture || "/default-avatar.png"} alt="Profile" className="object-cover w-full h-full" />
+                      <img 
+                        src={profilePicture || "/add_profile.png"} 
+                        alt="Profile" 
+                        className="object-cover w-full h-full" 
+                      />
                     </div>
-                    <button type="button" className="px-3 py-2 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50">
+                    <label className="px-3 py-2 text-sm text-blue-600 border border-blue-600 rounded-md cursor-pointer hover:bg-blue-50">
                       Change Photo
-                    </button>
+                      <input 
+                        type="file" 
+                        className="hidden" 
+                        accept="image/jpeg,image/png,image/gif"
+                        onChange={handlePhotoChange}
+                      />
+                    </label>
                   </div>
                 </div>
                 
@@ -170,6 +255,8 @@ useEffect(() => {
                     <label className="block text-sm font-medium text-gray-700">First Name</label>
                     <input
                       type="text"
+                      value={personalInfo.firstName}
+                      onChange={(e) => setPersonalInfo(prev => ({ ...prev, firstName: e.target.value }))}
                       className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -177,6 +264,8 @@ useEffect(() => {
                     <label className="block text-sm font-medium text-gray-700">Last Name</label>
                     <input
                       type="text"
+                      value={personalInfo.lastName}
+                      onChange={(e) => setPersonalInfo(prev => ({ ...prev, lastName: e.target.value }))}
                       className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -186,6 +275,8 @@ useEffect(() => {
                   <label className="block text-sm font-medium text-gray-700">Email</label>
                   <input
                     type="email"
+                    value={personalInfo.email}
+                    onChange={(e) => setPersonalInfo(prev => ({ ...prev, email: e.target.value }))}
                     className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -194,6 +285,8 @@ useEffect(() => {
                   <label className="block text-sm font-medium text-gray-700">Phone Number</label>
                   <input
                     type="tel"
+                    value={personalInfo.phone}
+                    onChange={(e) => setPersonalInfo(prev => ({ ...prev, phone: e.target.value }))}
                     className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -216,6 +309,14 @@ useEffect(() => {
                     <input
                       type="checkbox"
                       id={`area-${area.id}`}
+                      checked={selectedAreas.includes(area.name)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedAreas(prev => [...prev, area.name]);
+                        } else {
+                          setSelectedAreas(prev => prev.filter(a => a !== area.name));
+                        }
+                      }}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <label htmlFor={`area-${area.id}`} className="ml-2 text-sm text-gray-700">
@@ -225,6 +326,7 @@ useEffect(() => {
                 ))}
                 <button
                   type="button"
+                  onClick={handlePracticeAreasUpdate}
                   className="w-full px-4 py-2 mt-4 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   Update Practice Areas
