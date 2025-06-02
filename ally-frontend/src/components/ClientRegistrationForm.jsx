@@ -119,8 +119,9 @@ console.log("Submitting form with b:", body);
     }
   };
   return (    
-    <div className="flex items-center justify-center w-full min-h-screen overflow-hidden bg-white">
-      <div className="w-full max-w-4xl p-12 mx-auto shadow-lg bg-stone-100 border-stone-300 rounded-xl font-inter">
+    <div className="flex items-center justify-center w-full min-h-screen overflow-hidden bg-white font-['Poppins'] relative">
+      <Logo />
+      <div className="w-full max-w-4xl p-12 mx-auto shadow-lg bg-stone-100 border-stone-300 rounded-xl">
         <h2 className="mb-3 text-3xl font-bold text-center text-neutral-900">Register as a Client</h2>
         <p className="mb-8 text-base text-center text-neutral-600">Create your account to find legal help</p>
         

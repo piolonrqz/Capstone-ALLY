@@ -22,7 +22,7 @@ const VerifyLawyer = () => {
   const maskedEmail = email ? email.replace(/(.{2})(.*)(@.*)/, '$1***$3') : '';
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault();x
     setIsLoading(true);
     
     // Simulate verification process
