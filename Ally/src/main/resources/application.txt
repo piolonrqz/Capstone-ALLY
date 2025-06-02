@@ -34,3 +34,10 @@ spring.ai.openai.api-key=
 spring.ai.openai.chat.options.model=gemini-2.0-flash
 
 # K: AIzaSyBKAnxwUKbQdw87tccs-gLJx2vP03YHH9k
+
+# Use the path where Render mounts the secret file
+# firebase.service.account.path=file:/etc/secrets/studyspace-firebasesdk.json
+
+#for local development
+firebase.service.account.path=classpath:ally-firebasesdk.json
+firebase.bucket.name=ally-1d4e6.firebasestorage.app
