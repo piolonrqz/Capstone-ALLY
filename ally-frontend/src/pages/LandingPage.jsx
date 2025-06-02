@@ -1,31 +1,11 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { Shield, CheckCircle, Clock, Users, Award, Lock, Zap, Quote, Star } from 'lucide-react';
+import Footer from '../components/Footer';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const steps = [
-    {
-      number: "1.",
-      title: "Describe Your Need",
-      description:
-        "Tell us about your legal issue and what type of assistance you're looking for.",
-      icon: "/search.png",
-    },
-    {
-      number: "2.",
-      title: "Match with Experts",
-      description:
-        "We'll connect you with qualified legal professionals who specialize in your specific needs.",
-      icon: "/match.png",
-    },
-    {
-      number: "3.",
-      title: "Collaborate Securely",
-      description:
-        "Communicate, share documents, and work together in our secure platform.",
-      icon: "/collab.png",
-    },
-  ];
+  
   const companies = [
     { name: "LegalCorp", icon: "/legal_corp.png" },
     { name: "JusticeFirm", icon: "/justice_firm.png" },
@@ -33,127 +13,436 @@ const LandingPage = () => {
     { name: "EthicsLaw", icon: "/timbangan.png" },
     { name: "JusticeAid", icon: "/hammer.png" },
   ];
-  return (
+
+  const stats = [
+    {
+      number: "50,000+",
+      title: "Clients Helped",
+      description: "Successfully matched with legal experts",
+      icon: Users
+    },
+    {
+      number: "500+",
+      title: "Verified Lawyers",
+      description: "Licensed professionals in our network",
+      icon: Award
+    },
+    {
+      number: "100%",
+      title: "Confidential",
+      description: "Your privacy is always protected",
+      icon: Lock
+    },
+    {
+      number: "< 2 min",
+      title: "Average Response",
+      description: "Quick connections to legal help",
+      icon: Zap
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Kim Yu",
+      role: "Small Business Owner",
+      image: "/testimonial-profile-1.png",
+      quote: "I was completely overwhelmed trying to figure out where to start with a legal issue I'd never dealt with before. ALLY made it so easy to connect with a lawyer who understood my situation. The AI consultation gave me a clear idea of what to expect, and I didn't have to wait days for a response. Everything was smooth, secure, and honestly a relief. This platform gave me peace of mind when I needed it most."
+    },
+    {
+      name: "Piolo Enriquez", 
+      role: "Civil Litigation Attorney",
+      image: "/testimonial-profile-2.png",
+      quote: "ALLY has transformed the way I manage my practice. The case-matching system brings me clients that are actually relevant to my area of expertise, and the centralized document access saves hours each week. Plus, clients are better informed when they reach out, thanks to the AI consultation feature. It's a smarter, more efficient way to work—and I wouldn't go back."
+    }
+  ];  return (
     <div className="bg-white min-h-screen flex flex-col">
 
-
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm w-full h-16 px-32 fixed top-0 left-0 right-0 z-[100] shadow-sm">
-        <div className="w-full h-full flex justify-between items-center">          <div className="flex items-center gap-2 cursor-pointer">
-            <div className="flex items-center justify-center">
-              <img src="/small_logo.png" alt="Logo" className="w-10 h-10" />
-            </div>
-            <span className="text-2xl font-bold text-blue-500">ALLY</span>
-          </div>
-          <nav className="flex items-center gap-6">
-            <Link to="/lawyers" className="text-gray-600 hover:text-blue-600">Find Lawyers</Link>
-          </nav>
-          <button
-            onClick={() => navigate('/signup')}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium text-base"
-          >
-            Sign Up Free
-          </button>
-        </div>
-      </header>
       {/* Hero Section */}
-        <section
-          className="top-0 left-0 right-0 w-full h-[55.5svh] flex items-center justify-center overflow-hidden z-[10] bg-[url('/justice.png')] bg-cover bg-center mt-[64px]"
-        >
-          {/* <div className="absolute inset-0 bg-white/0 backdrop-blur-sm"></div> Optional overlay for readability */}
-          <div className="relative z-10 w-full py-8 max-w-[1560px] mx-auto">
-            <div className="flex flex-col items-start gap-8 max-w-2xl">
-              <div className="w-50%">
-                <h1 className="text-4xl md:text-4xl font-bold text-gray-900 leading-tight mb-7xl">
-                  Connect with Expert Legal
-                </h1>
-                <h1 className="text-4xl md:text-4xl font-bold text-gray-900 leading-tight mb-7xl">
-                  Help When You Need It Most
-                </h1>
-                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                  ALLY bridges the gap between clients seeking legal assistance
-                  and qualified professionals ready to help. Simplified legal
-                  solutions for everyone.
-                </p>                <div className="flex flex-wrap gap-4 mb-2">
-                  <button 
-                    onClick={() => navigate('/signup/client')} 
-                    className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors font-semibold shadow-lg text-base">
-                    Find Legal Help Now
-                  </button>
-                  <button 
-                    onClick={() => navigate('/signup/lawyer')} 
-                    className="bg-white text-blue-600 px-6 py-2 rounded-lg border hover:bg-blue-50 transition-colors font-md text-base">
-                    Join as a Lawyer
-                  </button>
+      <section className="bg-[#F7FBFF] px-8 py-20 min-h-[900px] flex items-center">
+        <div className="max-w-[1440px] mx-auto w-full">
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Main Heading */}
+            <h1 className="text-6xl font-bold text-black leading-tight mb-6">
+              Find Legal Help,<br />
+              Anonymously & Securely
+            </h1>
+            
+            {/* Subheading */}
+            <p className="text-3xl text-[#7C7C7C] mb-12 leading-relaxed">
+              Connect with verified legal professionals instantly. Get the help you<br />
+              need without compromising your privacy or breaking your budget.
+            </p>
+            
+            {/* Buttons */}
+            <div className="flex justify-center gap-6 mb-12">
+              <button
+                onClick={() => navigate('/lawyers')}
+                className="bg-[#1A6EFF] text-white px-8 py-5 rounded-lg text-2xl font-normal hover:bg-blue-700 transition-colors"
+              >
+                Get Legal Help Now
+              </button>
+              <button
+                onClick={() => navigate('/signup/lawyer')}
+                className="bg-white text-[#363636] px-8 py-5 rounded-lg border border-[#ADADAD] text-2xl font-normal hover:bg-gray-50 transition-colors"
+              >
+                Join as Lawyer
+              </button>
+            </div>
+              {/* Feature Badges */}
+            <div className="flex justify-center gap-12">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-[#00C06F]" strokeWidth={2} />
                 </div>
-                <div className="flex items-center gap-4 mt-3">
-                  <div className="flex -space-x-3">
-                    <img src="/user1.png" alt="User 1" className="w-8 h-8 rounded-full border-2 border-white relative z-30" />
-                    <img src="/user2.png" alt="User 2" className="w-8 h-8 rounded-full border-2 border-white relative z-20" />
-                    <img src="/user3.png" alt="User 3" className="w-8 h-8 rounded-full border-2 border-white relative z-10" />
-                  </div>
-                  <span className="text-gray-100 font-medium text-sm">
-                    10,000+ clients helped this month
-                  </span>
+                <span className="text-[#363636] text-lg">100% Anonymous</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-[#1A6EFF]" strokeWidth={2} />
                 </div>
+                <span className="text-[#363636] text-lg">Verified Lawyers</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-[#7578DA]" strokeWidth={2} />
+                </div>
+                <span className="text-[#363636] text-lg">24/7 Available</span>
               </div>
             </div>
           </div>
-        </section>
-
-
-      {/* Trusted Companies */}
-      <section className="min-h-[20svh] flex items-center bg-white w-full">
-        <div className="w-full px-6 max-w-[1440px] mx-auto">
-          <p className="text-center text-gray-500 mb-6 text-base">
-            Trusted by leading organizations
-          </p>
-          <div className="flex justify-center items-center gap-32 flex-wrap">
-            {companies.map((company, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 text-slate-500 hover:text-gray-700 transition-colors"
-              >                <img src={company.icon} alt={company.name} className="w-8 h-8 object-contain" />
-                <span className="font-semibold text-base">{company.name}</span>
-              </div>
-            ))}
-          </div>
         </div>
-      </section>
-
-      {/* How ALLY Works */}
-      <section className="w-full bg-gray-50">
-        <div className="w-full px-6 py-20 max-w-[1440px] mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-slate-600 mb-3">
-              How ALLY WORKS
-            </h2>
-            <p className="text-base text-gray-600">
-              Our platform makes finding and connecting with legal help simple
-              and efficient
+      </section>{/* How It Works Section */}
+      <section className="py-20">
+        <div className="max-w-[1200px] mx-auto px-8">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <h2 className="text-6xl font-semibold text-[#07284A] mb-4">HOW IT WORKS</h2>
+            <p className="text-2xl text-[#545454] font-normal">
+              Getting legal help has never been easier. Follow these simple steps<br />
+              to connect with expert Lawyers.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className="text-center p-6"
-              >                <div className="mb-10">
-                  <div className="flex items-center justify-center mx-auto mb-6">
-                    <img src={step.icon} alt={step.title} className="w-16 h-16 object-contain" />
+
+          {/* Step 1 */}
+          <div className="flex items-center gap-20 mb-20">
+            <div className="flex-1">
+              <div className="mb-6">
+                <span className="text-2xl text-[#1A6EFF] font-normal">/ 01</span>
+              </div>
+              <div className="mb-6">
+                <div className="bg-[#1A6EFF] text-white p-3 rounded-lg inline-block">
+                  <span className="text-3xl font-semibold">the ease of submitting</span>
+                </div>
+                <p className="text-3xl text-[#545454] mt-3">
+                  queries can provide a different experience
+                </p>
+              </div>
+              <p className="text-lg text-[#7B7B7B] mb-8 leading-relaxed">
+                Describe your legal issue anonymously in just a few minutes.<br />
+                our platform makes it easy for you to find the right legal help<br />
+                quickly and securely.
+              </p>
+              <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
+                Learn More
+              </button>
+            </div>              
+            <div className="flex-1 relative">
+              <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
+                <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
+                  {/* Top Icon */}
+                  <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-white" strokeWidth={2} />
+                    </div>
+                  </div>
+                  
+                  {/* Top Right Logo */}
+                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  
+                  {/* Mock Content Lines */}
+                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                    <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
+                    <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
+                  </div>
+                  
+                  {/* Blue Button */}
+                  <div className="absolute top-32 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                      Legal Question Form
+                    </div>
+                  </div>
+                  
+                  {/* Get Started Button */}
+                  <div className="absolute top-48 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                      Get Started
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Text */}
+                  <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
+                    Anonymous & Secure
+                  </p>
+                </div>
+              </div>
+              {/* Step Number */}
+              <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                <div className="bg-white w-11 h-11 rounded-full flex items-center justify-center">
+                  <span className="text-[#1A6EFF] font-normal text-base">01</span>
+                </div>
+              </div>
+            </div>
+          </div>          
+          {/* Step 2 */}          <div className="flex items-center gap-20 mb-20">            <div className="flex-1 relative">
+              <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
+                <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
+                  {/* Top Icon */}
+                  <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" strokeWidth={2} />
+                    </div>
+                  </div>
+                  
+                  {/* Top Right Logo */}
+                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  
+                  {/* Mock Content Lines */}
+                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                    <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
+                    <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
+                  </div>
+                  
+                  {/* Blue Button */}
+                  <div className="absolute top-32 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                      Expert Matching
+                    </div>
+                  </div>
+                  
+                  {/* Get Started Button */}
+                  <div className="absolute top-48 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                      Get Started
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Text */}
+                  <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
+                    AI-Powered Selection
+                  </p>
+                </div>
+              </div>
+              {/* Step Number */}
+              <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                <div className="bg-white w-11 h-11 rounded-full flex items-center justify-center">
+                  <span className="text-[#1A6EFF] font-normal text-base">02</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="mb-6">
+                <span className="text-2xl text-[#1A6EFF] font-normal">/ 02</span>
+              </div>
+              <div className="mb-6">
+                <div className="bg-[#1A6EFF] text-white p-3 rounded-lg inline-block">
+                  <span className="text-3xl font-semibold">the ease of matching</span>
+                </div>
+                <p className="text-3xl text-[#545454] mt-3">
+                  with experts can provide a different experience
+                </p>
+              </div>
+              <p className="text-lg text-[#7B7B7B] mb-8 leading-relaxed">
+                Our AI connects you with the right legal expert for your case. We categorize queries properly so that users can easily find the perfect match.
+              </p>
+              <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
+                Learn More
+              </button>
+            </div>
+          </div>          {/* Step 3 */}
+          <div className="flex items-center gap-20">
+            <div className="flex-1">
+              <div className="mb-6">
+                <span className="text-2xl text-[#1A6EFF] font-normal">/ 03</span>
+              </div>
+              <div className="mb-6">
+                <div className="bg-[#1A6EFF] text-white p-3 rounded-lg inline-block">
+                  <span className="text-3xl font-semibold">connecting with lawyers</span>
+                </div>
+                <p className="text-3xl text-[#545454] mt-3">
+                  can now be done by looking at the actual availability
+                </p>
+              </div>
+              <p className="text-lg text-[#7B7B7B] mb-8 leading-relaxed">
+                Start chatting or schedule a call with your matched lawyer. Connect directly and get the legal guidance you need when you need it.
+              </p>
+              <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
+                Learn More
+              </button>
+            </div>            <div className="flex-1 relative">
+              <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
+                <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
+                  {/* Top Icon */}
+                  <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-white" strokeWidth={2} />
+                    </div>
+                  </div>
+                  
+                  {/* Top Right Logo */}
+                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  
+                  {/* Mock Content Lines */}
+                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                    <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
+                    <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
+                  </div>
+                  
+                  {/* Blue Button */}
+                  <div className="absolute top-32 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                      Secure Chat
+                    </div>
+                  </div>
+                  
+                  {/* Get Started Button */}
+                  <div className="absolute top-48 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                      Get Started
+                    </div>
+                  </div>
+                  
+                  {/* Bottom Text */}
+                  <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
+                    Direct Communication
+                  </p>
+                </div>
+              </div>
+              {/* Step Number */}
+              <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                <div className="bg-white w-11 h-11 rounded-full flex items-center justify-center">
+                  <span className="text-[#1A6EFF] font-normal text-base">03</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>      {/* Mobile App Section */}
+      <section className="py-20">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="bg-[#F7FBFF] border border-[#BBBBBB] rounded-xl p-8 text-center shadow-lg shadow-[rgba(26,110,255,0.25)]">
+            <h3 className="text-3xl text-[#07284A] font-normal mb-8">
+              Legal Support at Your Fingertips
+            </h3>
+            <p className="text-lg text-[#545454] mb-8 leading-relaxed">
+              With our mobile app, exploring legal advice is easy and private. Ask questions anonymously, get<br />
+              the guidance you need, and when you're ready to take the next step, you can register on our<br />
+              website to connect with a lawyer.
+            </p>
+            <button className="bg-[#1A6EFF] text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-blue-700 transition-colors">
+              Get the App
+            </button>
+          </div>
+        </div>
+      </section>      {/* Statistics Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[1200px] mx-auto px-32">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-semibold text-[#07284A] mb-6">
+              Trusted by Legal Professionals & Clients
+            </h2>
+            <p className="text-xl text-[#545454]">
+              Join thousands who have found reliable legal help through our secure platform
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-4 gap-0 mb-16">
+            {stats.map((stat, index) => {
+              const IconComponent = stat.icon;
+              return (
+                <div key={index} className="text-center p-8">
+                  <div className="mb-4 flex justify-center">
+                    <div className="relative w-[75px] h-[75px] rounded-full bg-[#1A6EFF] flex items-center justify-center">
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center">
+                        <IconComponent className="w-6 h-6 text-white" strokeWidth={2} />
+                      </div>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-black mb-2">{stat.number}</h3>
+                  <h4 className="text-xs font-medium text-black mb-2">{stat.title}</h4>
+                  <p className="text-xs text-black">{stat.description}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Satisfaction Guarantee */}
+          <div className="bg-[#EDFFF7] p-8 rounded-lg text-center">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="w-15 h-15 flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-[#00C06F]" strokeWidth={2.5} />
+              </div>
+              <h3 className="text-4xl font-semibold text-[#003722]">
+                100% Satisfaction Guarantee
+              </h3>
+            </div>
+            <p className="text-xl text-[#545454] leading-relaxed">
+              We stand behind our service. If you're not completely satisfied with your legal consultation,<br />
+              we'll work to make it right or provide a full refund.
+            </p>
+          </div>
+        </div>
+      </section>      {/* Testimonials Section */}
+      <section className="py-20 bg-[#2553A7]">
+        <div className="max-w-[1200px] mx-auto px-32">
+          <div className="text-center mb-16">
+            <h2 className="text-6xl font-semibold text-white mb-8">What Our Clients Say</h2>
+            <p className="text-xl text-[#B9DFFE]">
+              Hear from real clients who have experienced the power of AI-enhanced legal services
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-0">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-white p-0 shadow-2xl" style={{
+                borderRadius: '0px 200px 0px 200px'
+              }}>
+                <div className="p-8 h-[227px] relative">
+                  {/* Quote Icon */}
+                  <div className="absolute top-32 right-8 w-16 h-16">
+                    <Quote className="w-8 h-8 text-[#1A6EFF]" strokeWidth={2} />
+                  </div>
+                  
+                  {/* Profile Image */}
+                  <div 
+                    className="absolute top-0 left-0 w-[183px] h-[183px] bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${testimonial.image})`,
+                      borderRadius: '0px 100px 0px 100px'
+                    }}
+                  ></div>
+                  
+                  {/* Name and Role */}
+                  <div className="absolute top-8 left-48 flex items-center gap-1.5 px-4 py-4">
+                    <span className="text-xl font-semibold text-black">{testimonial.name}</span>
+                    <span className="text-base text-[#545454]">/</span>
+                    <span className="text-xs text-[#545454]">{testimonial.role}</span>
+                  </div>
+                  
+                  {/* Testimonial Text */}
+                  <div className="absolute top-20 left-48 right-16 bottom-8">
+                    <p className="text-xs text-[#545454] leading-relaxed overflow-hidden">
+                      "{testimonial.quote}"
+                    </p>
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-600">
-                  {step.number} {step.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed text-md">
-                  {step.description}
-                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
