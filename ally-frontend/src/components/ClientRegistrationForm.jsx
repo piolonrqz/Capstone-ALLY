@@ -16,7 +16,8 @@ export default function ClientRegistrationForm() {
     city: "",
     province: "",
     zip: "",
-    agreeToTerms: false
+    agreeToTerms: false,
+    profilePhoto: null
   });
   const [errors, setErrors] = useState({});
 
@@ -87,26 +88,26 @@ export default function ClientRegistrationForm() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateStep2()) {
-        try{
-         const body = {
-  email: formData.email,
-  password: formData.password,
-  Fname: formData.fName,   
-  Lname: formData.lName,   
-  phoneNumber: formData.phoneNumber,
-  address: formData.address,
-  city: formData.city,
-  province: formData.province,
-  zip: formData.zip
-};
+    e.preventDefault();    if (validateStep2()) {
+        try {
+          const body = new FormData();
+          body.append("email", formData.email);
+          body.append("password", formData.password);
+          body.append("Fname", formData.fName);
+          body.append("Lname", formData.lName);
+          body.append("phoneNumber", formData.phoneNumber);
+          body.append("address", formData.address);
+          body.append("city", formData.city);
+          body.append("province", formData.province);
+          body.append("zip", formData.zip);
+          if (formData.profilePhoto) {
+            body.append("profilePhoto", formData.profilePhoto);
+          }
 
-console.log("Submitting form with b:", body);
+console.log("Submitting form with:", body);
         await fetch("http://localhost:8080/users/Client", {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(body)
+          body: body
         })
         console.log("Form submitted with:", body);
       alert("Registration successful! Please login.");
@@ -122,7 +123,7 @@ console.log("Submitting form with b:", body);
     <div className="flex items-center justify-center w-full min-h-screen overflow-hidden bg-white font-['Poppins'] relative">
       <Logo />
       <div className="w-full max-w-4xl p-12 mx-auto shadow-lg bg-stone-100 border-stone-300 rounded-xl">
-        <h2 className="mb-3 text-3xl font-bold text-center text-neutral-900">Register as a Client</h2>
+        <h2 className="mb-3 text-4xl font-semibold text-center text-blue-900">Register as a Client</h2>
         <p className="mb-8 text-base text-center text-neutral-600">Create your account to find legal help</p>
         
         {/* Progress Bar */}
@@ -144,7 +145,52 @@ console.log("Submitting form with b:", body);
         <form>
           {step === 1 ? (
             /* Step 1: Basic Information */
-            <div className="space-y-4">              <div className="flex gap-6">
+            <div className="space-y-4">
+              {/* Profile Photo Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 text-start">Profile Photo</label>
+                <div className="flex items-center gap-6 mt-2">
+                  <div className="relative flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
+                    {formData.profilePhoto ? (
+                      <img 
+                        src={URL.createObjectURL(formData.profilePhoto)} 
+                        alt="Profile" 
+                        className="object-cover w-full h-full rounded-full"
+                      />
+                    ) : (
+                      <img 
+                        src="/add_profile.png" 
+                        alt="Add Profile" 
+                        className="w-full h-full"
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="inline-block px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
+                      Upload Photo
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/jpeg,image/png,image/gif"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
+                            setFormData({
+                              ...formData,
+                              profilePhoto: file
+                            });
+                          } else {
+                            alert("File size should not exceed 5MB");
+                          }
+                        }}
+                      />
+                    </label>
+                    <p className="text-xs text-gray-500">JPEG, PNG or GIF, max 5MB</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-6">
                 <div className="w-1/2">
                   <input
                     type="text"

@@ -169,39 +169,81 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
       }
     }
   };
-    return (    
-  <div className="flex items-center justify-center min-h-screen bg-white">
-      <Logo />
-      <div className={`bg-stone-100 p-8 rounded-lg shadow-sm mx-4 ${
+  return (      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-6 bg-white">
+      <Logo className="hidden mb-6 md:block" />
+      <div className={`bg-stone-100 p-4 sm:p-6 md:p-8 rounded-lg shadow-sm w-full ${
         step === 3 
-          ? 'w-[1200px] max-w-[70%]' 
+          ? 'max-w-[1200px] lg:max-w-[70%]' 
           : step === 2 
-            ? 'w-[900px] min-h-[800px]' 
-            : 'w-[836px] h-[735px]'
-      }`}>
-        <h2 className="py-2 mb-2 text-2xl font-bold text-center">Register as a Lawyer</h2>
-        <p className="py-2 mb-6 text-sm text-center text-gray-600">Create your professional account to connect with clients</p>
+            ? 'max-w-[900px]' 
+            : 'max-w-[836px]'
+      } mx-auto overflow-hidden`}>        <h2 className="py-2 mb-2 text-xl font-bold text-center sm:text-2xl">Register as a Lawyer</h2>
+        <p className="py-2 mb-6 text-xs text-center text-gray-600 sm:text-sm">Create your professional account to connect with clients</p>
         
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="w-full h-2 bg-gray-200 rounded-full">
             <div 
               className="h-2 bg-blue-500 rounded-full" 
               style={{ width: step === 1 ? '33%' : step === 2 ? '66%' : '100%' }}
             ></div>
-          </div>
-          <div className="flex justify-between mt-1">
-            <span className={`text-xs font-medium ${step >= 1 ? 'text-blue-500' : 'text-gray-400'}`}>Account information</span>
-            <span className={`text-xs font-medium ${step >= 2 ? 'text-blue-500' : 'text-gray-400'}`}>Personal</span>
-            <span className={`text-xs font-medium ${step >= 3 ? 'text-blue-500' : 'text-gray-400'}`}>Professional</span>
+          </div>          <div className="flex justify-between mt-1">
+            <span className={`text-[10px] sm:text-xs font-medium ${step >= 1 ? 'text-blue-500' : 'text-gray-400'}`}>Account</span>
+            <span className={`text-[10px] sm:text-xs font-medium ${step >= 2 ? 'text-blue-500' : 'text-gray-400'}`}>Personal</span>
+            <span className={`text-[10px] sm:text-xs font-medium ${step >= 3 ? 'text-blue-500' : 'text-gray-400'}`}>Professional</span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
-          {step === 1 ? (            /* Step 1: Basic Information */
+          {step === 1 ? (
+            /* Step 1: Basic Information */
             <div className="space-y-6">
-              <div className="flex gap-6">
-                <div className="w-1/2">
+              {/* Profile Photo Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 text-start">Profile Photo</label>
+                <div className="flex flex-row items-center gap-6 mt-2">
+                  <div className="relative flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
+                    {formData.profilePhoto ? (
+                      <img 
+                        src={URL.createObjectURL(formData.profilePhoto)} 
+                        alt="Profile" 
+                        className="object-cover w-full h-full rounded-full"
+                      />
+                    ) : (
+                      <img 
+                        src="/add_profile.png" 
+                        alt="Add Profile" 
+                        className="w-full h-full"
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="inline-block px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
+                      Upload Photo
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/jpeg,image/png,image/gif"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
+                            setFormData({
+                              ...formData,
+                              profilePhoto: file
+                            });
+                          } else {
+                            alert("File size should not exceed 5MB");
+                          }
+                        }}
+                      />
+                    </label>
+                    <p className="text-xs text-gray-500">JPEG, PNG or GIF, max 5MB</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
+                <div className="w-full sm:w-1/2">
                   <label htmlFor="firstName" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                     First Name
                   </label>
@@ -214,8 +256,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                     onChange={handleChange}
                   />
                   {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
-                </div>
-                <div className="w-1/2">
+                </div>                <div className="w-full sm:w-1/2">
                   <label htmlFor="lastName" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                     Last Name
                   </label>
@@ -290,45 +331,6 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
           ) : step === 2 ? (
             /* Step 2: Personal Details */
             <div className="space-y-4">
-              {/* Profile Photo Upload */}
-              <div className="flex items-center gap-6 mb-6">
-                <div className="flex items-center justify-center w-32 h-32 overflow-hidden bg-gray-200 border-2 border-gray-300 border-dashed rounded-full">
-                  {formData.profilePhoto ? (
-                    <img 
-                      src={URL.createObjectURL(formData.profilePhoto)} 
-                      alt="Profile" 
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  )}
-                </div>
-                <div>
-                  <label className="inline-block px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
-                    Upload Photo
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/jpeg,image/png,image/gif"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
-                          setFormData({
-                            ...formData,
-                            profilePhoto: file
-                          });
-                        } else {
-                          alert("File size should not exceed 5MB");
-                        }
-                      }}
-                    />
-                  </label>
-                  <p className="mt-2 text-xs text-gray-500">JPEG, PNG or GIF, max 5MB</p>
-                </div>
-              </div>
-
               <div>
                 <label htmlFor="phoneNumber" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Phone Number
@@ -362,9 +364,8 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                 {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address}</p>}
               </div>
               
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="w-1/2">
+              <div className="space-y-4">                <div className="flex flex-col gap-4 sm:flex-row">
+                  <div className="w-full sm:w-1/2">
                     <label htmlFor="city" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                       City
                     </label>
@@ -377,8 +378,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                       onChange={handleChange}
                     />
                     {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
-                  </div>
-                  <div className="w-1/2">
+                  </div>                  <div className="w-full sm:w-1/2">
                     <label htmlFor="state" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                       State
                     </label>
@@ -409,18 +409,17 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                   {errors.zipCode && <p className="mt-1 text-xs text-red-500">{errors.zipCode}</p>}
                 </div>
               </div>
-              
-              <div className="flex justify-between mt-6">
+                <div className="flex flex-col justify-between gap-4 mt-6 sm:flex-row">
                 <button
                   type="button"
-                  className="flex items-center px-4 py-2 text-gray-600 border border-gray-300 rounded-lg bg-gray-50"
+                  className="order-2 w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg sm:w-auto bg-gray-50 sm:order-1"
                   onClick={handleBack}
                 >
                   ← Back
                 </button>
                 <button
                   type="button"
-                  className="px-4 py-2 text-white bg-blue-500 rounded-lg"
+                  className="order-1 w-full px-4 py-2 text-white bg-blue-500 rounded-lg sm:w-auto sm:order-2"
                   onClick={handleContinue}
                 >
                   Continue →
@@ -443,8 +442,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
               </div>
               
               <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Practice Areas</label>                <div className="p-3 border border-gray-300 rounded">
-                  <div className="grid grid-cols-2 gap-3">
+                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Practice Areas</label>                <div className="p-3 border border-gray-300 rounded">                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="flex items-center">
                       <input
                         type="checkbox"
@@ -610,17 +608,17 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                 </label>
               </div>
               {errors.agreeToTerms && <p className="text-xs text-red-500">{errors.agreeToTerms}</p>}
-              
-              <div className="flex justify-between mt-6">
+                <div className="flex flex-col justify-between gap-4 mt-6 sm:flex-row">
                 <button
                   type="button"
-                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg"
+                  className="order-2 w-full px-4 py-2 text-gray-600 border border-gray-300 rounded-lg sm:w-auto sm:order-1"
                   onClick={handleBack}
                 >
                   ← Back
-                </button>                <button
+                </button>
+                <button
                   type="submit"
-                  className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+                  className="order-1 w-full px-4 py-2 text-white bg-blue-500 rounded-lg sm:w-auto hover:bg-blue-600 sm:order-2"
                 >
                   Submit Application
                 </button>

@@ -79,7 +79,20 @@ useEffect(() => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}      <aside className="fixed top-0 left-0 flex flex-col w-64 h-screen bg-white shadow-lg">
+      {/* Mobile Header - Only visible on mobile */}
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between p-4 bg-white border-b border-gray-200 md:hidden">
+        <Link to="/">
+          <img src="/small_logo.png" alt="ALLY Logo" className="h-8" />
+        </Link>
+        <button className="p-2 text-gray-600 hover:text-gray-900">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Sidebar - Hidden on mobile by default */}
+      <aside className="fixed top-0 left-0 z-40 flex-col hidden w-64 h-screen md:flex bg-white shadow-lg">
         <div className="p-6 border-b border-gray-200">
           <Link to="/">
             <img src="/small_logo.png" alt="ALLY Logo" className="h-8" />
@@ -127,148 +140,101 @@ useEffect(() => {
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8 ml-64">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="mb-6 text-2xl font-bold text-gray-800">Account Settings</h1>
-
-          {/* Profile Section */}
-          <Section title="My Profile" onEdit={() => {}}>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full">
-                <span className="text-xl font-semibold text-blue-600">JD</span>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-800">{profile.name}</h4>
-                <p className="text-gray-600">{profile.title}</p>
-                <p className="text-gray-500">{profile.location}</p>
-              </div>
-            </div>
-          </Section>
-
-          {/* Personal Information */}
-          <Section title="Personal Information" onEdit={() => {}}>
-            <div className="grid grid-cols-2 gap-6">
-              <InputField label="First Name" value={personalInfo.firstName} />
-              <InputField label="First Name" value={personalInfo.lastName} />
-              <InputField label="Email address" value={personalInfo.email} />
-              <InputField label="Phone" value={personalInfo.phone} />
-              
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">Years of Experience</label>
-                <input
-                  type="text"
-                  value={personalInfo.experience}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">Bar Number</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={personalInfo.barNumber}
-                    placeholder="Family Law"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="px-2 py-1 text-sm text-blue-800 bg-blue-100 rounded">Immigration</span>
+      {/* Main Content Area */}
+      <main className="flex-1 w-full min-h-screen md:ml-64 bg-gray-50">
+        {/* Content wrapper with proper spacing */}
+        <div className="px-4 py-20 md:py-6 md:px-8">
+          <h1 className="mb-6 text-2xl font-bold text-gray-900">Settings</h1>
+          
+          {/* Settings Grid */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Profile Settings Card */}
+            <div className="p-6 bg-white rounded-lg shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold">Profile</h2>
+              <form className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Profile Picture
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 overflow-hidden rounded-full">
+                      <img src={profilePicture || "/default-avatar.png"} alt="Profile" className="object-cover w-full h-full" />
+                    </div>
+                    <button type="button" className="px-3 py-2 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50">
+                      Change Photo
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Address */}
-          <Section title="Address" onEdit={() => {}}>
-            <div className="grid grid-cols-2 gap-6">
-              <InputField label="Address Line 1" value={personalInfo.address} />
-              <InputField label="Country" value={personalInfo.province} />
-              <InputField label="ZIP Code" value={personalInfo.zipCode} />
-              <InputField label="City/State" value={personalInfo.city} />
-            </div>
-          </Section>
-
-          {/* Credentials & Documents */}
-          <Section title="Credentials & Documents" onEdit={() => {}}>
-            <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded bg-blue-50">
-                      <Upload className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800">{personalInfo.credentials}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    
-                    <Button variant="secondary" size="sm">
-                      <Download className="w-4 h-4" />
-                    </Button>
-                    <Button variant="danger" size="sm">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
                 
-        
-              <Button variant="primary" className="w-full">
-                <Upload className="w-4 h-4 mr-2" />
-                Add Document
-              </Button>
-            </div>
-          </Section>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">First Name</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
 
-          {/* Footer */}
-          <footer className="pt-8 mt-12 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center justify-center w-8 h-8 bg-blue-600 rounded">
-                  <span className="text-sm font-bold text-white">A</span>
-                </div>
                 <div>
-                  <h5 className="font-semibold text-gray-800">ALLY</h5>
-                  <p className="text-xs text-gray-500">Making legal help accessible to everyone through our innovative platform that connects clients with qualified legal professionals and AI.</p>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                  <input
+                    type="tel"
+                    className="w-full px-3 py-2 mt-1 border rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Save Changes
+                </button>
+              </form>
+            </div>
+
+            {/* Practice Areas Card */}
+            <div className="p-6 bg-white rounded-lg shadow-sm">
+              <h2 className="mb-4 text-lg font-semibold">Practice Areas</h2>
+              <div className="space-y-3">
+                {practiceAreas.map((area) => (
+                  <div key={area.id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={`area-${area.id}`}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor={`area-${area.id}`} className="ml-2 text-sm text-gray-700">
+                      {area.name}
+                    </label>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="w-full px-4 py-2 mt-4 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Update Practice Areas
+                </button>
               </div>
             </div>
-            
-            <div className="grid grid-cols-3 gap-8 mt-8">
-              <div>
-                <h6 className="mb-3 font-semibold text-gray-800">Company</h6>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><a href="#" className="hover:text-gray-800">About</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Careers</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Press</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Blog</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Partners</a></li>
-                </ul>
-              </div>
-              <div>
-                <h6 className="mb-3 font-semibold text-gray-800">Resources</h6>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><a href="#" className="hover:text-gray-800">Help Center</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Documentation</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Guides</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Legal Resources</a></li>
-                  <li><a href="#" className="hover:text-gray-800">FAQ</a></li>
-                </ul>
-              </div>
-              <div>
-                <h6 className="mb-3 font-semibold text-gray-800">Legal</h6>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li><a href="#" className="hover:text-gray-800">Terms of Service</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Privacy Policy</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Cookie Policy</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Data Protection</a></li>
-                  <li><a href="#" className="hover:text-gray-800">Disclaimer</a></li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="pt-4 mt-8 text-sm text-center text-gray-500 border-t border-gray-200">
-              © 2024 ALLY. All rights reserved
-            </div>
-          </footer>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
