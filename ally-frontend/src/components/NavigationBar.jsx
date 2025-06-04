@@ -1,33 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, MessageCircle, Bell } from 'lucide-react';
 import { getAuthData, isAuthenticated, logout, fetchUserDetails } from '../utils/auth.jsx';
 import { shouldHideNavigation } from '../utils/navigation.js';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const authData = getAuthData();
   const isLoggedIn = isAuthenticated();
+  
+  // Memoize authData to prevent infinite re-renders
+  const authData = useMemo(() => getAuthData(), [isLoggedIn]);
+  
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
   const dropdownRef = useRef(null);
-
   // Fetch user details when logged in
   useEffect(() => {
     const getUserDetails = async () => {
-      if (isLoggedIn && authData?.userId) {
+      // Only fetch if logged in, have userId, and not already loading
+      if (isLoggedIn && authData?.userId && !isLoadingUser) {
+        setIsLoadingUser(true);
         try {
           const details = await fetchUserDetails(authData.userId);
           setUserDetails(details);
         } catch (error) {
           console.error('Failed to fetch user details:', error);
+          setUserDetails(null);
+        } finally {
+          setIsLoadingUser(false);
         }
+      } else if (!isLoggedIn) {
+        // Clear user details when logged out
+        setUserDetails(null);
+        setIsLoadingUser(false);
       }
     };
 
     getUserDetails();
-  }, [isLoggedIn, authData]);
+  }, [isLoggedIn, authData?.userId]); // Only depend on login status and userId
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -85,34 +97,64 @@ const NavigationBar = () => {
       {/* Logo */}
       <Link to="/" className="flex items-center justify-center h-10">
         <img src="/ally_logo.svg" alt="ALLY Logo" className="w-[114px] h-10" />
-      </Link>
-
+      </Link>      
       {/* Navigation Links */}
       <div className="flex items-center gap-8">
-        <Link 
-          to="#" 
-          className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-        >
-          About
-        </Link>
-        <Link 
-          to="#" 
-          className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-        >
-          Legal Resources
-        </Link>
-        <Link 
-          to="#" 
-          className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-        >
-          FAQ
-        </Link>
-      </div>
-        {/* Right Side Buttons */}
-      <div className="flex items-center gap-3">
-        {/* Login/Register or Profile Dropdown */}
         {isLoggedIn ? (
-          <div className="relative" ref={dropdownRef}>            <button
+          <>            
+          <Link 
+              to="/my-cases" 
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              My Cases
+            </Link>
+            <Link 
+              to="/appointments" 
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              Appointment
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link 
+              to="#" 
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              About
+            </Link>
+            <Link 
+              to="#" 
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              Legal Resources
+            </Link>
+            <Link 
+              to="#" 
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              FAQ
+            </Link>
+          </>
+        )}
+      </div>        
+      {/* Right Side Buttons */}
+      <div className="flex items-center gap-3">
+        {/* Login/Register or Profile Dropdown */}        
+        {isLoggedIn ? (
+          <>
+            {/* Message and Notification Icons */}
+            <button className="relative flex items-center justify-center w-11 h-11 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8F2FF] hover:border-[#2B62C4]/30 hover:bg-white hover:shadow-lg transition-all duration-300 ease-in-out group">
+              <MessageCircle className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors duration-200" strokeWidth={1.8} />
+            </button>
+            <button className="relative flex items-center justify-center w-11 h-11 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8F2FF] hover:border-[#2B62C4]/30 hover:bg-white hover:shadow-lg transition-all duration-300 ease-in-out group">
+              <Bell className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors duration-200" strokeWidth={1.8} />
+              {/* Optional notification badge */}
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+            </button>
+            
+            <div className="relative" ref={dropdownRef}>
+          <button
               onClick={toggleDropdown}
               className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-[#E8F2FF] transition-all duration-200 ease-in-out hover:shadow-md"
             >
@@ -120,7 +162,8 @@ const NavigationBar = () => {
                 {getUserInitials()}
               </div>
               <ChevronDown className={`w-5 h-5 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>            {/* Dropdown Menu */}
+            </button>            
+            {/* Dropdown Menu */}
             {isDropdownOpen && (
               <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-[#E8F2FF] py-2 z-50 backdrop-blur-sm">
                 <div className="px-4 py-3 border-b border-[#E8F2FF]">
@@ -142,10 +185,11 @@ const NavigationBar = () => {
                 >
                   <LogOut className="w-5 h-5 text-red-500 group-hover:text-red-600 transition-colors" />
                   <span className="font-medium">Logout</span>
-                </button>
-              </div>
+                </button>              
+                </div>
             )}
           </div>
+          </>
         ) : (
           <button
             onClick={handleAuthAction}
