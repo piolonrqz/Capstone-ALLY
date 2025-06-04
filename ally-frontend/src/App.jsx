@@ -17,6 +17,7 @@ import DocumentSubmission from './components/DocumentSubmission'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
 import NavigationBar from './components/NavigationBar'
+import MyCasesPage from './pages/MyCasesPage'
 import { shouldShowNavigation } from './utils/navigation.js'
 
 // Custom hook to determine if navigation bar should be visible
@@ -38,8 +39,9 @@ function AppContent() {
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
         <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
         <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />        
         <Route path="/lawyers" element={<LawyerDirectoryPage />} />
+        <Route path="/my-cases" element={<MyCasesPage />} />
         <Route path="/documents" element={<DocumentSubmission />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/chat" element={<ChatContainer />} />

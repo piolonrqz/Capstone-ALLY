@@ -14,13 +14,19 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Client")
-public class ClientEntity extends UserEntity{
-
-    @OneToMany(mappedBy = "client")
+public class ClientEntity extends UserEntity{    @OneToMany(mappedBy = "client")
     @JsonManagedReference(value = "client-case")
     private List<LegalCasesEntity> cases;
 
     public ClientEntity() {
+    }
+
+    public List<LegalCasesEntity> getCases() {
+        return cases;
+    }
+
+    public void setCases(List<LegalCasesEntity> cases) {
+        this.cases = cases;
     }
     
 }

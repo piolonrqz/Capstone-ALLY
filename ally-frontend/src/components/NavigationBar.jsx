@@ -101,12 +101,12 @@ const NavigationBar = () => {
       {/* Navigation Links */}
       <div className="flex items-center gap-8">
         {isLoggedIn ? (
-          <>
-            <Link 
-              to="/present-case" 
+          <>            
+          <Link 
+              to="/my-cases" 
               className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
             >
-              Present Your Case
+              My Cases
             </Link>
             <Link 
               to="/appointments" 

@@ -1,21 +1,18 @@
 package com.wachichaw.Case.Service;
 
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
+import com.wachichaw.Case.Entity.CaseStatus;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.Case.Repo.LegalCaseRepo;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Client.Repo.ClientRepo;
-import com.wachichaw.Document.Entity.DocumentEntity;
-import com.wachichaw.Document.Repo.DocumentRepo;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
-import com.wachichaw.Lawyer.Repo.LawyerRepo;
 
 
 @Service
@@ -25,28 +22,53 @@ public class LegalCaseService {
     @Autowired
     private ClientRepo clientRepo;
     @Autowired
-    private LawyerRepo lawyerRepo;
-    @Autowired
     private final LegalCaseRepo legalCaseRepo;
 
     public LegalCaseService(LegalCaseRepo legalCaseRepo) {
         this.legalCaseRepo = legalCaseRepo;
-    }
-
-
-    public LegalCasesEntity createLegalCase(int clientId, LawyerEntity lawyer, String title, Long caseNo, String caseDescription, LocalDateTime caseDate, String status) {
+    }    public LegalCasesEntity createLegalCase(int clientId, LawyerEntity lawyer, String title, String caseDescription, LocalDateTime caseDate, CaseStatus status) {
         ClientEntity client = clientRepo.findById(clientId)
                 .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
+        
+        // Auto-generate sequential case number
+        Long nextCaseNumber = generateNextCaseNumber();
+        
+        // Default to PENDING if no status is provided
+        if (status == null) {
+            status = CaseStatus.PENDING;
+        }
         
         LegalCasesEntity legalCase = new LegalCasesEntity();
         legalCase.setClient(client);
         legalCase.setLawyer(lawyer);
         legalCase.setTitle(title);
-        legalCase.setCaseNumber(caseNo);
+        legalCase.setCaseNumber(nextCaseNumber);
         legalCase.setDescription(caseDescription);
         legalCase.setDateSubmitted(caseDate);
-        legalCase.setStatus(status);
+        legalCase.setStatus(status);        
+        return legalCaseRepo.save(legalCase);
+    }
+    
+    private Long generateNextCaseNumber() {
+        // Get the maximum case number and increment by 1
+        // If no cases exist, start with 1
+        return legalCaseRepo.findMaxCaseNumber()
+                .map(maxNumber -> maxNumber + 1)
+                .orElse(1L);
+    }
 
+    public List<LegalCasesEntity> getCasesByClientId(int clientId) {
+        return legalCaseRepo.findByClientUserId(clientId);
+    }
+
+    public List<LegalCasesEntity> getCasesByLawyerId(int lawyerId) {
+        return legalCaseRepo.findByLawyerUserId(lawyerId);
+    }
+
+    public LegalCasesEntity updateCaseStatus(int caseId, CaseStatus status) {
+        LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found with ID: " + caseId));
+        legalCase.setStatus(status);
         return legalCaseRepo.save(legalCase);
     }
 }
