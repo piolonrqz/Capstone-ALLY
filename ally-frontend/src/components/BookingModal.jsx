@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, Clock, Calendar as CalendarIcon, User, Loader2 } from 'lucide-react';
+import { X, Clock, Calendar as CalendarIcon, User, Loader2, FileText } from 'lucide-react';
 import { Calendar } from './ui/calendar';
 import { scheduleService } from '../services/scheduleService.jsx';
 import { getAuthData, fetchUserDetails } from '../utils/auth.jsx';
 
-export const BookingModal = ({ lawyer, isOpen, onClose }) => {
+export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
   const [consultationType, setConsultationType] = useState('in-person');
@@ -138,9 +138,7 @@ export const BookingModal = ({ lawyer, isOpen, onClose }) => {
     }
 
     setIsLoading(true);
-    setError('');
-
-    try {
+    setError('');    try {
       const bookingData = {
         lawyerId: lawyer.id,
         clientId: userDetails.id,
@@ -150,11 +148,25 @@ export const BookingModal = ({ lawyer, isOpen, onClose }) => {
         notes
       };
 
-      const result = await scheduleService.createAppointment(bookingData);
+      let result;
+      if (caseInfo) {
+        // Case-based appointment booking
+        result = await scheduleService.createCaseAppointment({
+          ...bookingData,
+          caseId: caseInfo.caseId
+        });
+      } else {
+        // Regular appointment booking
+        result = await scheduleService.createAppointment(bookingData);
+      }
       
       console.log('Appointment created successfully:', result);
       alert('Consultation booked successfully!');
-      onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     } catch (error) {
       console.error('Error creating appointment:', error);
       setError(error.message || 'Failed to book consultation. Please try again.');
@@ -187,13 +199,45 @@ export const BookingModal = ({ lawyer, isOpen, onClose }) => {
             </button>
           </div>
           
-          <div className="p-8">
-            <div className="mb-6">
+          <div className="p-8">            <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Schedule Consultation</h2>
-              <p className="mt-1 text-gray-600">Book an appointment with {lawyer.name}</p>
-            </div>
+              <p className="mt-1 text-gray-600">
+                Book an appointment with {lawyer.name}
+                {caseInfo && (
+                  <span className="block mt-1 text-sm text-blue-600">
+                    For Case: {caseInfo.title} (#{caseInfo.caseId})
+                  </span>
+                )}
+              </p>
+            </div>            <form onSubmit={handleBooking} className="space-y-6">
+              {/* Case Information Display */}
+              {caseInfo && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="flex items-center mb-3 text-sm font-medium text-blue-900">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Case Details
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="font-medium text-blue-800">Title:</span>
+                      <span className="ml-2 text-blue-700">{caseInfo.title}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-blue-800">Case #:</span>
+                      <span className="ml-2 text-blue-700">{caseInfo.caseId}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-blue-800">Status:</span>
+                      <span className="ml-2 text-green-700 font-medium">{caseInfo.status}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-blue-800">Description:</span>
+                      <p className="mt-1 text-blue-700 text-sm leading-relaxed">{caseInfo.description}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-            <form onSubmit={handleBooking} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 {/* Calendar Section */}
                 <div>

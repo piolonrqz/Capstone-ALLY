@@ -3,7 +3,8 @@ package com.wachichaw.Schedule.Entity;
 import java.time.LocalDateTime;
 
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
-import com.wachichaw.Client.Entity.ClientEntity; 
+import com.wachichaw.Client.Entity.ClientEntity;
+import com.wachichaw.Case.Entity.LegalCasesEntity; 
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +38,10 @@ public class ScheduleEntity {
     @JoinColumn(name = "client_id", nullable = false) // Added annotation
     private ClientEntity client; // Added field
 
+    @ManyToOne
+    @JoinColumn(name = "case_id", nullable = true)
+    private LegalCasesEntity legalCase;
+
     @Column(name = "is_booked", nullable = false)
     private boolean isBooked;
 
@@ -48,6 +53,16 @@ public class ScheduleEntity {
         this.bookingStartTime = bookingStartTime;
         this.bookingEndTime = bookingEndTime;
         this.client = client;
+        this.isBooked = isBooked;
+    }
+
+    public ScheduleEntity(int scheduleId, LawyerEntity lawyer, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, ClientEntity client, LegalCasesEntity legalCase, boolean isBooked) {
+        this.scheduleId = scheduleId;
+        this.lawyer = lawyer;
+        this.bookingStartTime = bookingStartTime;
+        this.bookingEndTime = bookingEndTime;
+        this.client = client;
+        this.legalCase = legalCase;
         this.isBooked = isBooked;
     }
 
@@ -97,5 +112,13 @@ public class ScheduleEntity {
 
     public void setBooked(boolean booked) {
         isBooked = booked;
+    }
+
+    public LegalCasesEntity getLegalCase() {
+        return legalCase;
+    }
+
+    public void setLegalCase(LegalCasesEntity legalCase) {
+        this.legalCase = legalCase;
     }
 }

@@ -9,6 +9,7 @@ public class ScheduleResponseDTO {
     private LocalDateTime bookingStartTime;
     private LocalDateTime bookingEndTime;
     private boolean isBooked;
+    private CaseSummaryDTO legalCase; // Optional - only present for case-based appointments
 
     // Constructors
     public ScheduleResponseDTO() {
@@ -21,6 +22,16 @@ public class ScheduleResponseDTO {
         this.bookingStartTime = bookingStartTime;
         this.bookingEndTime = bookingEndTime;
         this.isBooked = isBooked;
+    }
+
+    public ScheduleResponseDTO(int scheduleId, UserSummaryDTO lawyer, UserSummaryDTO client, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, boolean isBooked, CaseSummaryDTO legalCase) {
+        this.scheduleId = scheduleId;
+        this.lawyer = lawyer;
+        this.client = client;
+        this.bookingStartTime = bookingStartTime;
+        this.bookingEndTime = bookingEndTime;
+        this.isBooked = isBooked;
+        this.legalCase = legalCase;
     }
 
     // Getters and Setters
@@ -70,5 +81,13 @@ public class ScheduleResponseDTO {
 
     public void setBooked(boolean booked) {
         isBooked = booked;
+    }
+
+    public CaseSummaryDTO getLegalCase() {
+        return legalCase;
+    }
+
+    public void setLegalCase(CaseSummaryDTO legalCase) {
+        this.legalCase = legalCase;
     }
 }

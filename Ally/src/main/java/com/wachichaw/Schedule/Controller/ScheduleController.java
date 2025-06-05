@@ -9,6 +9,7 @@ import java.util.stream.Collectors; // Added for mapping to DTO
 
 import com.wachichaw.Schedule.DTO.ScheduleResponseDTO; // Added DTO import
 import com.wachichaw.Schedule.DTO.UserSummaryDTO; // Added DTO import
+import com.wachichaw.Schedule.DTO.CaseSummaryDTO; // Added for case appointments
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,40 +42,15 @@ public class ScheduleController {    @Autowired
      */    @PostMapping("/book")
     public ResponseEntity<?> createAppointment(@RequestBody BookingRequest request) {
         try {
-            LocalDateTime startTime = parseDateTime(request.getStartTime());
-
-            ScheduleEntity schedule = scheduleService.createAppointment(
+            LocalDateTime startTime = parseDateTime(request.getStartTime());            ScheduleEntity schedule = scheduleService.createAppointment(
                 request.getClientId(),
                 request.getLawyerId(),
                 startTime
             );
 
-            // Convert ScheduleEntity to ScheduleResponseDTO
-            UserSummaryDTO clientDTO = new UserSummaryDTO(
-                schedule.getClient().getUserId(), 
-                schedule.getClient().getFname(), 
-                schedule.getClient().getLname(), 
-                schedule.getClient().getEmail(),
-                schedule.getClient().getPhoneNumber()
-            );
-            UserSummaryDTO lawyerDTO = new UserSummaryDTO(
-                schedule.getLawyer().getUserId(), 
-                schedule.getLawyer().getFname(), 
-                schedule.getLawyer().getLname(), 
-                schedule.getLawyer().getEmail(),
-                schedule.getLawyer().getPhoneNumber()
-            );
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
 
-            ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO(
-                schedule.getScheduleId(),
-                lawyerDTO,
-                clientDTO,
-                schedule.getBookingStartTime(),
-                schedule.getBookingEndTime(),
-                schedule.isBooked()
-            );
-
-            return ResponseEntity.ok(scheduleResponseDTO); // Return DTO
+            return ResponseEntity.ok(scheduleResponseDTO);
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
         } catch (RuntimeException e) {
@@ -82,6 +58,32 @@ public class ScheduleController {    @Autowired
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create appointment");
+        }
+    }
+
+    /**
+     * Create a new appointment booking for a specific legal case
+     * POST /schedules/book-for-case
+     */
+    @PostMapping("/book-for-case")
+    public ResponseEntity<?> createCaseAppointment(@RequestBody CaseBookingRequest request) {
+        try {
+            LocalDateTime startTime = parseDateTime(request.getStartTime());            ScheduleEntity schedule = scheduleService.createCaseAppointment(
+                request.getClientId(),
+                request.getCaseId(),
+                startTime
+            );
+
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+
+            return ResponseEntity.ok(scheduleResponseDTO);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create case appointment");
         }
     }
 
@@ -323,9 +325,7 @@ public class ScheduleController {    @Autowired
     private LocalDateTime parseDateTime(String dateTimeStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return LocalDateTime.parse(dateTimeStr, formatter);
-    }
-
-    // Helper method to convert ScheduleEntity to ScheduleResponseDTO
+    }    // Helper method to convert ScheduleEntity to ScheduleResponseDTO
     private ScheduleResponseDTO convertToScheduleResponseDTO(ScheduleEntity schedule) {
         UserSummaryDTO clientDTO = new UserSummaryDTO(
             schedule.getClient().getUserId(),
@@ -341,13 +341,25 @@ public class ScheduleController {    @Autowired
             schedule.getLawyer().getEmail(),
             schedule.getLawyer().getPhoneNumber()
         );
+          // Check if this is a case-based appointment
+        CaseSummaryDTO caseDTO = null;
+        if (schedule.getLegalCase() != null) {
+            caseDTO = new CaseSummaryDTO(
+                schedule.getLegalCase().getCaseId(),
+                schedule.getLegalCase().getTitle(),
+                schedule.getLegalCase().getStatus().toString(),
+                schedule.getLegalCase().getDescription()
+            );
+        }
+        
         return new ScheduleResponseDTO(
             schedule.getScheduleId(),
             lawyerDTO,
             clientDTO,
             schedule.getBookingStartTime(),
             schedule.getBookingEndTime(),
-            schedule.isBooked()
+            schedule.isBooked(),
+            caseDTO
         );
     }
 
@@ -395,5 +407,21 @@ public class ScheduleController {    @Autowired
         
         public String getMessage() { return message; }
         public void setMessage(String message) { this.message = message; }
+    }
+
+    public static class CaseBookingRequest {
+        private int clientId;
+        private int caseId;
+        private String startTime;
+
+        // Getters and setters
+        public int getClientId() { return clientId; }
+        public void setClientId(int clientId) { this.clientId = clientId; }
+        
+        public int getCaseId() { return caseId; }
+        public void setCaseId(int caseId) { this.caseId = caseId; }
+        
+        public String getStartTime() { return startTime; }
+        public void setStartTime(String startTime) { this.startTime = startTime; }
     }
 }

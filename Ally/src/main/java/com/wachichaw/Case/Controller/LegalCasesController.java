@@ -18,6 +18,7 @@ import java.util.List;
 import com.wachichaw.Case.Entity.CaseStatus;
 import com.wachichaw.Case.Entity.LegalCaseRequestDTO;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
+import com.wachichaw.Case.Entity.LegalCaseResponseDTO;
 import com.wachichaw.Case.Service.LegalCaseService;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.User.Repo.UserRepo;
@@ -60,36 +61,37 @@ public class LegalCasesController {
     } catch (Exception e) {
     e.printStackTrace(); // This will print the error to your console/logs
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-}    }
-
-    @GetMapping("/client/{clientId}")
-    public ResponseEntity<List<LegalCasesEntity>> getClientCases(@PathVariable int clientId) {
+}    }    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<LegalCaseResponseDTO>> getClientCases(@PathVariable int clientId) {
         try {
-            List<LegalCasesEntity> cases = LegalCaseService.getCasesByClientId(clientId);
+            List<LegalCaseResponseDTO> cases = LegalCaseService.getCasesByClientIdWithDetails(clientId);
             return ResponseEntity.ok(cases);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-
-    @GetMapping("/lawyer/{lawyerId}")
-    public ResponseEntity<List<LegalCasesEntity>> getLawyerCases(@PathVariable int lawyerId) {
+    }    @GetMapping("/lawyer/{lawyerId}")
+    public ResponseEntity<List<LegalCaseResponseDTO>> getLawyerCases(@PathVariable int lawyerId) {
         try {
-            List<LegalCasesEntity> cases = LegalCaseService.getCasesByLawyerId(lawyerId);
+            List<LegalCaseResponseDTO> cases = LegalCaseService.getCasesByLawyerIdWithDetails(lawyerId);
             return ResponseEntity.ok(cases);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }    @PutMapping("/{caseId}/status")
+    }@PutMapping("/{caseId}/status")
     public ResponseEntity<LegalCasesEntity> updateCaseStatus(@PathVariable int caseId, @RequestBody CaseStatus status) {
         return updateStatus(caseId, status);
-    }
-
-    @PutMapping("/{caseId}/accept")
-    public ResponseEntity<LegalCasesEntity> acceptCase(@PathVariable int caseId) {
-        return updateStatus(caseId, CaseStatus.ACCEPTED);
+    }    
+    @PutMapping("/{caseId}/accept/{lawyerId}")
+    public ResponseEntity<LegalCasesEntity> acceptCase(@PathVariable int caseId, @PathVariable int lawyerId) {
+        try {
+            LegalCasesEntity updatedCase = LegalCaseService.acceptCase(caseId, lawyerId);
+            return ResponseEntity.ok(updatedCase);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{caseId}/decline")

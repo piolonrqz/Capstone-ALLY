@@ -66,7 +66,6 @@ const MyCasesPage = () => {
     setShowSubmissionForm(false);
     fetchCases(); // Refresh cases list
   };
-
   // Handle status change for lawyer
   const handleStatusChange = async (caseId, newStatus) => {
     try {
@@ -84,6 +83,13 @@ const MyCasesPage = () => {
       console.error('Error updating case status:', err);
       setError('Failed to update case status');
     }
+  };
+
+  // Handle appointment booking success
+  const handleAppointmentBooked = (caseId) => {
+    console.log('Appointment booked for case:', caseId);
+    // Could refresh cases or show success message
+    // For now, just log the success
   };
 
   if (loading) {
@@ -171,13 +177,12 @@ const MyCasesPage = () => {
               <option value="ACCEPTED">Accepted</option>
               <option value="DECLINED">Declined</option>
             </select>
-          </div>
-
-          {/* Cases List */}
+          </div>          {/* Cases List */}
           <CasesList
             cases={filteredCases}
             userRole={authData?.accountType}
             onStatusChange={handleStatusChange}
+            onAppointmentBooked={handleAppointmentBooked}
           />
         </div>
       </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { FileX, Briefcase } from 'lucide-react';
 import CaseCard from './CaseCard.jsx';
 
-const CasesList = ({ cases, userRole, onStatusChange }) => {
+const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => {
   if (cases.length === 0) {
     return (
       <div className="text-center py-12">
@@ -46,7 +46,6 @@ const CasesList = ({ cases, userRole, onStatusChange }) => {
           Showing {cases.length} {cases.length === 1 ? 'case' : 'cases'}
         </p>
       </div>
-
       {/* Cases Grid */}
       <div className="grid gap-4">
         {sortedCases.map((case_) => (
@@ -55,6 +54,7 @@ const CasesList = ({ cases, userRole, onStatusChange }) => {
             case_={case_}
             userRole={userRole}
             onStatusChange={onStatusChange}
+            onAppointmentBooked={onAppointmentBooked}
           />
         ))}
       </div>

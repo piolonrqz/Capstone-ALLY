@@ -13,6 +13,9 @@ import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Lawyer.Repo.LawyerRepo;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Client.Repo.ClientRepo;
+import com.wachichaw.Case.Entity.LegalCasesEntity;
+import com.wachichaw.Case.Entity.CaseStatus;
+import com.wachichaw.Case.Repo.LegalCaseRepo;
 
 @Service
 public class ScheduleService {
@@ -23,6 +26,8 @@ public class ScheduleService {
     private ClientRepo clientRepo;
     @Autowired
     private LawyerRepo lawyerRepo;
+    @Autowired
+    private LegalCaseRepo legalCaseRepo;
 
     public ScheduleService(ScheduleRepository scheduleRepository) {
         this.scheduleRepository = scheduleRepository;
@@ -56,6 +61,56 @@ public class ScheduleService {
         schedule.setBookingStartTime(startTime);
         schedule.setBookingEndTime(endTime);
         schedule.setBooked(true); // Set is_booked to true for new appointments
+
+        return scheduleRepository.save(schedule);
+    }
+
+    /**
+     * Create a new appointment booking for a specific legal case
+     */
+    public ScheduleEntity createCaseAppointment(int clientId, int caseId, LocalDateTime startTime) {        // Validate case exists and is ACCEPTED
+        LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Legal case not found with ID: " + caseId));
+        
+        if (!legalCase.getStatus().equals(CaseStatus.ACCEPTED)) {
+            throw new RuntimeException("Cannot book appointment for case with status: " + legalCase.getStatus() + ". Only ACCEPTED cases allow appointments.");
+        }
+
+        // Validate client exists and owns the case
+        ClientEntity client = clientRepo.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
+        
+        if (legalCase.getClient().getUserId() != client.getUserId()) {
+            throw new RuntimeException("Client does not own this legal case");
+        }
+
+        // Get the assigned lawyer from the case
+        LawyerEntity lawyer = legalCase.getLawyer();
+        if (lawyer == null) {
+            throw new RuntimeException("No lawyer assigned to this case");
+        }
+
+        // Validate booking time (must be in the future)
+        if (startTime.isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Cannot book appointments in the past");
+        }
+
+        // Calculate end time (1-hour consultation)
+        LocalDateTime endTime = startTime.plusHours(1);
+
+        // Check for scheduling conflicts
+        if (hasSchedulingConflict(lawyer, startTime, endTime)) {
+            throw new RuntimeException("Lawyer is not available at the requested time slot");
+        }
+
+        // Create and save the schedule with case reference
+        ScheduleEntity schedule = new ScheduleEntity();
+        schedule.setClient(client);
+        schedule.setLawyer(lawyer);
+        schedule.setLegalCase(legalCase);
+        schedule.setBookingStartTime(startTime);
+        schedule.setBookingEndTime(endTime);
+        schedule.setBooked(true);
 
         return scheduleRepository.save(schedule);
     }

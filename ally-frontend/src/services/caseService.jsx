@@ -113,7 +113,6 @@ export const caseService = {
       throw error;
     }
   },
-
   // Accept a case (for lawyers)
   acceptCase: async (caseId) => {
     try {
@@ -122,7 +121,7 @@ export const caseService = {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`${API_BASE_URL}/${caseId}/accept`, {
+      const response = await fetch(`${API_BASE_URL}/${caseId}/accept/${authData.userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authData.token}`,

@@ -25,11 +25,22 @@ export const AppointmentCard = ({ appointment, onEdit, onCancel }) => {
     <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
       <div className="flex items-start justify-between">
         {/* Main Information */}
-        <div className="flex-1">
+        <div className="flex-1">          
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {appointment.appointmentType || 'Legal Consultation'}
             </h3>
+            {/* Case Information */}
+            {appointment.legalCase && (
+              <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                <div className="text-sm text-blue-800">
+                  <span className="font-medium">Case:</span> {appointment.legalCase.title} (#{appointment.legalCase.caseId})
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  Status: {appointment.legalCase.status}
+                </div>
+              </div>
+            )}
             <div className="flex items-center text-gray-600 mb-2">
               <Calendar className="w-4 h-4 mr-2" />
               <span>{date} | {time} - {endTime}</span>

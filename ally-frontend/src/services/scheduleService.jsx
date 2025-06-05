@@ -94,6 +94,41 @@ export const scheduleService = {
     } catch (error) {
       console.error('Error checking availability:', error);
       throw error;
+    }  },
+
+  // Create a case-based appointment booking
+  createCaseAppointment: async (bookingData) => {
+    try {
+      const { lawyerId, clientId, caseId, date, time, consultationType, notes } = bookingData;
+      
+      const startTime = formatDateTime(date, time);
+      if (!startTime) {
+        throw new Error('Invalid date or time format');
+      }
+      
+      const requestBody = {
+        clientId: parseInt(clientId),
+        caseId: parseInt(caseId),
+        startTime
+      };
+
+      const response = await fetch(`${API_BASE_URL}/book-for-case`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to create case appointment');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating case appointment:', error);
+      throw error;
     }
   },
 
