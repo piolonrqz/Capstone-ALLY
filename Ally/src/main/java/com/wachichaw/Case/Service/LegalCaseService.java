@@ -3,24 +3,28 @@ package com.wachichaw.Case.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wachichaw.Case.Entity.CaseStatus;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
+import com.wachichaw.Case.Entity.LegalCaseResponseDTO;
 import com.wachichaw.Case.Repo.LegalCaseRepo;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Client.Repo.ClientRepo;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
+import com.wachichaw.User.Repo.UserRepo;
 
 
 @Service
 public class LegalCaseService {
-    
-
+        
     @Autowired
     private ClientRepo clientRepo;
+    @Autowired
+    private UserRepo userRepo;
     @Autowired
     private final LegalCaseRepo legalCaseRepo;
 
@@ -55,9 +59,7 @@ public class LegalCaseService {
         return legalCaseRepo.findMaxCaseNumber()
                 .map(maxNumber -> maxNumber + 1)
                 .orElse(1L);
-    }
-
-    public List<LegalCasesEntity> getCasesByClientId(int clientId) {
+    }    public List<LegalCasesEntity> getCasesByClientId(int clientId) {
         return legalCaseRepo.findByClientUserId(clientId);
     }
 
@@ -65,10 +67,36 @@ public class LegalCaseService {
         return legalCaseRepo.findByLawyerUserId(lawyerId);
     }
 
-    public LegalCasesEntity updateCaseStatus(int caseId, CaseStatus status) {
+    // New methods that return DTOs with full lawyer/client information
+    public List<LegalCaseResponseDTO> getCasesByClientIdWithDetails(int clientId) {
+        List<LegalCasesEntity> cases = legalCaseRepo.findByClientUserId(clientId);
+        return cases.stream()
+                .map(LegalCaseResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<LegalCaseResponseDTO> getCasesByLawyerIdWithDetails(int lawyerId) {
+        List<LegalCasesEntity> cases = legalCaseRepo.findByLawyerUserId(lawyerId);
+        return cases.stream()
+                .map(LegalCaseResponseDTO::new)
+                .collect(Collectors.toList());
+    }public LegalCasesEntity updateCaseStatus(int caseId, CaseStatus status) {
         LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found with ID: " + caseId));
         legalCase.setStatus(status);
+        return legalCaseRepo.save(legalCase);
+    }
+
+    public LegalCasesEntity acceptCase(int caseId, int lawyerId) {
+        LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found with ID: " + caseId));
+        
+        LawyerEntity lawyer = (LawyerEntity) userRepo.findById(lawyerId)
+                .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
+        
+        legalCase.setStatus(CaseStatus.ACCEPTED);
+        legalCase.setLawyer(lawyer);
+        
         return legalCaseRepo.save(legalCase);
     }
 }

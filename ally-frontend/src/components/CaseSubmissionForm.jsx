@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Send, AlertCircle, Loader2 } from 'lucide-react';
 import { caseService } from '../services/caseService.jsx';
 import { getAuthData } from '../utils/auth.jsx';
 
-const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFormData] = useState({
+const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
     title: '',
     description: ''
   });
@@ -12,7 +15,6 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
   const [errors, setErrors] = useState({});
   const [lawyers, setLawyers] = useState([]);
   const [lawyerId, setLawyerId] = useState('');
-
   useEffect(() => {
     // Fetch verified lawyers directly here
     fetch('http://localhost:8080/lawyers/verified')
@@ -20,6 +22,12 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
       .then(setLawyers)
       .catch(() => setLawyers([]));
   }, []);
+  useEffect(() => {
+    // Pre-select lawyer if provided
+    if (selectedLawyer && selectedLawyer.id) {
+      setLawyerId(selectedLawyer.id.toString());
+    }
+  }, [selectedLawyer]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -29,12 +37,13 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
     } else if (formData.title.trim().length < 5) {
       newErrors.title = 'Case title must be at least 5 characters long';
     }
-    
-    if (!formData.description.trim()) {
+      if (!formData.description.trim()) {
       newErrors.description = 'Case description is required';
     } else if (formData.description.trim().length < 20) {
       newErrors.description = 'Case description must be at least 20 characters long';
-    }    if (!lawyerId) {
+    } else if (formData.description.trim().length > 1000) {
+      newErrors.description = 'Case description must be less than 1000 characters';
+    }if (!lawyerId) {
       newErrors.lawyerId = 'Please select a lawyer';
     }
 
@@ -76,14 +85,15 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
         title: formData.title.trim(),
         description: formData.description.trim(),
         lawyerId: Number(lawyerId)
-      };
-
-      await caseService.createCase(authData.userId, caseData);
+      };      await caseService.createCase(authData.userId, caseData);
       
       // Call success callback
       if (onSuccess) {
         onSuccess();
       }
+      
+      // Navigate to My Cases page
+      navigate('/my-cases');
     } catch (err) {
       console.error('Error submitting case:', err);
       setError(err.message || 'Failed to submit case. Please try again.');
@@ -117,8 +127,7 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
             </div>
           </div>
         )}        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Lawyer Selection */}
+        <form onSubmit={handleSubmit} className="space-y-6">          {/* Lawyer Selection */}
           <div>
             <label htmlFor="lawyerId" className="block text-sm font-medium text-gray-700 mb-2">
               Select a Lawyer *
@@ -129,7 +138,7 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
               value={lawyerId}
               onChange={e => setLawyerId(e.target.value)}
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.lawyerId ? 'border-red-300' : 'border-gray-300'}`}
-              disabled={isSubmitting || lawyers.length === 0}
+              disabled={isSubmitting || lawyers.length === 0 || selectedLawyer}
             >
               <option value="">-- Select a lawyer --</option>
               {lawyers.map(lawyer => (
@@ -138,6 +147,11 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
                 </option>
               ))}
             </select>
+            {selectedLawyer && (
+              <p className="mt-1 text-sm text-blue-600">
+                Submitting case to: {selectedLawyer.name}
+              </p>
+            )}
             {errors.lawyerId && (
               <p className="mt-1 text-sm text-red-600">{errors.lawyerId}</p>
             )}
@@ -169,11 +183,11 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
               Case Description *
-            </label>
-            <textarea
+            </label>            <textarea
               id="description"
               name="description"
               rows={6}
+              maxLength={1000}
               value={formData.description}
               onChange={handleInputChange}
               placeholder="Provide detailed information about your legal situation. Include relevant facts, dates, and any specific legal questions you have. The more detail you provide, the better we can match you with the right lawyer."
@@ -184,9 +198,8 @@ const CaseSubmissionForm = ({ onClose, onSuccess }) => {  const [formData, setFo
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-            )}
-            <p className="mt-2 text-xs text-gray-500">
-              {formData.description.length}/500 characters recommended
+            )}            <p className="mt-2 text-xs text-gray-500">
+              {formData.description.length}/1000 characters maximum
             </p>
           </div>
 

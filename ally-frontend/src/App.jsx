@@ -13,6 +13,7 @@ import AnalyticsDashboard from './components/AnalyticsDashboard'
 import SettingsDashboard from './components/SettingsDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import { LawyerDirectoryPage } from './pages/LawyerDirectoryPage'
+import { AppointmentsPage } from './pages/AppointmentsPage'
 import DocumentSubmission from './components/DocumentSubmission'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
@@ -39,8 +40,8 @@ function AppContent() {
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
         <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
         <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
-        <Route path="/login" element={<Login />} />        
-        <Route path="/lawyers" element={<LawyerDirectoryPage />} />
+        <Route path="/login" element={<Login />} />          <Route path="/lawyers" element={<LawyerDirectoryPage />} />
+        <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="/my-cases" element={<MyCasesPage />} />
         <Route path="/documents" element={<DocumentSubmission />} />
         <Route path="/settings" element={<AccountSettings />} />

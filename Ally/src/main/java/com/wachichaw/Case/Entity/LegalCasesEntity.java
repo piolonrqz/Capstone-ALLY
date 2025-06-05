@@ -27,8 +27,10 @@ public class LegalCasesEntity {
     @Column(name = "case_no", nullable = true, unique = true)
     private long caseNumber;
 
-    @Column(name = "description", nullable = true)
-    private String description;    @CreationTimestamp
+    @Column(name = "description", nullable = true, columnDefinition = "TEXT")
+    private String description;
+    
+    @CreationTimestamp
     @Column(name = "date_submitted", updatable = false)
     private LocalDateTime dateSubmitted;
 
@@ -49,7 +51,8 @@ public class LegalCasesEntity {
     @OneToMany(mappedBy = "legalcaseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages;
 
-    public LegalCasesEntity(){}    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, CaseStatus status, LawyerEntity lawyer, ClientEntity client) {
+    public LegalCasesEntity(){}    
+    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, CaseStatus status, LawyerEntity lawyer, ClientEntity client) {
         this.caseId = caseId;
         this.title = title;
         this.caseNumber = caseNumber;

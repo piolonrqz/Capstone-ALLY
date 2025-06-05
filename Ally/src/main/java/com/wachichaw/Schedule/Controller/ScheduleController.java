@@ -9,6 +9,13 @@ import java.util.stream.Collectors; // Added for mapping to DTO
 
 import com.wachichaw.Schedule.DTO.ScheduleResponseDTO; // Added DTO import
 import com.wachichaw.Schedule.DTO.UserSummaryDTO; // Added DTO import
+import com.wachichaw.Schedule.DTO.CaseSummaryDTO; // Added for case appointments
+import com.wachichaw.Schedule.DTO.BookingRequestDTO;
+import com.wachichaw.Schedule.DTO.CaseBookingRequestDTO;
+import com.wachichaw.Schedule.DTO.RescheduleRequestDTO;
+import com.wachichaw.Schedule.DTO.AvailabilityResponseDTO;
+import com.wachichaw.Schedule.DTO.AcceptRequestDTO;
+import com.wachichaw.Schedule.DTO.DeclineRequestDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,42 +46,17 @@ public class ScheduleController {    @Autowired
      * Create a new appointment booking
      * POST /schedules/book
      */    @PostMapping("/book")
-    public ResponseEntity<?> createAppointment(@RequestBody BookingRequest request) {
+    public ResponseEntity<?> createAppointment(@RequestBody BookingRequestDTO request) {
         try {
-            LocalDateTime startTime = parseDateTime(request.getStartTime());
-
-            ScheduleEntity schedule = scheduleService.createAppointment(
+            LocalDateTime startTime = parseDateTime(request.getStartTime());            ScheduleEntity schedule = scheduleService.createAppointment(
                 request.getClientId(),
                 request.getLawyerId(),
                 startTime
             );
 
-            // Convert ScheduleEntity to ScheduleResponseDTO
-            UserSummaryDTO clientDTO = new UserSummaryDTO(
-                schedule.getClient().getUserId(), 
-                schedule.getClient().getFname(), 
-                schedule.getClient().getLname(), 
-                schedule.getClient().getEmail(),
-                schedule.getClient().getPhoneNumber()
-            );
-            UserSummaryDTO lawyerDTO = new UserSummaryDTO(
-                schedule.getLawyer().getUserId(), 
-                schedule.getLawyer().getFname(), 
-                schedule.getLawyer().getLname(), 
-                schedule.getLawyer().getEmail(),
-                schedule.getLawyer().getPhoneNumber()
-            );
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
 
-            ScheduleResponseDTO scheduleResponseDTO = new ScheduleResponseDTO(
-                schedule.getScheduleId(),
-                lawyerDTO,
-                clientDTO,
-                schedule.getBookingStartTime(),
-                schedule.getBookingEndTime(),
-                schedule.isBooked()
-            );
-
-            return ResponseEntity.ok(scheduleResponseDTO); // Return DTO
+            return ResponseEntity.ok(scheduleResponseDTO);
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
         } catch (RuntimeException e) {
@@ -82,6 +64,31 @@ public class ScheduleController {    @Autowired
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create appointment");
+        }
+    }
+
+    /**
+     * Create a new appointment booking for a specific legal case
+     * POST /schedules/book-for-case
+     */    @PostMapping("/book-for-case")
+    public ResponseEntity<?> createCaseAppointment(@RequestBody CaseBookingRequestDTO request) {
+        try {
+            LocalDateTime startTime = parseDateTime(request.getStartTime());            ScheduleEntity schedule = scheduleService.createCaseAppointment(
+                request.getClientId(),
+                request.getCaseId(),
+                startTime
+            );
+
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+
+            return ResponseEntity.ok(scheduleResponseDTO);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create case appointment");
         }
     }
 
@@ -222,11 +229,10 @@ public class ScheduleController {    @Autowired
                 .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
 
             LocalDateTime startTime = parseDateTime(start);
-            LocalDateTime endTime = parseDateTime(end);
-
+            LocalDateTime endTime = parseDateTime(end);            
             boolean hasConflict = scheduleService.hasSchedulingConflict(lawyer, startTime, endTime);
             
-            AvailabilityResponse response = new AvailabilityResponse(!hasConflict, 
+            AvailabilityResponseDTO response = new AvailabilityResponseDTO(!hasConflict, 
                 hasConflict ? "Lawyer is not available at this time" : "Lawyer is available");
             
             return ResponseEntity.ok(response);
@@ -240,13 +246,14 @@ public class ScheduleController {    @Autowired
         }
     }    /**
      * Cancel an appointment
-     * DELETE /schedules/{scheduleId}
+     * PUT /schedules/{scheduleId}/cancel
      */
-    @DeleteMapping("/{scheduleId}")
+    @PutMapping("/{scheduleId}/cancel")
     public ResponseEntity<?> cancelAppointment(@PathVariable Integer scheduleId) {
         try {
-            scheduleService.cancelAppointment(scheduleId);
-            return ResponseEntity.ok().body("Appointment cancelled successfully");
+            ScheduleEntity schedule = scheduleService.cancelAppointment(scheduleId);
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+            return ResponseEntity.ok(scheduleResponseDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -255,27 +262,44 @@ public class ScheduleController {    @Autowired
         }
     }
 
-    /**
-     * Reschedule an appointment
-     * PUT /schedules/{scheduleId}/reschedule
-     */
-    @PutMapping("/{scheduleId}/reschedule")
-    public ResponseEntity<?> rescheduleAppointment(
-            @PathVariable Integer scheduleId,
-            @RequestBody RescheduleRequest request) {
-        try {
-            LocalDateTime newStartTime = parseDateTime(request.getNewStartTime());
-            LocalDateTime newEndTime = parseDateTime(request.getNewEndTime());
 
-            ScheduleEntity schedule = scheduleService.rescheduleAppointment(scheduleId, newStartTime, newEndTime);
-            return ResponseEntity.ok(convertToScheduleResponseDTO(schedule)); // Return DTO
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
+    /**
+     * Accept an appointment (for lawyers)
+     * PUT /schedules/{scheduleId}/accept
+     */
+    @PutMapping("/{scheduleId}/accept")
+    public ResponseEntity<?> acceptAppointment(
+            @PathVariable Integer scheduleId,
+            @RequestBody AcceptRequestDTO request) {
+        try {
+            ScheduleEntity schedule = scheduleService.acceptAppointment(scheduleId, request.getLawyerId());
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+            return ResponseEntity.ok(scheduleResponseDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to reschedule appointment");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to accept appointment");
+        }
+    }
+
+    /**
+     * Decline an appointment (for lawyers)
+     * PUT /schedules/{scheduleId}/decline
+     */
+    @PutMapping("/{scheduleId}/decline")
+    public ResponseEntity<?> declineAppointment(
+            @PathVariable Integer scheduleId,
+            @RequestBody DeclineRequestDTO request) {
+        try {
+            ScheduleEntity schedule = scheduleService.declineAppointment(scheduleId, request.getLawyerId(), request.getReason());
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+            return ResponseEntity.ok(scheduleResponseDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to decline appointment");
         }
     }
 
@@ -323,9 +347,7 @@ public class ScheduleController {    @Autowired
     private LocalDateTime parseDateTime(String dateTimeStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return LocalDateTime.parse(dateTimeStr, formatter);
-    }
-
-    // Helper method to convert ScheduleEntity to ScheduleResponseDTO
+    }    // Helper method to convert ScheduleEntity to ScheduleResponseDTO
     private ScheduleResponseDTO convertToScheduleResponseDTO(ScheduleEntity schedule) {
         UserSummaryDTO clientDTO = new UserSummaryDTO(
             schedule.getClient().getUserId(),
@@ -341,59 +363,26 @@ public class ScheduleController {    @Autowired
             schedule.getLawyer().getEmail(),
             schedule.getLawyer().getPhoneNumber()
         );
-        return new ScheduleResponseDTO(
+          // Check if this is a case-based appointment
+        CaseSummaryDTO caseDTO = null;
+        if (schedule.getLegalCase() != null) {
+            caseDTO = new CaseSummaryDTO(
+                schedule.getLegalCase().getCaseId(),
+                schedule.getLegalCase().getTitle(),
+                schedule.getLegalCase().getStatus().toString(),
+                schedule.getLegalCase().getDescription()
+            );
+        }
+          return new ScheduleResponseDTO(
             schedule.getScheduleId(),
             lawyerDTO,
             clientDTO,
             schedule.getBookingStartTime(),
             schedule.getBookingEndTime(),
-            schedule.isBooked()
+            schedule.isBooked(),
+            caseDTO,
+            schedule.getStatus(),
+            schedule.getDeclineReason()
         );
-    }
-
-    // DTOs for request/response
-    public static class BookingRequest {
-        private int clientId;
-        private int lawyerId;
-        private String startTime;
-
-        // Getters and setters
-        public int getClientId() { return clientId; }
-        public void setClientId(int clientId) { this.clientId = clientId; }
-        
-        public int getLawyerId() { return lawyerId; }
-        public void setLawyerId(int lawyerId) { this.lawyerId = lawyerId; }
-        
-        public String getStartTime() { return startTime; }
-        public void setStartTime(String startTime) { this.startTime = startTime; }
-    }
-
-    public static class RescheduleRequest {
-        private String newStartTime;
-        private String newEndTime;
-
-        // Getters and setters
-        public String getNewStartTime() { return newStartTime; }
-        public void setNewStartTime(String newStartTime) { this.newStartTime = newStartTime; }
-        
-        public String getNewEndTime() { return newEndTime; }
-        public void setNewEndTime(String newEndTime) { this.newEndTime = newEndTime; }
-    }
-
-    public static class AvailabilityResponse {
-        private boolean available;
-        private String message;
-
-        public AvailabilityResponse(boolean available, String message) {
-            this.available = available;
-            this.message = message;
-        }
-
-        // Getters and setters
-        public boolean isAvailable() { return available; }
-        public void setAvailable(boolean available) { this.available = available; }
-        
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
     }
 }

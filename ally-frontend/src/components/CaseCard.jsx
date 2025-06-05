@@ -1,7 +1,10 @@
-import React from 'react';
-import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle, CalendarPlus } from 'lucide-react';
+import { BookingModal } from './BookingModal';
 
-const CaseCard = ({ case_, userRole, onStatusChange }) => {
+const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -37,10 +40,19 @@ const CaseCard = ({ case_, userRole, onStatusChange }) => {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
-
   const handleStatusChange = (newStatus) => {
     if (onStatusChange) {
       onStatusChange(case_.caseId, newStatus);
+    }
+  };  
+  const handleBookAppointment = () => {
+    setIsBookingModalOpen(true);
+  };
+
+  const handleAppointmentBookingSuccess = () => {
+    setIsBookingModalOpen(false);
+    if (onAppointmentBooked) {
+      onAppointmentBooked(case_.caseId);
     }
   };
 
@@ -56,11 +68,17 @@ const CaseCard = ({ case_, userRole, onStatusChange }) => {
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               <span>Submitted: {formatDate(case_.dateSubmitted)}</span>
-            </div>
-            <div className="flex items-center gap-1">
+            </div>            <div className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span>Case #{case_.caseId}</span>
             </div>
+            {/* Show appointment count if available */}
+            {case_.appointmentCount !== undefined && (
+              <div className="flex items-center gap-1">
+                <CalendarPlus className="w-4 h-4" />
+                <span>{case_.appointmentCount} appointment{case_.appointmentCount !== 1 ? 's' : ''}</span>
+              </div>
+            )}
           </div>
         </div>
         
@@ -132,14 +150,21 @@ const CaseCard = ({ case_, userRole, onStatusChange }) => {
             Decline Case
           </button>
         </div>
-      )}
-
-      {/* Additional Status Info */}
+      )}      {/* Additional Status Info */}
       {case_.status === 'ACCEPTED' && (
         <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-green-800 text-sm">
             ✓ This case has been accepted and is being processed.
-          </p>
+          </p>          {/* Book Appointment Button for Clients */}
+          {userRole === 'CLIENT' && (
+            <button
+              onClick={handleBookAppointment}
+              className="flex items-center gap-2 px-4 py-2 mt-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            >
+              <CalendarPlus className="w-4 h-4" />
+              {case_.appointmentCount > 0 ? 'Book Another Appointment' : 'Book Appointment'}
+            </button>
+          )}
         </div>
       )}
 
@@ -149,6 +174,21 @@ const CaseCard = ({ case_, userRole, onStatusChange }) => {
             ✗ This case has been declined. You may submit a new case or contact support.
           </p>
         </div>
+      )}
+
+      {/* Booking Modal */}
+      {isBookingModalOpen && case_.lawyer && (
+        <BookingModal
+          lawyer={{
+            id: case_.lawyer.userId,
+            name: `${case_.lawyer.Fname} ${case_.lawyer.Lname}`,
+            fee: case_.lawyer.fee || 'Consultation Fee Available'
+          }}
+          caseInfo={case_}
+          isOpen={isBookingModalOpen}
+          onClose={() => setIsBookingModalOpen(false)}
+          onSuccess={handleAppointmentBookingSuccess}
+        />
       )}
     </div>
   );
