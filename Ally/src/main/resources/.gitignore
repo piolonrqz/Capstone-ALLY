@@ -1,3 +1,4 @@
 src/main/resources/application.properties
 ally.db
 application.properties
+ally-firebasesdk.json
