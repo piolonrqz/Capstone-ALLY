@@ -177,5 +177,76 @@ export const scheduleService = {
       console.error('Error fetching upcoming schedules:', error);
       throw error;
     }
+  },
+
+  // Accept an appointment (for lawyers)
+  acceptAppointment: async (scheduleId, lawyerId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${scheduleId}/accept`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lawyerId: parseInt(lawyerId)
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to accept appointment');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error accepting appointment:', error);
+      throw error;
+    }
+  },
+  // Decline an appointment (for lawyers)
+  declineAppointment: async (scheduleId, lawyerId, reason) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${scheduleId}/decline`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lawyerId: parseInt(lawyerId),
+          reason: reason || 'No reason provided'
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to decline appointment');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error declining appointment:', error);
+      throw error;
+    }
+  },
+  // Cancel an appointment
+  cancelAppointment: async (scheduleId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/${scheduleId}/cancel`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to cancel appointment');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error cancelling appointment:', error);
+      throw error;
+    }
   }
 };

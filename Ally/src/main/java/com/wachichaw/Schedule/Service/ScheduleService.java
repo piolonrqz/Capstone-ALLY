@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wachichaw.Schedule.Entity.ScheduleEntity;
+import com.wachichaw.Schedule.Entity.AppointmentStatus;
 import com.wachichaw.Schedule.Repo.ScheduleRepository;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Lawyer.Repo.LawyerRepo;
@@ -166,10 +167,10 @@ public class ScheduleService {
         // This would typically be more complex, considering business hours, lunch breaks, etc.
         // For now, returning empty list - can be implemented based on business requirements
         return List.of();
-    }    /**
+    }      /**
      * Cancel an appointment
      */
-    public void cancelAppointment(Integer scheduleId) {
+    public ScheduleEntity cancelAppointment(Integer scheduleId) {
         ScheduleEntity schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Schedule not found with ID: " + scheduleId));
         
@@ -178,39 +179,14 @@ public class ScheduleService {
             throw new RuntimeException("Cannot cancel past appointments");
         }
 
-        scheduleRepository.delete(schedule);
-    }
-
-    /**
-     * Reschedule an appointment
-     */
-    public ScheduleEntity rescheduleAppointment(Integer scheduleId, LocalDateTime newStartTime, LocalDateTime newEndTime) {
-        ScheduleEntity schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new RuntimeException("Schedule not found with ID: " + scheduleId));
-
-        // Check if original appointment is in the future
-        if (schedule.getBookingStartTime().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Cannot reschedule past appointments");
+        // Validate appointment status can be changed
+        if (schedule.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new RuntimeException("Appointment is already cancelled");
         }
 
-        // Validate new time slot
-        if (newStartTime.isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Cannot reschedule to a past time");
-        }
-
-        if (newEndTime.isBefore(newStartTime) || newEndTime.equals(newStartTime)) {
-            throw new RuntimeException("End time must be after start time");
-        }        // Check for conflicts (excluding the current appointment)
-        List<ScheduleEntity> conflicts = scheduleRepository.findConflictingSchedules(schedule.getLawyer(), newStartTime, newEndTime);
-        conflicts.removeIf(s -> s.getScheduleId() == scheduleId); // Fixed comparison for int
-        
-        if (!conflicts.isEmpty()) {
-            throw new RuntimeException("Lawyer is not available at the requested new time slot");
-        }
-
-        // Update the schedule
-        schedule.setBookingStartTime(newStartTime);
-        schedule.setBookingEndTime(newEndTime);
+        // Set status to CANCELLED instead of deleting
+        schedule.setStatus(AppointmentStatus.CANCELLED);
+        schedule.setDeclineReason(null); // Clear any decline reason
 
         return scheduleRepository.save(schedule);
     }
@@ -220,12 +196,57 @@ public class ScheduleService {
      */
     public Optional<ScheduleEntity> findScheduleById(Integer scheduleId) {
         return scheduleRepository.findById(scheduleId);
-    }
-
-    /**
+    }    /**
      * Get all schedules (admin function)
      */
     public List<ScheduleEntity> getAllSchedules() {
         return scheduleRepository.findAll();
+    }
+
+    /**
+     * Accept an appointment (for lawyers)
+     */
+    public ScheduleEntity acceptAppointment(int scheduleId, int lawyerId) {
+        ScheduleEntity schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found with ID: " + scheduleId));
+        
+        // Validate that the lawyer owns this appointment
+        if (schedule.getLawyer().getUserId() != lawyerId) {
+            throw new RuntimeException("Lawyer does not own this appointment");
+        }
+        
+        // Validate appointment status can be changed
+        if (schedule.getStatus() != AppointmentStatus.PENDING) {
+            throw new RuntimeException("Only pending appointments can be accepted");
+        }
+        
+        
+        schedule.setStatus(AppointmentStatus.ACCEPTED);
+        schedule.setDeclineReason(null); // Clear any previous decline reason
+        
+        return scheduleRepository.save(schedule);
+    }
+
+    /**
+     * Decline an appointment (for lawyers)
+     */
+    public ScheduleEntity declineAppointment(int scheduleId, int lawyerId, String reason) {
+        ScheduleEntity schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found with ID: " + scheduleId));
+        
+        // Validate that the lawyer owns this appointment
+        if (schedule.getLawyer().getUserId() != lawyerId) {
+            throw new RuntimeException("Lawyer does not own this appointment");
+        }
+        
+        // Validate appointment status can be changed
+        if (schedule.getStatus() != AppointmentStatus.PENDING) {
+            throw new RuntimeException("Only pending appointments can be declined");
+        }
+        
+        schedule.setStatus(AppointmentStatus.DECLINED);
+        schedule.setDeclineReason(reason);
+        
+        return scheduleRepository.save(schedule);
     }
 }

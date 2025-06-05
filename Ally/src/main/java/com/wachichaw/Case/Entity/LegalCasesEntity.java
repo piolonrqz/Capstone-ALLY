@@ -51,7 +51,8 @@ public class LegalCasesEntity {
     @OneToMany(mappedBy = "legalcaseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages;
 
-    public LegalCasesEntity(){}    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, CaseStatus status, LawyerEntity lawyer, ClientEntity client) {
+    public LegalCasesEntity(){}    
+    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, CaseStatus status, LawyerEntity lawyer, ClientEntity client) {
         this.caseId = caseId;
         this.title = title;
         this.caseNumber = caseNumber;

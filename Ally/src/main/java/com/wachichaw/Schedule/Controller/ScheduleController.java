@@ -14,6 +14,8 @@ import com.wachichaw.Schedule.DTO.BookingRequestDTO;
 import com.wachichaw.Schedule.DTO.CaseBookingRequestDTO;
 import com.wachichaw.Schedule.DTO.RescheduleRequestDTO;
 import com.wachichaw.Schedule.DTO.AvailabilityResponseDTO;
+import com.wachichaw.Schedule.DTO.AcceptRequestDTO;
+import com.wachichaw.Schedule.DTO.DeclineRequestDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -244,13 +246,14 @@ public class ScheduleController {    @Autowired
         }
     }    /**
      * Cancel an appointment
-     * DELETE /schedules/{scheduleId}
+     * PUT /schedules/{scheduleId}/cancel
      */
-    @DeleteMapping("/{scheduleId}")
+    @PutMapping("/{scheduleId}/cancel")
     public ResponseEntity<?> cancelAppointment(@PathVariable Integer scheduleId) {
         try {
-            scheduleService.cancelAppointment(scheduleId);
-            return ResponseEntity.ok().body("Appointment cancelled successfully");
+            ScheduleEntity schedule = scheduleService.cancelAppointment(scheduleId);
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+            return ResponseEntity.ok(scheduleResponseDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -259,26 +262,44 @@ public class ScheduleController {    @Autowired
         }
     }
 
-    /**
-     * Reschedule an appointment
-     * PUT /schedules/{scheduleId}/reschedule
-     */    @PutMapping("/{scheduleId}/reschedule")
-    public ResponseEntity<?> rescheduleAppointment(
-            @PathVariable Integer scheduleId,
-            @RequestBody RescheduleRequestDTO request) {
-        try {
-            LocalDateTime newStartTime = parseDateTime(request.getNewStartTime());
-            LocalDateTime newEndTime = parseDateTime(request.getNewEndTime());
 
-            ScheduleEntity schedule = scheduleService.rescheduleAppointment(scheduleId, newStartTime, newEndTime);
-            return ResponseEntity.ok(convertToScheduleResponseDTO(schedule)); // Return DTO
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
+    /**
+     * Accept an appointment (for lawyers)
+     * PUT /schedules/{scheduleId}/accept
+     */
+    @PutMapping("/{scheduleId}/accept")
+    public ResponseEntity<?> acceptAppointment(
+            @PathVariable Integer scheduleId,
+            @RequestBody AcceptRequestDTO request) {
+        try {
+            ScheduleEntity schedule = scheduleService.acceptAppointment(scheduleId, request.getLawyerId());
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+            return ResponseEntity.ok(scheduleResponseDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to reschedule appointment");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to accept appointment");
+        }
+    }
+
+    /**
+     * Decline an appointment (for lawyers)
+     * PUT /schedules/{scheduleId}/decline
+     */
+    @PutMapping("/{scheduleId}/decline")
+    public ResponseEntity<?> declineAppointment(
+            @PathVariable Integer scheduleId,
+            @RequestBody DeclineRequestDTO request) {
+        try {
+            ScheduleEntity schedule = scheduleService.declineAppointment(scheduleId, request.getLawyerId(), request.getReason());
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+            return ResponseEntity.ok(scheduleResponseDTO);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to decline appointment");
         }
     }
 
@@ -352,14 +373,16 @@ public class ScheduleController {    @Autowired
                 schedule.getLegalCase().getDescription()
             );
         }
-        
-        return new ScheduleResponseDTO(
+          return new ScheduleResponseDTO(
             schedule.getScheduleId(),
             lawyerDTO,
             clientDTO,
             schedule.getBookingStartTime(),
             schedule.getBookingEndTime(),
             schedule.isBooked(),
-            caseDTO        );
+            caseDTO,
+            schedule.getStatus(),
+            schedule.getDeclineReason()
+        );
     }
 }
