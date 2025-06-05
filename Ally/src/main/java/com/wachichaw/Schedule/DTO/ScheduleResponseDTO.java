@@ -9,19 +9,8 @@ public class ScheduleResponseDTO {
     private LocalDateTime bookingStartTime;
     private LocalDateTime bookingEndTime;
     private boolean isBooked;
-    private CaseSummaryDTO legalCase; // Optional - only present for case-based appointments
-
-    // Constructors
+    private CaseSummaryDTO legalCase; // Required - every appointment must be tied to a case    // Constructors
     public ScheduleResponseDTO() {
-    }
-
-    public ScheduleResponseDTO(int scheduleId, UserSummaryDTO lawyer, UserSummaryDTO client, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, boolean isBooked) {
-        this.scheduleId = scheduleId;
-        this.lawyer = lawyer;
-        this.client = client;
-        this.bookingStartTime = bookingStartTime;
-        this.bookingEndTime = bookingEndTime;
-        this.isBooked = isBooked;
     }
 
     public ScheduleResponseDTO(int scheduleId, UserSummaryDTO lawyer, UserSummaryDTO client, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, boolean isBooked, CaseSummaryDTO legalCase) {

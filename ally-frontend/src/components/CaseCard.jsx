@@ -45,6 +45,9 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
       onStatusChange(case_.caseId, newStatus);
     }
   };  
+  const handleBookAppointment = () => {
+    setIsBookingModalOpen(true);
+  };
 
   const handleAppointmentBookingSuccess = () => {
     setIsBookingModalOpen(false);

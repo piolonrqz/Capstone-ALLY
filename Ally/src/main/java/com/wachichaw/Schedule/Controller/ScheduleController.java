@@ -10,6 +10,10 @@ import java.util.stream.Collectors; // Added for mapping to DTO
 import com.wachichaw.Schedule.DTO.ScheduleResponseDTO; // Added DTO import
 import com.wachichaw.Schedule.DTO.UserSummaryDTO; // Added DTO import
 import com.wachichaw.Schedule.DTO.CaseSummaryDTO; // Added for case appointments
+import com.wachichaw.Schedule.DTO.BookingRequestDTO;
+import com.wachichaw.Schedule.DTO.CaseBookingRequestDTO;
+import com.wachichaw.Schedule.DTO.RescheduleRequestDTO;
+import com.wachichaw.Schedule.DTO.AvailabilityResponseDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,7 +44,7 @@ public class ScheduleController {    @Autowired
      * Create a new appointment booking
      * POST /schedules/book
      */    @PostMapping("/book")
-    public ResponseEntity<?> createAppointment(@RequestBody BookingRequest request) {
+    public ResponseEntity<?> createAppointment(@RequestBody BookingRequestDTO request) {
         try {
             LocalDateTime startTime = parseDateTime(request.getStartTime());            ScheduleEntity schedule = scheduleService.createAppointment(
                 request.getClientId(),
@@ -64,9 +68,8 @@ public class ScheduleController {    @Autowired
     /**
      * Create a new appointment booking for a specific legal case
      * POST /schedules/book-for-case
-     */
-    @PostMapping("/book-for-case")
-    public ResponseEntity<?> createCaseAppointment(@RequestBody CaseBookingRequest request) {
+     */    @PostMapping("/book-for-case")
+    public ResponseEntity<?> createCaseAppointment(@RequestBody CaseBookingRequestDTO request) {
         try {
             LocalDateTime startTime = parseDateTime(request.getStartTime());            ScheduleEntity schedule = scheduleService.createCaseAppointment(
                 request.getClientId(),
@@ -224,11 +227,10 @@ public class ScheduleController {    @Autowired
                 .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
 
             LocalDateTime startTime = parseDateTime(start);
-            LocalDateTime endTime = parseDateTime(end);
-
+            LocalDateTime endTime = parseDateTime(end);            
             boolean hasConflict = scheduleService.hasSchedulingConflict(lawyer, startTime, endTime);
             
-            AvailabilityResponse response = new AvailabilityResponse(!hasConflict, 
+            AvailabilityResponseDTO response = new AvailabilityResponseDTO(!hasConflict, 
                 hasConflict ? "Lawyer is not available at this time" : "Lawyer is available");
             
             return ResponseEntity.ok(response);
@@ -260,11 +262,10 @@ public class ScheduleController {    @Autowired
     /**
      * Reschedule an appointment
      * PUT /schedules/{scheduleId}/reschedule
-     */
-    @PutMapping("/{scheduleId}/reschedule")
+     */    @PutMapping("/{scheduleId}/reschedule")
     public ResponseEntity<?> rescheduleAppointment(
             @PathVariable Integer scheduleId,
-            @RequestBody RescheduleRequest request) {
+            @RequestBody RescheduleRequestDTO request) {
         try {
             LocalDateTime newStartTime = parseDateTime(request.getNewStartTime());
             LocalDateTime newEndTime = parseDateTime(request.getNewEndTime());
@@ -359,69 +360,6 @@ public class ScheduleController {    @Autowired
             schedule.getBookingStartTime(),
             schedule.getBookingEndTime(),
             schedule.isBooked(),
-            caseDTO
-        );
-    }
-
-    // DTOs for request/response
-    public static class BookingRequest {
-        private int clientId;
-        private int lawyerId;
-        private String startTime;
-
-        // Getters and setters
-        public int getClientId() { return clientId; }
-        public void setClientId(int clientId) { this.clientId = clientId; }
-        
-        public int getLawyerId() { return lawyerId; }
-        public void setLawyerId(int lawyerId) { this.lawyerId = lawyerId; }
-        
-        public String getStartTime() { return startTime; }
-        public void setStartTime(String startTime) { this.startTime = startTime; }
-    }
-
-    public static class RescheduleRequest {
-        private String newStartTime;
-        private String newEndTime;
-
-        // Getters and setters
-        public String getNewStartTime() { return newStartTime; }
-        public void setNewStartTime(String newStartTime) { this.newStartTime = newStartTime; }
-        
-        public String getNewEndTime() { return newEndTime; }
-        public void setNewEndTime(String newEndTime) { this.newEndTime = newEndTime; }
-    }
-
-    public static class AvailabilityResponse {
-        private boolean available;
-        private String message;
-
-        public AvailabilityResponse(boolean available, String message) {
-            this.available = available;
-            this.message = message;
-        }
-
-        // Getters and setters
-        public boolean isAvailable() { return available; }
-        public void setAvailable(boolean available) { this.available = available; }
-        
-        public String getMessage() { return message; }
-        public void setMessage(String message) { this.message = message; }
-    }
-
-    public static class CaseBookingRequest {
-        private int clientId;
-        private int caseId;
-        private String startTime;
-
-        // Getters and setters
-        public int getClientId() { return clientId; }
-        public void setClientId(int clientId) { this.clientId = clientId; }
-        
-        public int getCaseId() { return caseId; }
-        public void setCaseId(int caseId) { this.caseId = caseId; }
-        
-        public String getStartTime() { return startTime; }
-        public void setStartTime(String startTime) { this.startTime = startTime; }
+            caseDTO        );
     }
 }
