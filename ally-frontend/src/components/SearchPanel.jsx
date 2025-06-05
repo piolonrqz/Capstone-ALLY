@@ -7,109 +7,75 @@ export const SearchPanel = ({
   setSearchQuery, 
   filters, 
   setFilters, 
+  lawyers,
   onLawyerSelect
 }) => {
-  const [lawyers, setLawyers] = useState([]);
   const [filteredLawyers, setFilteredLawyers] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const API_BASE_URL = 'http://localhost:8080/users';
-
-  // Fetch initial data on component mount
+  // Initialize filtered lawyers and extract unique specializations and locations
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch all lawyers
-        const lawyersResponse = await fetch(`${API_BASE_URL}/all`);
-        if (!lawyersResponse.ok) throw new Error('Failed to fetch lawyers');
-        const lawyersData = await lawyersResponse.json();
-        
-        // Fetch specializations for dropdown
-        const specializationsResponse = await fetch(`${API_BASE_URL}/specializations`);
-        if (!specializationsResponse.ok) throw new Error('Failed to fetch specializations');
-        const specializationsData = await specializationsResponse.json();
-        
-        // Fetch locations for dropdown
-        const locationsResponse = await fetch(`${API_BASE_URL}/locations`);
-        if (!locationsResponse.ok) throw new Error('Failed to fetch locations');
-        const locationsData = await locationsResponse.json();
-        
-        setLawyers(lawyersData);
-        setFilteredLawyers(lawyersData);
-        setSpecializations(specializationsData);
-        setLocations(locationsData);
-        
-      } catch (err) {
-        setError(err.message);
-        console.error('Error fetching data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, []);
-
-  // Apply filters function
-  const applyFilters = async () => {
-    try {
-      setLoading(true);
+    if (lawyers && lawyers.length > 0) {
+      setFilteredLawyers(lawyers);
       
-      const params = new URLSearchParams();
+      // Extract unique specializations
+      const specs = [...new Set(lawyers.map(lawyer => lawyer.specialty).filter(Boolean))];
+      setSpecializations(specs);
       
-      // Add search query as name parameter
-      if (searchQuery && searchQuery.trim()) {
-        params.append('name', searchQuery.trim());
-      }
-      
-      // Add specialty filter
-      if (filters.specialty && filters.specialty !== 'All Specialties') {
-        params.append('specialization', filters.specialty);
-      }
-      
-      // Add location filter
-      if (filters.location && filters.location !== 'All Locations' && filters.location !== '') {
-        // If location contains comma, split into city and province
-        const locationParts = filters.location.split(', ');
-        if (locationParts.length > 1) {
-          params.append('city', locationParts[0]);
-          params.append('province', locationParts[1]);
-        } else {
-          params.append('city', filters.location);
-        }
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/search?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to search lawyers');
-      
-      const searchResults = await response.json();
-      setFilteredLawyers(searchResults);
-      
-    } catch (err) {
-      setError(err.message);
-      console.error('Error applying filters:', err);
-    } finally {
-      setLoading(false);
+      // Extract unique locations
+      const locs = [...new Set(lawyers.map(lawyer => lawyer.location).filter(Boolean))];
+      setLocations(locs);
     }
+  }, [lawyers]);
+  // Apply filters function
+  const applyFilters = () => {
+    if (!lawyers || lawyers.length === 0) {
+      setFilteredLawyers([]);
+      return;
+    }
+
+    let filtered = [...lawyers];
+
+    // Apply search query filter
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(lawyer => 
+        lawyer.name?.toLowerCase().includes(query) ||
+        lawyer.specialty?.toLowerCase().includes(query) ||
+        lawyer.location?.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply specialty filter
+    if (filters.specialty && filters.specialty !== 'All Specialties') {
+      filtered = filtered.filter(lawyer => 
+        lawyer.specialty?.includes(filters.specialty)
+      );
+    }
+
+    // Apply location filter
+    if (filters.location && filters.location !== 'All Locations' && filters.location !== '') {
+      filtered = filtered.filter(lawyer => 
+        lawyer.location?.includes(filters.location)
+      );
+    }
+
+    // Apply rating filter
+    if (filters.rating && filters.rating !== 'Any Rating') {
+      const minRating = filters.rating === '4+ Stars' ? 4 : 4.5;
+      filtered = filtered.filter(lawyer => 
+        lawyer.rating && lawyer.rating >= minRating
+      );
+    }
+
+    setFilteredLawyers(filtered);
   };
-
-  // Auto-apply filters when search query changes
+  // Auto-apply filters when search query or filters change
   useEffect(() => {
-    const delayedSearch = setTimeout(() => {
-      if (searchQuery !== '') {
-        applyFilters();
-      } else {
-        setFilteredLawyers(lawyers);
-      }
-    }, 500); // 500ms delay for debouncing
-
-    return () => clearTimeout(delayedSearch);
-  }, [searchQuery]);
+    applyFilters();
+  }, [searchQuery, filters, lawyers]);
 
   // Reset filters
   const resetFilters = () => {
@@ -120,7 +86,6 @@ export const SearchPanel = ({
       availability: 'Any Day',
       rating: 'Any Rating'
     });
-    setFilteredLawyers(lawyers);
   };
 
   return (
@@ -206,15 +171,12 @@ export const SearchPanel = ({
             <option>4+ Stars</option>
             <option>4.5+ Stars</option>
           </select>
-        </div>
-
-        <div className="flex space-x-2">
+        </div>        <div className="flex space-x-2">
           <button 
-            className="flex-1 px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
             onClick={applyFilters}
-            disabled={loading}
           >
-            {loading ? 'Searching...' : 'Apply Filters'}
+            Apply Filters
           </button>
           <button 
             className="px-4 py-2 font-medium text-gray-700 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
@@ -223,24 +185,16 @@ export const SearchPanel = ({
             Reset
           </button>
         </div>
-      </div>
-
-      {/* Results count */}
+      </div>      {/* Results count */}
       <div className="mb-4">
         <p className="text-sm text-gray-600">
           Showing {filteredLawyers.length} lawyer{filteredLawyers.length !== 1 ? 's' : ''}
-          {loading && ' (Loading...)'}
         </p>
       </div>
 
       {/* Lawyers list */}
       <div className="space-y-4">
-        {loading && filteredLawyers.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Loading lawyers...</p>
-          </div>
-        ) : filteredLawyers.length === 0 ? (
+        {filteredLawyers.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-600">No lawyers found matching your criteria.</p>
             <button 

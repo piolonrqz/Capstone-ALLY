@@ -27,8 +27,10 @@ public class LegalCasesEntity {
     @Column(name = "case_no", nullable = true, unique = true)
     private long caseNumber;
 
-    @Column(name = "description", nullable = true)
-    private String description;    @CreationTimestamp
+    @Column(name = "description", nullable = true, columnDefinition = "TEXT")
+    private String description;
+    
+    @CreationTimestamp
     @Column(name = "date_submitted", updatable = false)
     private LocalDateTime dateSubmitted;
 
