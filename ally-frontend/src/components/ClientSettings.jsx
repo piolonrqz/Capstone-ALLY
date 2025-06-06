@@ -1,40 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Shield, Trash2, Bell } from 'lucide-react';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 
-const ClientSettings = () => {
+const ClientSettings = ({ user }) => {
+  // Initialize state from user prop
   const [profile, setProfile] = useState({
-    name: 'John Doe',
+    name: user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Client',
     title: 'Client',
-    location: 'New York, NY'
+    location: user?.location || user?.city || '',
   });
 
   const [personalInfo, setPersonalInfo] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1(3) 999 3438 324',
-    bio: 'A brief description about me.'
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    phone: user?.phoneNumber || '',
+    bio: user?.bio || '',
   });
 
   const [address, setAddress] = useState({
-    line1: 'Sacramento, Westland',
-    country: 'Cebu City',
-    zipCode: '6032',
-    cityState: 'Cebu City'
+    line1: user?.address || '',
+    province: user?.province || '',
+    zipCode: user?.zipCode || user?.zip || '',
+    cityState: user?.cityState || user?.city || '',
   });
 
   const location = useLocation();
   const path = location.pathname;
+
+  // Optionally, update state if user prop changes
+  useEffect(() => {
+    setProfile({
+      name: user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Client',
+      title: 'Client',
+      location: user?.location || user?.city || '',
+    });
+    setPersonalInfo({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      email: user?.email || '',
+      phone: user?.phoneNumber || '',
+      bio: user?.bio || '',
+    });
+    setAddress({
+      line1: user?.address || '',
+      province: user?.province || '',
+      zipCode: user?.zipCode || user?.zip || '',
+      cityState: user?.cityState || user?.city || '',
+    });
+  }, [user]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}      <aside className="fixed top-0 left-0 flex flex-col w-64 h-screen bg-white shadow-lg">
         <div className="p-6 border-b border-gray-200">
           <Link to="/">
-            <img src="/small_logo.png" alt="ALLY Logo" className="h-8" />
+            <img src="/small_logo.png" alt="ALLY Logo" className="h-8 cursor-pointer" />
           </Link>
         </div>
         <nav className="flex flex-col justify-between flex-1">
@@ -74,10 +97,15 @@ const ClientSettings = () => {
           <h1 className="mb-6 text-2xl font-bold text-gray-800">Account Settings</h1>
 
           {/* Profile Section */}
-          <Section title="My Profile" onEdit={() => {}}>
+          <Section title="My Profile">
             <div className="flex items-center space-x-4">
               <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full">
-                <span className="text-xl font-semibold text-blue-600">JD</span>
+                <span className="text-xl font-semibold text-blue-600">
+                  {(
+                    (personalInfo.firstName?.charAt(0) || '') +
+                    (personalInfo.lastName?.charAt(0) || '')
+                  ).toUpperCase() || 'U'}
+                </span>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-800">{profile.name}</h4>
@@ -88,23 +116,20 @@ const ClientSettings = () => {
           </Section>
 
           {/* Personal Information */}
-          <Section title="Personal Information" onEdit={() => {}}>
+          <Section title="Personal Information">
             <div className="grid grid-cols-2 gap-6">
               <InputField label="First Name" value={personalInfo.firstName} />
               <InputField label="Last Name" value={personalInfo.lastName} />
               <InputField label="Email address" value={personalInfo.email} />
               <InputField label="Phone" value={personalInfo.phone} />
-              <div className="col-span-2">
-                <InputField label="Bio" value={personalInfo.bio} />
-              </div>
             </div>
           </Section>
 
           {/* Address */}
-          <Section title="Address" onEdit={() => {}}>
+          <Section title="Address">
             <div className="grid grid-cols-2 gap-6">
               <InputField label="Address Line 1" value={address.line1} />
-              <InputField label="Country" value={address.country} />
+              <InputField label="Province" value={address.province} />
               <InputField label="ZIP Code" value={address.zipCode} />
               <InputField label="City/State" value={address.cityState} />
             </div>

@@ -29,18 +29,29 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
         <div className="p-8">
           <div className="flex items-start mb-6 space-x-4">
             <div className="flex items-center justify-center w-20 h-20 text-2xl font-semibold text-white bg-blue-500 rounded-full">
-              {lawyer.image}
+              {/* Show initials if no image, else show image */}
+              {lawyer?.image ? (
+                <img src={lawyer.image} alt="Profile" className="object-cover w-full h-full rounded-full" />
+              ) : (
+                ((lawyer?.firstName?.charAt(0) || lawyer?.name?.charAt(0) || '') + (lawyer?.lastName?.charAt(0) || '')).toUpperCase() || 'L'
+              )}
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold">{lawyer.name}</h2>
-              <span className="inline-block px-3 py-1 mt-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">
-                {lawyer.specialty}
-              </span>
+              <h2 className="text-2xl font-bold">{lawyer?.name || (lawyer?.firstName && lawyer?.lastName ? `${lawyer.firstName} ${lawyer.lastName}` : 'Lawyer')}</h2>
+              {lawyer?.specialty && (
+                <span className="inline-block px-3 py-1 mt-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">
+                  {lawyer.specialty}
+                </span>
+              )}
               <p className="flex items-center mt-2 text-gray-600">
                 <MapPin className="w-4 h-4 mr-1" />
-                {lawyer.location}
-                <Star className="w-4 h-4 ml-4 mr-1 text-yellow-400 fill-yellow-400" />
-                {lawyer.rating}
+                {lawyer?.location || lawyer?.city || ''}
+                {lawyer?.rating && (
+                  <>
+                    <Star className="w-4 h-4 ml-4 mr-1 text-yellow-400 fill-yellow-400" />
+                    {lawyer.rating}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -48,15 +59,15 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
           <div className="grid gap-6 mb-6 md:grid-cols-2">
             <div>
               <h3 className="mb-2 font-semibold">About</h3>
-              <p className="text-sm text-gray-700">{lawyer.about}</p>
+              <p className="text-sm text-gray-700">{lawyer?.about || ''}</p>
             </div>
             <div>
               <h3 className="mb-2 font-semibold">Case Rate</h3>
-              <p className="font-semibold text-blue-600">{lawyer.fee}</p>
+              <p className="font-semibold text-blue-600">{lawyer?.fee || ''}</p>
             </div>
             <div>
               <h3 className="mb-2 font-semibold">Experience</h3>
-              <p className="text-gray-700">{lawyer.experience}</p>
+              <p className="text-gray-700">{lawyer?.experience || ''}</p>
             </div>
             <div>
               <h3 className="mb-2 font-semibold">Availability</h3>
@@ -64,20 +75,25 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
             </div>
             <div>
               <h3 className="mb-2 font-semibold">Education</h3>
-              <p className="text-gray-700">{lawyer.education}</p>
+              <p className="text-gray-700">{lawyer?.education || ''}</p>
             </div>
           </div>
 
           <div className="mb-6">
             <h3 className="mb-3 font-semibold">Areas of Practice</h3>
             <div className="flex flex-wrap gap-2">
-              {lawyer.areas?.map((area, index) => (
-                <span key={index} className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-full">
-                  {area}
-                </span>
-              ))}
+              {Array.isArray(lawyer?.areas) && lawyer.areas.length > 0 ? (
+                lawyer.areas.map((area, index) => (
+                  <span key={index} className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-full">
+                    {area}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-400">No areas listed</span>
+              )}
             </div>
-          </div>          <div className="flex space-x-4">
+          </div>
+          <div className="flex space-x-4">
             <button className="flex items-center justify-center flex-1 px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
               <MessageCircle className="w-4 h-4 mr-2" />
               Message
@@ -103,3 +119,5 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
   </div>
 );
 };
+
+export default LawyerProfile;
