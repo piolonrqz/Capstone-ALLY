@@ -61,7 +61,9 @@ public class LegalCasesController {
     } catch (Exception e) {
     e.printStackTrace(); // This will print the error to your console/logs
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-}    }    @GetMapping("/client/{clientId}")
+    }    }    
+    
+    @GetMapping("/client/{clientId}")
     public ResponseEntity<List<LegalCaseResponseDTO>> getClientCases(@PathVariable int clientId) {
         try {
             List<LegalCaseResponseDTO> cases = LegalCaseService.getCasesByClientIdWithDetails(clientId);
@@ -70,7 +72,9 @@ public class LegalCasesController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }    @GetMapping("/lawyer/{lawyerId}")
+    }    
+    
+    @GetMapping("/lawyer/{lawyerId}")
     public ResponseEntity<List<LegalCaseResponseDTO>> getLawyerCases(@PathVariable int lawyerId) {
         try {
             List<LegalCaseResponseDTO> cases = LegalCaseService.getCasesByLawyerIdWithDetails(lawyerId);
@@ -79,24 +83,40 @@ public class LegalCasesController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }@PutMapping("/{caseId}/status")
+    }
+    
+    @PutMapping("/{caseId}/status")
     public ResponseEntity<LegalCasesEntity> updateCaseStatus(@PathVariable int caseId, @RequestBody CaseStatus status) {
         return updateStatus(caseId, status);
     }    
+    
     @PutMapping("/{caseId}/accept/{lawyerId}")
     public ResponseEntity<LegalCasesEntity> acceptCase(@PathVariable int caseId, @PathVariable int lawyerId) {
         try {
+            // The service method LegalCaseService.acceptCase now contains the refined logic
             LegalCasesEntity updatedCase = LegalCaseService.acceptCase(caseId, lawyerId);
             return ResponseEntity.ok(updatedCase);
+        } catch (RuntimeException e) { // Catch specific exceptions if preferred
+            e.printStackTrace(); // Or log more appropriately
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Or a proper error DTO
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @PutMapping("/{caseId}/decline")
-    public ResponseEntity<LegalCasesEntity> declineCase(@PathVariable int caseId) {
-        return updateStatus(caseId, CaseStatus.DECLINED);
+    @PutMapping("/{caseId}/decline/{lawyerId}")
+    public ResponseEntity<LegalCasesEntity> declineCase(@PathVariable int caseId, @PathVariable int lawyerId) {
+        try {
+            LegalCasesEntity updatedCase = LegalCaseService.declineCase(caseId, lawyerId); // Calling the new service method
+            return ResponseEntity.ok(updatedCase);
+        } catch (RuntimeException e) { // Catch specific exceptions if preferred
+            e.printStackTrace(); // Or log more appropriately
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Or a proper error DTO
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // Helper method to eliminate code duplication

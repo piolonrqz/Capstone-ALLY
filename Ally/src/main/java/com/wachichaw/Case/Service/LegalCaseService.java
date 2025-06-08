@@ -80,23 +80,38 @@ public class LegalCaseService {
         return cases.stream()
                 .map(LegalCaseResponseDTO::new)
                 .collect(Collectors.toList());
-    }public LegalCasesEntity updateCaseStatus(int caseId, CaseStatus status) {
+    }
+    
+    public LegalCasesEntity updateCaseStatus(int caseId, CaseStatus status) {
         LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found with ID: " + caseId));
         legalCase.setStatus(status);
         return legalCaseRepo.save(legalCase);
     }
 
-    public LegalCasesEntity acceptCase(int caseId, int lawyerId) {
+    public LegalCasesEntity acceptCase(int caseId, int lawyerIdPerformingAction) {
         LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found with ID: " + caseId));
-        
-        LawyerEntity lawyer = (LawyerEntity) userRepo.findById(lawyerId)
-                .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
-        
+
+        // Authorization check
+        if (legalCase.getLawyer() == null || legalCase.getLawyer().getUserId() != lawyerIdPerformingAction) {
+            throw new RuntimeException("Lawyer " + lawyerIdPerformingAction + " is not authorized to accept case " + caseId);
+        }
+
         legalCase.setStatus(CaseStatus.ACCEPTED);
-        legalCase.setLawyer(lawyer);
-        
+        return legalCaseRepo.save(legalCase);
+    }
+
+    public LegalCasesEntity declineCase(int caseId, int lawyerIdPerformingAction) {
+        LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found with ID: " + caseId));
+
+        // Authorization check
+        if (legalCase.getLawyer() == null || legalCase.getLawyer().getUserId() != lawyerIdPerformingAction) {
+            throw new RuntimeException("Lawyer " + lawyerIdPerformingAction + " is not authorized to decline case " + caseId);
+        }
+
+        legalCase.setStatus(CaseStatus.DECLINED);
         return legalCaseRepo.save(legalCase);
     }
 }
