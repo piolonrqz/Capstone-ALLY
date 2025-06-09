@@ -67,7 +67,11 @@ const NavigationBar = () => {
 
   const handleProfileSettings = () => {
     setIsDropdownOpen(false);
-    navigate('/settings');
+    if (authData?.accountType?.toLowerCase() === 'lawyer') {
+      navigate('/lawyer-profile');
+    } else {
+      navigate('/settings');
+    }
   };
 
   const handleLogout = () => {
@@ -101,8 +105,8 @@ const NavigationBar = () => {
       {/* Navigation Links */}
       <div className="flex items-center gap-8">
         {isLoggedIn ? (
-          <>            
-          <Link 
+          <>
+            <Link 
               to="/my-cases" 
               className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
             >
@@ -114,7 +118,14 @@ const NavigationBar = () => {
             >
               Appointment
             </Link>
-          </>
+            {/* Lawyer Settings link, only for lawyers */}
+              <Link
+                to="/lawyer-settings"
+                className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+              >
+                Settings
+              </Link>
+          </> /* End fragment for logged-in links */
         ) : (
           <>
             <Link 
@@ -150,7 +161,7 @@ const NavigationBar = () => {
             <button className="relative flex items-center justify-center w-11 h-11 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8F2FF] hover:border-[#2B62C4]/30 hover:bg-white hover:shadow-lg transition-all duration-300 ease-in-out group">
               <Bell className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors duration-200" strokeWidth={1.8} />
               {/* Optional notification badge */}
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+              <span className="absolute w-3 h-3 transition-opacity duration-200 bg-red-500 border-2 border-white rounded-full opacity-0 -top-1 -right-1 group-hover:opacity-100"></span>
             </button>
             
             <div className="relative" ref={dropdownRef}>
@@ -181,9 +192,9 @@ const NavigationBar = () => {
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors group"
+                  className="flex items-center w-full gap-3 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50 group"
                 >
-                  <LogOut className="w-5 h-5 text-red-500 group-hover:text-red-600 transition-colors" />
+                  <LogOut className="w-5 h-5 text-red-500 transition-colors group-hover:text-red-600" />
                   <span className="font-medium">Logout</span>
                 </button>              
                 </div>
