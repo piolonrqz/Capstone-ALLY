@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import LandingPage from './pages/LandingPage'
 import SignUpPage from './pages/SignupPage'
@@ -13,7 +13,6 @@ import AnalyticsDashboard from './components/AnalyticsDashboard'
 import SettingsDashboard from './components/SettingsDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import { LawyerDirectoryPage } from './pages/LawyerDirectoryPage'
-import { AppointmentsPage } from './pages/AppointmentsPage'
 import DocumentSubmission from './components/DocumentSubmission'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
@@ -28,14 +27,10 @@ const useNavigationVisibility = () => {
   return shouldShowNavigation(location.pathname);
 };
 
-function AppContent() {
-  const showNavigation = useNavigationVisibility();
-  
+function App() {
   return (
-    <>
-      <NavigationBar />
-      <div className={showNavigation ? "pt-[104px]" : ""}>
-        <Routes>
+    <Router>
+      <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
@@ -62,20 +57,11 @@ function AppContent() {
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="analytics" element={<AnalyticsDashboard />} />
-          <Route path="settings" element={<SettingsDashboard />} />     
-          </Route>
+          <Route path="settings" element={<SettingsDashboard />} />
+        </Route>
       </Routes>
-      </div>
-    </>
-  );
-}
-
-function App() {
-  return (
-    <Router>
-      <AppContent />
     </Router>
-  );
+  )
 }
 
 export default App

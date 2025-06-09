@@ -51,9 +51,9 @@ public class UserService {
         admin.setAccountType(AccountType.ADMIN);  
         admin.setDepartment("General"); 
         return userRepo.save(admin);
-    }    
-    
-    public ClientEntity createClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String profilePhoto) {
+    }
+
+    public ClientEntity createClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip) {
         ClientEntity client = new ClientEntity();
         client.setEmail(email);
         client.setPassword(passwordEncoder.encode(pass));
@@ -64,7 +64,6 @@ public class UserService {
         client.setCity(city);
         client.setProvince(province);
         client.setZip(zip);
-        client.setProfilePhoto(profilePhoto);
         client.setAccountType(AccountType.CLIENT);  
         return userRepo.save(client);
     }

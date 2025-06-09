@@ -4,8 +4,9 @@ package com.wachichaw.Case.Entity;
 public class LegalCaseRequestDTO {
 
     private String title;
+    private long caseNumber;
     private String description;
-    private CaseStatus status;
+    private String status;
     private int lawyerId;
 
     public LegalCaseRequestDTO() {
@@ -13,8 +14,18 @@ public class LegalCaseRequestDTO {
 
     public String getTitle() {
         return title;
-    }    public void setTitle(String title) {
+    }
+
+    public void setTitle(String title) {
         this.title = title;
+    }
+
+    public long getCaseNumber() {
+        return caseNumber;
+    }
+
+    public void setCaseNumber(long caseNumber) {
+        this.caseNumber = caseNumber;
     }
 
     public String getDescription() {
@@ -23,11 +34,13 @@ public class LegalCaseRequestDTO {
 
     public void setDescription(String description) {
         this.description = description;
-    }    public CaseStatus getStatus() {
+    }
+
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(CaseStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
     

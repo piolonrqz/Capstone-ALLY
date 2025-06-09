@@ -52,12 +52,10 @@ public abstract class UserEntity {
     private String city;
 
     @Column(name = "province", nullable = true)
-    private String province;    
+    private String province;
+
     @Column(name = "zip", nullable = true)
     private String zip;
-    
-    @Column(name = "profile_photo", nullable = true)
-    private String profilePhoto;
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -180,18 +178,12 @@ public abstract class UserEntity {
     }
     public void setProvince(String province) {
         this.province = province;
-    }    public String getZip() {
+    }
+    public String getZip() {
         return zip;
     }
     public void setZip(String zip) {
         this.zip = zip;
-    }
-    
-    public String getProfilePhoto() {
-        return profilePhoto;
-    }
-    public void setProfilePhoto(String profilePhoto) {
-        this.profilePhoto = profilePhoto;
     }
     
 }

@@ -1,15 +1,9 @@
 import { useState } from 'react';
-import { Star, MapPin, MessageCircle, X, FileText } from 'lucide-react';
-import CaseSubmissionForm from './CaseSubmissionForm';
+import { Star, MapPin, MessageCircle, X } from 'lucide-react';
+import { BookingModal } from './BookingModal';
 
 export const LawyerProfile = ({ lawyer, onClose }) => {
-  const [isCaseSubmissionOpen, setIsCaseSubmissionOpen] = useState(false);
-
-  const handleCaseSubmissionSuccess = () => {
-    setIsCaseSubmissionOpen(false);
-    // Optionally show a success message or redirect
-    // You could also call onClose() to close the lawyer profile
-  };
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   return (
   <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -99,23 +93,20 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
               Message
             </button>
             <button 
-              onClick={() => setIsCaseSubmissionOpen(true)}
-              className="flex items-center justify-center flex-1 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              onClick={() => setIsBookingModalOpen(true)}
+              className="flex-1 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             >
-              <FileText className="w-4 h-4 mr-2" />
-              Submit Case
+              Schedule Consultation
             </button>
           </div>
         </div>
       </div>
-    </div>    {/* Case Submission Form */}
-    {isCaseSubmissionOpen && (
-      <CaseSubmissionForm
-        selectedLawyer={lawyer}
-        onClose={() => setIsCaseSubmissionOpen(false)}
-        onSuccess={handleCaseSubmissionSuccess}
-      />
-    )}
+    </div>    {/* Booking Modal */}
+    <BookingModal
+      lawyer={lawyer}
+      isOpen={isBookingModalOpen}
+      onClose={() => setIsBookingModalOpen(false)}
+    />
   </div>
 );
 };

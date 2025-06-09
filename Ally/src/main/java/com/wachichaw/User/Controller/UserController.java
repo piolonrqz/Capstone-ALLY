@@ -48,38 +48,12 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
      
-     @PostMapping(value = "/Client", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ClientEntity> createClient(
-        @RequestParam("email") String email,
-        @RequestParam("password") String password,
-        @RequestParam("Fname") String fname,
-        @RequestParam("Lname") String lname,
-        @RequestParam("phoneNumber") Long phoneNumber,
-        @RequestParam("address") String address,
-        @RequestParam("city") String city,
-        @RequestParam("province") String province,
-        @RequestParam("zip") String zip,
-        @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhotoFile
-    ) throws java.io.IOException {
-        
-        String profilePhotoPath = null;
-        
-        // Handle profile photo upload if provided
-        if (profilePhotoFile != null && !profilePhotoFile.isEmpty()) {
-            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/profile_pictures";
-            Files.createDirectories(Paths.get(uploadDir)); // Ensure directory exists
-
-            String uniqueFileName = UUID.randomUUID() + "_" + profilePhotoFile.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, uniqueFileName);
-            Files.copy(profilePhotoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Save the relative path to DB
-            profilePhotoPath = "/static/profile_pictures/" + uniqueFileName;
-        }
-        
-        ClientEntity client = userService.createClient(email, password, fname, lname, 
-                                        phoneNumber, address, city, province, zip, profilePhotoPath);
-        return ResponseEntity.ok(client);
+   
+    @PostMapping("/Client")
+    public ClientEntity createClient(@RequestBody ClientEntity client) {
+        return userService.createClient(client.getEmail(), client.getPassword(), client.getFname(), client.getLname(), 
+                                        client.getPhoneNumber(), client.getAddress(), client.getCity(), 
+                                        client.getProvince(), client.getZip());
     }
 
     @PostMapping("/Admin")

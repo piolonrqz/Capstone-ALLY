@@ -3,13 +3,10 @@ package com.wachichaw.Schedule.Entity;
 import java.time.LocalDateTime;
 
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
-import com.wachichaw.Client.Entity.ClientEntity;
-import com.wachichaw.Case.Entity.LegalCasesEntity; 
+import com.wachichaw.Client.Entity.ClientEntity; 
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,21 +37,19 @@ public class ScheduleEntity {
     @JoinColumn(name = "client_id", nullable = false) // Added annotation
     private ClientEntity client; // Added field
 
-    @ManyToOne
-    @JoinColumn(name = "case_id", nullable = true)
-    private LegalCasesEntity legalCase;    
     @Column(name = "is_booked", nullable = false)
     private boolean isBooked;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private AppointmentStatus status = AppointmentStatus.PENDING;
-
-    @Column(name = "decline_reason")
-    private String declineReason;
-
     public ScheduleEntity() {}
 
+    public ScheduleEntity(int scheduleId, LawyerEntity lawyer, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, ClientEntity client, boolean isBooked) {
+        this.scheduleId = scheduleId;
+        this.lawyer = lawyer;
+        this.bookingStartTime = bookingStartTime;
+        this.bookingEndTime = bookingEndTime;
+        this.client = client;
+        this.isBooked = isBooked;
+    }
 
     public int getScheduleId() {
         return scheduleId;
@@ -102,27 +97,5 @@ public class ScheduleEntity {
 
     public void setBooked(boolean booked) {
         isBooked = booked;
-    }
-
-    public LegalCasesEntity getLegalCase() {
-        return legalCase;
-    }    public void setLegalCase(LegalCasesEntity legalCase) {
-        this.legalCase = legalCase;
-    }
-
-    public AppointmentStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AppointmentStatus status) {
-        this.status = status;
-    }
-
-    public String getDeclineReason() {
-        return declineReason;
-    }
-
-    public void setDeclineReason(String declineReason) {
-        this.declineReason = declineReason;
     }
 }

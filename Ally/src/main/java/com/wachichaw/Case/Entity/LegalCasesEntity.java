@@ -1,5 +1,6 @@
 package com.wachichaw.Case.Entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,16 +28,15 @@ public class LegalCasesEntity {
     @Column(name = "case_no", nullable = true, unique = true)
     private long caseNumber;
 
-    @Column(name = "description", nullable = true, columnDefinition = "TEXT")
+    @Column(name = "description", nullable = true)
     private String description;
-    
+
     @CreationTimestamp
     @Column(name = "date_submitted", updatable = false)
     private LocalDateTime dateSubmitted;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private CaseStatus status;
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "lawyer_id")
@@ -51,8 +51,9 @@ public class LegalCasesEntity {
     @OneToMany(mappedBy = "legalcaseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageEntity> messages;
 
-    public LegalCasesEntity(){}    
-    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, CaseStatus status, LawyerEntity lawyer, ClientEntity client) {
+    public LegalCasesEntity(){}
+
+    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, String status, LawyerEntity lawyer, ClientEntity client) {
         this.caseId = caseId;
         this.title = title;
         this.caseNumber = caseNumber;
@@ -101,11 +102,13 @@ public class LegalCasesEntity {
 
     public void setDateSubmitted(LocalDateTime dateSubmitted) {
         this.dateSubmitted = dateSubmitted;
-    }    public CaseStatus getStatus() {
+    }
+
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(CaseStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

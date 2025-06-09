@@ -94,19 +94,17 @@ export default function ClientRegistrationForm() {
           body.append("email", formData.email);
           body.append("password", formData.password);
           body.append("Fname", formData.fName);
-          body.append("Lname", formData.lName);          body.append("phoneNumber", formData.phoneNumber);
+          body.append("Lname", formData.lName);
+          body.append("phoneNumber", formData.phoneNumber);
           body.append("address", formData.address);
           body.append("city", formData.city);
           body.append("province", formData.province);
-          body.append("zip", formData.zip);          
+          body.append("zip", formData.zip);
           if (formData.profilePhoto) {
             body.append("profilePhoto", formData.profilePhoto);
-            console.log("Profile photo added to FormData:", formData.profilePhoto);
-          } else {
-            console.log("No profile photo to add");
           }
-          console.log("Submitting form with:", body);
-          
+
+console.log("Submitting form with:", body);
         await fetch("http://localhost:8080/users/Client", {
           method: "POST",
           body: body
