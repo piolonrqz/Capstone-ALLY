@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+MY_CASES_TASK_PLAN.md
+CASE_APPOINTMENT_INTEGRATION_IMPLEMENTATION.md
