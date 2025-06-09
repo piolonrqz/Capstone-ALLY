@@ -81,7 +81,12 @@ export const fetchUserDetails = async (userId) => {
       lastName: userData.Lname || userData.lname,
       email: userData.email,
       fullName: `${userData.Fname || userData.fname || ''} ${userData.Lname || userData.lname || ''}`.trim(),
-      accountType: userData.accountType
+      accountType: userData.accountType,
+      phoneNumber: userData.phoneNumber || '+63',
+      address: userData.address || '',
+      city: userData.city || '',
+      province: userData.province || '',
+      zip: userData.zip || ''
     };
   } catch (error) {
     console.error('Error fetching user details:', error);

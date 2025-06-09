@@ -16,6 +16,16 @@ import { LawyerDirectoryPage } from './pages/LawyerDirectoryPage'
 import DocumentSubmission from './components/DocumentSubmission'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
+import NavigationBar from './components/NavigationBar'
+import MyCasesPage from './pages/MyCasesPage'
+import { shouldShowNavigation } from './utils/navigation.js'
+import LawyerSettings from './components/LawyerSettings'
+
+// Custom hook to determine if navigation bar should be visible
+const useNavigationVisibility = () => {
+  const location = useLocation();
+  return shouldShowNavigation(location.pathname);
+};
 
 function App() {
   return (
@@ -26,11 +36,14 @@ function App() {
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
         <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
         <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />          
         <Route path="/lawyers" element={<LawyerDirectoryPage />} />
+        <Route path="/appointments" element={<AppointmentsPage />} />
+        <Route path="/my-cases" element={<MyCasesPage />} />
         <Route path="/documents" element={<DocumentSubmission />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/chat" element={<ChatContainer />} />
+        <Route path="/lawyer-settings" element={<LawyerSettings />} />
 
         {/* Admin Routes */}
         <Route
