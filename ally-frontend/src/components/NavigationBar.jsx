@@ -16,6 +16,15 @@ const NavigationBar = () => {
   const [userDetails, setUserDetails] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Check if user is a lawyer
+  const isLawyer = authData?.accountType?.toLowerCase() === 'lawyer';
+  
+  // Check if we're in lawyer profile/settings area
+  const isInLawyerArea = location.pathname.startsWith('/lawyer-') || 
+                        location.pathname === '/my-cases' || 
+                        location.pathname === '/appointments';
+  
   // Fetch user details when logged in
   useEffect(() => {
     const getUserDetails = async () => {
@@ -52,7 +61,8 @@ const NavigationBar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-    };  }, []);
+    };
+  }, []);
 
   // Don't show nav bar on specific routes
   if (shouldHideNavigation(location.pathname)) {
@@ -67,7 +77,7 @@ const NavigationBar = () => {
 
   const handleProfileSettings = () => {
     setIsDropdownOpen(false);
-    if (authData?.accountType?.toLowerCase() === 'lawyer') {
+    if (isLawyer) {
       navigate('/lawyer-profile');
     } else {
       navigate('/settings');
@@ -96,15 +106,18 @@ const NavigationBar = () => {
     }
     return 'U';
   };
+
   return (
     <nav className="fixed top-0 bg-[#F7FBFF] w-full h-[104px] px-8 flex justify-between items-center z-50" style={{boxShadow: '0px 0px 4px 0px rgba(0, 0, 0, 0.25)'}}>
       {/* Logo */}
       <Link to="/" className="flex items-center justify-center h-10">
         <img src="/ally_logo.svg" alt="ALLY Logo" className="w-[114px] h-10" />
       </Link>      
+      
       {/* Navigation Links */}
       <div className="flex items-center gap-8">
-        {isLoggedIn ? (
+        {isLoggedIn && isLawyer && isInLawyerArea ? (
+          // Links for lawyers when in lawyer area (profile settings, my cases, appointments)
           <>
             <Link 
               to="/my-cases" 
@@ -118,37 +131,38 @@ const NavigationBar = () => {
             >
               Appointment
             </Link>
-            {/* Lawyer Settings link, only for lawyers */}
-              <Link
-                to="/lawyer-settings"
-                className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-              >
-                Settings
-              </Link>
-          </> /* End fragment for logged-in links */
+            <Link
+              to="/lawyer-settings"
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              Settings
+            </Link>
+          </>
         ) : (
+          // Default links for everyone (lawyers and clients when not in lawyer area)
           <>
             <Link 
-              to="#" 
+              to="/" 
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              Home
+            </Link>
+            <Link 
+              to="/about" 
               className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
             >
               About
             </Link>
             <Link 
-              to="#" 
+              to="/contact" 
               className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
             >
-              Legal Resources
-            </Link>
-            <Link 
-              to="#" 
-              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-            >
-              FAQ
+              Contact
             </Link>
           </>
         )}
       </div>        
+      
       {/* Right Side Buttons */}
       <div className="flex items-center gap-3">
         {/* Login/Register or Profile Dropdown */}        
@@ -165,41 +179,42 @@ const NavigationBar = () => {
             </button>
             
             <div className="relative" ref={dropdownRef}>
-          <button
-              onClick={toggleDropdown}
-              className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-[#E8F2FF] transition-all duration-200 ease-in-out hover:shadow-md"
-            >
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-base font-semibold shadow-lg">
-                {getUserInitials()}
-              </div>
-              <ChevronDown className={`w-5 h-5 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>            
-            {/* Dropdown Menu */}
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-[#E8F2FF] py-2 z-50 backdrop-blur-sm">
-                <div className="px-4 py-3 border-b border-[#E8F2FF]">
-                  <p className="text-sm text-[#11265A]/60">Signed in as</p>
-                  <p className="text-sm font-semibold text-[#11265A] truncate">
-                    {userDetails?.email || authData?.email || 'User'}
-                  </p>
+              <button
+                onClick={toggleDropdown}
+                className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-[#E8F2FF] transition-all duration-200 ease-in-out hover:shadow-md"
+              >
+                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-base font-semibold shadow-lg">
+                  {getUserInitials()}
                 </div>
-                <button
-                  onClick={handleProfileSettings}
-                  className="flex items-center gap-3 w-full px-4 py-3 text-left text-[#11265A] hover:bg-[#E8F2FF] transition-colors group"
-                >
-                  <Settings className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors" />
-                  <span className="font-medium">Profile Settings</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center w-full gap-3 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50 group"
-                >
-                  <LogOut className="w-5 h-5 text-red-500 transition-colors group-hover:text-red-600" />
-                  <span className="font-medium">Logout</span>
-                </button>              
+                <ChevronDown className={`w-5 h-5 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>            
+              
+              {/* Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-[#E8F2FF] py-2 z-50 backdrop-blur-sm">
+                  <div className="px-4 py-3 border-b border-[#E8F2FF]">
+                    <p className="text-sm text-[#11265A]/60">Signed in as</p>
+                    <p className="text-sm font-semibold text-[#11265A] truncate">
+                      {userDetails?.email || authData?.email || 'User'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleProfileSettings}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-[#11265A] hover:bg-[#E8F2FF] transition-colors group"
+                  >
+                    <Settings className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors" />
+                    <span className="font-medium">Profile Settings</span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full gap-3 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50 group"
+                  >
+                    <LogOut className="w-5 h-5 text-red-500 transition-colors group-hover:text-red-600" />
+                    <span className="font-medium">Logout</span>
+                  </button>              
                 </div>
-            )}
-          </div>
+              )}
+            </div>
           </>
         ) : (
           <button
