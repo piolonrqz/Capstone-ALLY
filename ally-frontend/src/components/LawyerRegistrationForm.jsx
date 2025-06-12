@@ -13,7 +13,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
     phoneNumber: "",
     address: "",
     city: "",
-    state: "",
+    province: "",
     zipCode: "",
     prcNumber: "",
     practiceAreas: {
@@ -95,7 +95,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
     if (!formData.address.trim()) newErrors.address = "Address is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
-    if (!formData.state.trim()) newErrors.state = "State is required";
+    if (!formData.province.trim()) newErrors.province = "Province is required";
     if (!formData.zipCode.trim()) newErrors.zipCode = "ZIP code is required";
     
     setErrors(newErrors);
@@ -104,11 +104,9 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
 
   const validateStep3 = () => {
     const newErrors = {};
-    
-    if (!formData.prcNumber.trim()) newErrors.prcNumber = "Bar Number is required";
+    // Disabled: if (!formData.prcNumber.trim()) newErrors.prcNumber = "Bar Number is required";
     if (!formData.yearsOfExperience.trim()) newErrors.yearsOfExperience = "Years of experience is required";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms";
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -141,7 +139,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
         body.append("phoneNumber", formData.phoneNumber);      
         body.append("address", formData.address);
         body.append("city", formData.city);
-        body.append("province", formData.state);              
+        body.append("province", formData.province);              
         body.append("zip", formData.zipCode);                  
         body.append("barNumber", formData.prcNumber);          
         body.append("experience", formData.yearsOfExperience);
@@ -163,7 +161,8 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.log("Form submitted with:", body);
       alert("Registration successful!");
-     navigate('/signup/lawyer/verify-lawyer', { state: { email: formData.email } });
+      // navigate('/signup/lawyer/verify-lawyer', { state: { email: formData.email } });
+      navigate('/login');
       } catch (error) {
         console.error('Error submitting form:', error);
       }
@@ -379,18 +378,18 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                     />
                     {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
                   </div>                  <div className="w-full sm:w-1/2">
-                    <label htmlFor="state" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
-                      State
+                    <label htmlFor="province" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                      Province
                     </label>
                     <input
-                      id="state"
+                      id="province"
                       type="text"
-                      name="state"
-                      className={`w-full p-2.5 border rounded-md ${errors.state ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      value={formData.state}
+                      name="province"
+                      className={`w-full p-2.5 border rounded-md ${errors.province ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      value={formData.province}
                       onChange={handleChange}
                     />
-                    {errors.state && <p className="mt-1 text-xs text-red-500">{errors.state}</p>}
+                    {errors.province && <p className="mt-1 text-xs text-red-500">{errors.province}</p>}
                   </div>
                 </div>
                 
@@ -429,6 +428,8 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
           ) : (
             /* Step 3: Professional Information - Matches the image design */
             <div className="space-y-4">
+              {/* Disabled Bar Number field */}
+              {/*
               <div>
                 <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Bar Number</label>
                 <input
@@ -440,6 +441,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                 />
                 {errors.prcNumber && <p className="mt-1 text-xs text-red-500">{errors.prcNumber}</p>}
               </div>
+              */}
               
               <div>
                 <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Practice Areas</label>                <div className="p-3 border border-gray-300 rounded">                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
