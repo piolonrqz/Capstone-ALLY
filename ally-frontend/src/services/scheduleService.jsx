@@ -1,4 +1,6 @@
 // Schedule API service
+import { formatDateForAPI, formatDateTimeForAPI } from '../utils/dateUtils.js';
+
 const API_BASE_URL = 'http://localhost:8080/schedules';
 
 // Helper function to format date and time for backend
@@ -66,7 +68,7 @@ export const scheduleService = {
   // This replaces the need for multiple individual availability checks
   getAvailableSlots: async (lawyerId, date) => {
     try {
-      const dateStr = date.toISOString().slice(0, 10); // YYYY-MM-DD format
+      const dateStr = formatDateForAPI(date); // YYYY-MM-DD format in local timezone
       
       const response = await fetch(`${API_BASE_URL}/lawyer/${lawyerId}/available-slots?date=${dateStr}`, {
         method: 'GET',
@@ -127,8 +129,8 @@ export const scheduleService = {
   getLawyerSchedule: async (lawyerId, startDate, endDate) => {
     try {
       const params = new URLSearchParams({
-        start: startDate.toISOString().slice(0, 19),
-        end: endDate.toISOString().slice(0, 19)
+        start: formatDateTimeForAPI(startDate),
+        end: formatDateTimeForAPI(endDate)
       });
       
       const response = await fetch(`${API_BASE_URL}/lawyer/${lawyerId}/range?${params}`, {
