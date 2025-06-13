@@ -14,7 +14,7 @@ import SettingsDashboard from './components/SettingsDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import { LawyerDirectoryPage } from './pages/LawyerDirectoryPage'
 import { AppointmentsPage } from './pages/AppointmentsPage'
-import DocumentSubmission from './components/DocumentSubmission'
+import DocumentsPage from './pages/DocumentsPage'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
 import NavigationBar from './components/NavigationBar'
@@ -45,7 +45,8 @@ function AppContent() {
         <Route path="/lawyers" element={<LawyerDirectoryPage />} />
         <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="/my-cases" element={<MyCasesPage />} />
-        <Route path="/documents" element={<DocumentSubmission />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/documents/:caseId" element={<DocumentsPage />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/chat" element={<ChatContainer />} />
         <Route path="/lawyer-settings" element={<LawyerSettings />} />

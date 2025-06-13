@@ -1,4 +1,6 @@
 // Schedule API service
+import { formatDateForAPI, formatDateTimeForAPI } from '../utils/dateUtils.js';
+
 const API_BASE_URL = 'http://localhost:8080/schedules';
 
 // Helper function to format date and time for backend
@@ -61,25 +63,14 @@ export const scheduleService = {
       throw error;
     }
   },
-  // Check lawyer availability
-  checkAvailability: async (lawyerId, date, time) => {
+
+  // Get all available slots for a lawyer on a specific date
+  // This replaces the need for multiple individual availability checks
+  getAvailableSlots: async (lawyerId, date) => {
     try {
-      const startTime = formatDateTime(date, time);
-      if (!startTime) {
-        throw new Error('Invalid date or time format');
-      }
+      const dateStr = formatDateForAPI(date); // YYYY-MM-DD format in local timezone
       
-      // Calculate end time for availability check (1-hour consultation)
-      const startDate = new Date(startTime);
-      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
-      const endTime = endDate.toISOString().slice(0, 19).replace('T', 'T');
-      
-      const params = new URLSearchParams({
-        start: startTime,
-        end: endTime
-      });
-      
-      const response = await fetch(`${API_BASE_URL}/lawyer/${lawyerId}/availability?${params}`, {
+      const response = await fetch(`${API_BASE_URL}/lawyer/${lawyerId}/available-slots?date=${dateStr}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -87,14 +78,16 @@ export const scheduleService = {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to check availability');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to fetch available slots');
       }
       
       return await response.json();
     } catch (error) {
-      console.error('Error checking availability:', error);
+      console.error('Error fetching available slots:', error);
       throw error;
-    }  },
+    }
+  },
 
   // Create a case-based appointment booking
   createCaseAppointment: async (bookingData) => {
@@ -136,8 +129,8 @@ export const scheduleService = {
   getLawyerSchedule: async (lawyerId, startDate, endDate) => {
     try {
       const params = new URLSearchParams({
-        start: startDate.toISOString().slice(0, 19),
-        end: endDate.toISOString().slice(0, 19)
+        start: formatDateTimeForAPI(startDate),
+        end: formatDateTimeForAPI(endDate)
       });
       
       const response = await fetch(`${API_BASE_URL}/lawyer/${lawyerId}/range?${params}`, {

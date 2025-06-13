@@ -1,10 +1,39 @@
-import React, { useState } from 'react';
-import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle, CalendarPlus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle, CalendarPlus, Upload, Eye } from 'lucide-react';
 import { BookingModal } from './BookingModal';
+import { documentService } from '../services/documentService';
 
 const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
+  const navigate = useNavigate();
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  
+  const [documentCount, setDocumentCount] = useState(0);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+
+  // Load document count for accepted cases
+  useEffect(() => {
+    if (case_.status === 'ACCEPTED') {
+      loadDocumentCount();
+    }
+  }, [case_.caseId, case_.status]);
+
+  const loadDocumentCount = async () => {
+    try {
+      setLoadingDocuments(true);
+      const count = await documentService.getDocumentCount(case_.caseId);
+      setDocumentCount(count);
+    } catch (error) {
+      console.error('Error loading document count:', error);
+      setDocumentCount(0);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  const handleNavigateToDocuments = () => {
+    navigate(`/documents/${case_.caseId}`);
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -40,11 +69,13 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+
   const handleStatusChange = (newStatus) => {
     if (onStatusChange) {
       onStatusChange(case_.caseId, newStatus);
     }
-  };  
+  };
+
   const handleBookAppointment = () => {
     setIsBookingModalOpen(true);
   };
@@ -68,7 +99,8 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               <span>Submitted: {formatDate(case_.dateSubmitted)}</span>
-            </div>            <div className="flex items-center gap-1">
+            </div>
+            <div className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
               <span>Case #{case_.caseId}</span>
             </div>
@@ -150,16 +182,57 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
             Decline Case
           </button>
         </div>
-      )}      {/* Additional Status Info */}
+      )}
+
+      {/* Additional Status Info */}
       {case_.status === 'ACCEPTED' && (
         <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-800 text-sm">
+          <p className="text-green-800 text-sm mb-3">
             ✓ This case has been accepted and is being processed.
-          </p>          {/* Book Appointment Button for Clients */}
+          </p>
+          
+          {/* Document Management Section */}
+          <div className="flex items-center justify-between mb-3 p-2 bg-white rounded border">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-gray-500" />
+              <span className="text-sm text-gray-700">
+                {loadingDocuments ? (
+                  'Loading documents...'
+                ) : (
+                  `${documentCount} document${documentCount !== 1 ? 's' : ''}`
+                )}
+              </span>
+            </div>
+            
+            {/* Document Management Button */}
+            {userRole === 'CLIENT' && (
+              <button
+                onClick={handleNavigateToDocuments}
+                className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                disabled={loadingDocuments}
+              >
+                <Upload className="w-3 h-3" />
+                {documentCount > 0 ? 'Manage Documents' : 'Upload Documents'}
+              </button>
+            )}
+            
+            {userRole === 'LAWYER' && documentCount > 0 && (
+              <button
+                onClick={handleNavigateToDocuments}
+                className="flex items-center gap-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-sm"
+                disabled={loadingDocuments}
+              >
+                <Eye className="w-3 h-3" />
+                View Documents
+              </button>
+            )}
+          </div>
+
+          {/* Book Appointment Button for Clients */}
           {userRole === 'CLIENT' && (
             <button
               onClick={handleBookAppointment}
-              className="flex items-center gap-2 px-4 py-2 mt-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-full justify-center"
             >
               <CalendarPlus className="w-4 h-4" />
               {case_.appointmentCount > 0 ? 'Book Another Appointment' : 'Book Appointment'}
@@ -190,6 +263,7 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
           onSuccess={handleAppointmentBookingSuccess}
         />
       )}
+
     </div>
   );
 };

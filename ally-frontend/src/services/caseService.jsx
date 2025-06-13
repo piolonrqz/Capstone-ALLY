@@ -148,7 +148,7 @@ export const caseService = {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`${API_BASE_URL}/${caseId}/decline`, {
+      const response = await fetch(`${API_BASE_URL}/${caseId}/decline/${authData.userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authData.token}`,
