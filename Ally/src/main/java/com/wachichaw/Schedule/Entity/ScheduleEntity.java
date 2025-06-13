@@ -30,15 +30,15 @@ public class ScheduleEntity {
     @JoinColumn(name = "lawyer_id", nullable = false)
     private LawyerEntity lawyer;
 
-    @Column(name = "booking_start_time", nullable = false) // Modified field and annotation
-    private LocalDateTime bookingStartTime; // Modified field
+    @Column(name = "booking_start_time", nullable = false)
+    private LocalDateTime bookingStartTime; 
 
-    @Column(name = "booking_end_time", nullable = false) // Added field and annotation
-    private LocalDateTime bookingEndTime; // Added field
+    @Column(name = "booking_end_time", nullable = false) 
+    private LocalDateTime bookingEndTime; 
 
-    @ManyToOne // Added annotation
-    @JoinColumn(name = "client_id", nullable = false) // Added annotation
-    private ClientEntity client; // Added field
+    @ManyToOne 
+    @JoinColumn(name = "client_id", nullable = false)
+    private ClientEntity client; 
 
     @ManyToOne
     @JoinColumn(name = "case_id", nullable = true)
