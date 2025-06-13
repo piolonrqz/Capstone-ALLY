@@ -89,28 +89,20 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
     setError('');
     
     try {
-      // Check availability for each time slot
-      const availabilityPromises = allTimeSlots.map(async (timeSlot) => {
-        try {
-          const availability = await scheduleService.checkAvailability(lawyer.id, selectedDate, timeSlot);
-          return { timeSlot, available: availability.available };
-        } catch (error) {
-          console.error(`Error checking availability for ${timeSlot}:`, error);
-          return { timeSlot, available: false };
-        }
-      });
+      // OPTIMIZED: Single API call instead of 9 individual calls
+      const availabilityData = await scheduleService.getAvailableSlots(lawyer.id, selectedDate);
       
-      const availabilityResults = await Promise.all(availabilityPromises);
-      const available = availabilityResults
-        .filter(result => result.available)
-        .map(result => result.timeSlot);
-      
-      setAvailableSlots(available);
+      // Extract just the time slot strings for the existing UI logic
+      const availableTimeSlots = availabilityData.availableSlots.map(slot => slot.startTime);
+      setAvailableSlots(availableTimeSlots);
       
       // Clear selected time if it's no longer available
-      if (selectedTime && !available.includes(selectedTime)) {
+      if (selectedTime && !availableTimeSlots.includes(selectedTime)) {
         setSelectedTime('');
       }
+      
+      // Optional: Store full availability data for enhanced UI features
+      // setFullAvailabilityData(availabilityData);
     } catch (error) {
       console.error('Error checking availability:', error);
       setError('Failed to check availability. Please try again.');
