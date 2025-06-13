@@ -63,6 +63,11 @@
 			<version>3.36.0.3</version>
 		</dependency>
 		<dependency>
+    <groupId>com.google.firebase</groupId>
+    <artifactId>firebase-admin</artifactId>
+    <version>9.2.0</version> <!-- or latest -->
+</dependency>
+		<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
 				<version>6.2.6.Final</version>

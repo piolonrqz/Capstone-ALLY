@@ -429,7 +429,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
             /* Step 3: Professional Information - Matches the image design */
             <div className="space-y-4">
               {/* Disabled Bar Number field */}
-              {/*
+              
               <div>
                 <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Bar Number</label>
                 <input
@@ -441,7 +441,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                 />
                 {errors.prcNumber && <p className="mt-1 text-xs text-red-500">{errors.prcNumber}</p>}
               </div>
-              */}
+             
               
               <div>
                 <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Practice Areas</label>                <div className="p-3 border border-gray-300 rounded">                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
