@@ -87,6 +87,67 @@ public class UserService {
         lawyer.setAccountType(AccountType.LAWYER);
         return userRepo.save(lawyer);
     }
+
+            public AdminEntity updateAdmin(int id, String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip) {
+            AdminEntity admin = (AdminEntity) userRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Admin not found with id: " + id));
+            admin.setEmail(email);
+            if (pass != null && !pass.trim().isEmpty()) {
+                admin.setPassword(passwordEncoder.encode(pass));
+            }
+            admin.setFname(Fname);
+            admin.setLname(Lname);
+            admin.setPhoneNumber(phoneNumber);
+            admin.setAddress(address);
+            admin.setCity(city);
+            admin.setProvince(province);
+            admin.setZip(zip);
+            return userRepo.save(admin);
+        }
+
+        public ClientEntity updateClient(int id, String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String profilePhoto) {
+            ClientEntity client = (ClientEntity) userRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Client not found with id: " + id));
+            client.setEmail(email);
+            if (pass != null && !pass.trim().isEmpty()) {
+                client.setPassword(passwordEncoder.encode(pass));
+            }
+            client.setFname(Fname);
+            client.setLname(Lname);
+            client.setPhoneNumber(phoneNumber);
+            client.setAddress(address);
+            client.setCity(city);
+            client.setProvince(province);
+            client.setZip(zip);
+            client.setProfilePhoto(profilePhoto);
+            return userRepo.save(client);
+        }
+
+        public LawyerEntity updateLawyer(int id,String email,String pass,String Fname,String Lname,Long phoneNumber,String address,String city,String province,String zip,String barNumber,List<String> specialization,String experience,String credentials)   
+          {
+            LawyerEntity lawyer = (LawyerEntity) userRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Lawyer not found with id: " + id));
+            lawyer.setEmail(email);
+            if (pass != null && !pass.trim().isEmpty()) {
+                lawyer.setPassword(passwordEncoder.encode(pass));
+            }
+            lawyer.setFname(Fname);
+            lawyer.setLname(Lname);
+            lawyer.setPhoneNumber(phoneNumber);
+            lawyer.setAddress(address);
+            lawyer.setCity(city);
+            lawyer.setProvince(province);
+            lawyer.setZip(zip);
+            lawyer.setBarNumber(barNumber);
+            if (specialization != null && !specialization.isEmpty()) {
+                lawyer.setSpecialization(specialization);
+            }
+            lawyer.setExperience(experience);
+            if (credentials != null && !credentials.trim().isEmpty()) {
+                lawyer.setCredentials(credentials);
+            }
+            return userRepo.save(lawyer);
+        }
     
     public String authenticate(String email, String password) {
         UserEntity foundUser = userRepo.findByEmail(email)

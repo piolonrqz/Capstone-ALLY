@@ -1,5 +1,7 @@
 package com.wachichaw.Schedule.Controller;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,7 +15,7 @@ import com.wachichaw.Schedule.DTO.CaseSummaryDTO; // Added for case appointments
 import com.wachichaw.Schedule.DTO.BookingRequestDTO;
 import com.wachichaw.Schedule.DTO.CaseBookingRequestDTO;
 import com.wachichaw.Schedule.DTO.RescheduleRequestDTO;
-import com.wachichaw.Schedule.DTO.AvailabilityResponseDTO;
+import com.wachichaw.Schedule.DTO.AvailableSlotResponseDTO;
 import com.wachichaw.Schedule.DTO.AcceptRequestDTO;
 import com.wachichaw.Schedule.DTO.DeclineRequestDTO;
 
@@ -216,35 +218,43 @@ public class ScheduleController {    @Autowired
     }
 
     /**
-     * Check if lawyer is available at a specific time
-     * GET /schedules/lawyer/{lawyerId}/availability?start=...&end=...
+     * Get all available time slots for a lawyer on a specific date
+     * Optimized endpoint that replaces multiple individual availability checks
+     * GET /schedules/lawyer/{lawyerId}/available-slots?date=2025-01-15
      */
-    @GetMapping("/lawyer/{lawyerId}/availability")
-    public ResponseEntity<?> checkLawyerAvailability(
+    @GetMapping("/lawyer/{lawyerId}/available-slots")
+    public ResponseEntity<?> getAvailableSlots(
             @PathVariable int lawyerId,
-            @RequestParam String start,
-            @RequestParam String end) {
+            @RequestParam String date) {
         try {
-            LawyerEntity lawyer = (LawyerEntity) userRepo.findById(lawyerId)
-                .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
-
-            LocalDateTime startTime = parseDateTime(start);
-            LocalDateTime endTime = parseDateTime(end);            
-            boolean hasConflict = scheduleService.hasSchedulingConflict(lawyer, startTime, endTime);
+            LocalDate requestDate = LocalDate.parse(date);
             
-            AvailabilityResponseDTO response = new AvailabilityResponseDTO(!hasConflict, 
-                hasConflict ? "Lawyer is not available at this time" : "Lawyer is available");
+            // Validate date is not in the past
+            if (requestDate.isBefore(LocalDate.now())) {
+                return ResponseEntity.badRequest().body("Cannot check availability for past dates");
+            }
             
+            // Validate date is not a weekend
+            if (requestDate.getDayOfWeek() == DayOfWeek.SATURDAY ||
+                requestDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                return ResponseEntity.badRequest().body("No consultations available on weekends");
+            }
+            
+            AvailableSlotResponseDTO response = scheduleService.getAvailableSlots(lawyerId, requestDate);
             return ResponseEntity.ok(response);
+            
         } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
+            return ResponseEntity.badRequest().body("Invalid date format. Use YYYY-MM-DD");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to check availability");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to retrieve available slots");
         }
-    }    /**
+    }
+
+    /**
      * Cancel an appointment
      * PUT /schedules/{scheduleId}/cancel
      */

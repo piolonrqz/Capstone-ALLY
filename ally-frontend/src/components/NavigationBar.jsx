@@ -115,18 +115,24 @@ const NavigationBar = () => {
       {/* Navigation Links */}
       <div className="flex items-center gap-8">
         {isLoggedIn ? (
-          <>            
-            <Link 
-              to="/my-cases" 
+          <>
+          <Link
+              to="/my-cases"
               className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
             >
               My Cases
             </Link>
-            <Link 
-              to="/appointments" 
+            <Link
+              to="/appointments"
               className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
             >
               Appointment
+            </Link>
+            <Link
+              to="/documents"
+              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
+            >
+              Documents
             </Link>
           </>
         ) : (
