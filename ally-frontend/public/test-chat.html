@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALLY Chat Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-top: 0;
+        }
+        .button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .button:hover {
+            background-color: #1d4ed8;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f9ff;
+            border-radius: 4px;
+            border-left: 4px solid #2563eb;
+        }
+        .error {
+            background-color: #fef2f2;
+            border-left: 4px solid #ef4444;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ALLY Chat Test</h1>
+        <p>This page allows you to test the chat functionality of the ALLY application.</p>
+        
+        <div>
+            <button id="createUsers" class="button">1. Create Test Users</button>
+            <button id="testChat" class="button" disabled>2. Test Chat Functionality</button>
+            <button id="clearResults" class="button">Clear Results</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            getDocs, 
+            query, 
+            orderBy, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaRDhcbb2w_oZ0vrckRiNsblR29wSVnao",
+            authDomain: "ally-chat-dfcdf.firebaseapp.com",
+            projectId: "ally-chat-dfcdf",
+            storageBucket: "ally-chat-dfcdf.firebasestorage.app",
+            messagingSenderId: "737144936275",
+            appId: "1:737144936275:web:f8ae58301911db76c1f3a6",
+            measurementId: "G-YC2D94FY8X"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Store test user IDs
+        let testLawyerId = null;
+        let testClientId = null;
+
+        // DOM elements
+        const createUsersBtn = document.getElementById('createUsers');
+        const testChatBtn = document.getElementById('testChat');
+        const clearResultsBtn = document.getElementById('clearResults');
+        const resultsDiv = document.getElementById('results');
+
+        // Add result to the results div
+        function addResult(message, isError = false) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${isError ? 'error' : ''}`;
+            resultDiv.innerHTML = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        // Create test users
+        async function createTestUsers() {
+            try {
+                addResult("<h3>Creating Test Users</h3>");
+                
+                // Create a lawyer user
+                const lawyer = {
+                    name: "Test Lawyer",
+                    role: "lawyer",
+                    specialty: "Family Law",
+                    email: "lawyer@test.com"
+                };
+                
+                // Create a client user
+                const client = {
+                    name: "Test Client",
+                    role: "client",
+                    email: "client@test.com"
+                };
+                
+                // Add users to Firestore
+                const lawyerRef = await addDoc(collection(db, "users"), lawyer);
+                const clientRef = await addDoc(collection(db, "users"), client);
+                
+                testLawyerId = lawyerRef.id;
+                testClientId = clientRef.id;
+                
+                addResult(`
+                    <p>✅ Created test users successfully!</p>
+                    <p>Lawyer ID: <code>${testLawyerId}</code></p>
+                    <p>Client ID: <code>${testClientId}</code></p>
+                `);
+                
+                // Enable the test chat button
+                testChatBtn.disabled = false;
+                
+                return {
+                    success: true,
+                    lawyerId: testLawyerId,
+                    clientId: testClientId
+                };
+            } catch (error) {
+                console.error("Error creating test users:", error);
+                addResult(`<p>❌ Error creating test users: ${error.message}</p>`, true);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        // Test chat functionality
+        async function testChatFunctionality() {
+            if (!testLawyerId || !testClientId) {
+                addResult("<p>❌ Test user IDs not available. Please create test users first.</p>", true);
+                return;
+            }
+            
+            try {
+                addResult("<h3>Testing Chat Functionality</h3>");
+                
+                // Create chatroom ID (always sort IDs to ensure consistency)
+                const chatroomId = [testLawyerId, testClientId].sort().join('_');
+                addResult(`<p>Testing with chatroom ID: <code>${chatroomId}</code></p>`);
+                
+                // Add test messages
+                const message1 = {
+                    senderId: testLawyerId,
+                    content: "Hello, this is a test message from the lawyer",
+                    createdAt: serverTimestamp(),
+                    read: false
+                };
+                
+                const message2 = {
+                    senderId: testClientId,
+                    content: "Hi there! This is a response from the client",
+                    createdAt: serverTimestamp(),
+                    read: false
+                };
+                
+                // Add messages to Firestore
+                addResult("<p>Adding test messages to Firestore...</p>");
+                await addDoc(collection(db, `chatrooms/${chatroomId}/messages`), message1);
+                await addDoc(collection(db, `chatrooms/${chatroomId}/messages`), message2);
+                
+                // Retrieve messages to verify
+                addResult("<p>Retrieving messages to verify...</p>");
+                const messagesQuery = query(
+                    collection(db, `chatrooms/${chatroomId}/messages`),
+                    orderBy('createdAt', 'asc')
+                );
+                
+                const snapshot = await getDocs(messagesQuery);
+                const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                addResult(`
+                    <p>✅ Retrieved ${messages.length} messages successfully!</p>
+                    <p>Messages:</p>
+                    <pre>${JSON.stringify(messages, null, 2)}</pre>
+                `);
+                
+                return {
+                    success: true,
+                    chatroomId,
+                    messages
+                };
+            } catch (error) {
+                console.error("Error testing chat functionality:", error);
+                addResult(`<p>❌ Error testing chat functionality: ${error.message}</p>`, true);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        // Event listeners
+        createUsersBtn.addEventListener('click', createTestUsers);
+        testChatBtn.addEventListener('click', testChatFunctionality);
+        clearResultsBtn.addEventListener('click', () => {
+            resultsDiv.innerHTML = '';
+        });
+    </script>
+</body>
+</html>

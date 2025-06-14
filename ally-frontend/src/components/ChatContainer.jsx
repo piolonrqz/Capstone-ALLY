@@ -1,141 +1,177 @@
-import React, { useState, useEffect } from 'react';
+// src/components/ChatContainer.jsx
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import UserList from './UserList';
 import Chat from './Chat';
 import { toast } from 'react-toastify';
 
+// Import services
+import { fetchActiveConversations } from '../services/chatService';
+import { fetchUserDetails } from '../utils/auth';
+
+import { getAuthData, isAuthenticated } from '../utils/auth';
+
 const ChatContainer = () => {
     const [selectedUser, setSelectedUser] = useState(null);
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);    const [currentUser, setCurrentUser] = useState(null);    useEffect(() => {
+    const [conversations, setConversations] = useState([]); // CHANGED: Renamed state for clarity
+    const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState(null);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { chatroomId } = useParams(); // For /messages/:chatroomId route
+
+    // Load current user details from token
+    const loadCurrentUser = useCallback(async () => {
+        if (!isAuthenticated()) {
+            toast.warn('Please log in to continue.');
+            navigate('/login', { state: { from: location.pathname } });
+            return null;
+        }
+
+        try {
+            const authData = getAuthData();
+            const userDetails = await fetchUserDetails(authData.userId);
+            setCurrentUser(userDetails);
+            return userDetails;
+        } catch (error) {
+            console.error('Error loading current user:', error);
+            toast.error('Session expired. Please log in again.');
+            navigate('/login');
+            return null;
+        }
+    }, [navigate, location.pathname]);
+
+
+    // The main effect to initialize the chat interface
+    useEffect(() => {
         const initializeChat = async () => {
+            setLoading(true);
+
+            const user = await loadCurrentUser();
+            if (!user) {
+                // loadCurrentUser handles redirection, so we can stop here.
+                setLoading(false);
+                return;
+            }
+
             try {
-                await loadUsers();
-                if (currentUser) {
-                    toast.success(`Welcome ${currentUser.name}!`);
+                // 1. Fetch existing conversations using user ID
+                const activeConvos = await fetchActiveConversations(user.id);
+
+                // 2. Determine the selected user
+                let userToSelect = null;
+                
+                // Priority 1: A user was passed via navigation state (e.g., clicking "Message" on a profile)
+                const userFromState = location.state?.selectedUser;
+                if (userFromState) {
+                    userToSelect = userFromState;
+                    // If this new user isn't already in our active conversations, add them to the list
+                    if (!activeConvos.some(c => c.id === userFromState.id)) {
+                        setConversations([userFromState, ...activeConvos]);
+                    } else {
+                        setConversations(activeConvos);
+                    }
+                // Priority 2: A chatroom ID is in the URL
+                } else if (chatroomId) {
+                    userToSelect = activeConvos.find(c => c.chatroomId === chatroomId);
+                     setConversations(activeConvos);
+                } else {
+                    setConversations(activeConvos);
                 }
+
+                setSelectedUser(userToSelect);
+
             } catch (error) {
-                console.error('Error setting up chat:', error);
-                toast.error('Error loading chat data');
+                console.error('Error initializing chat:', error.message);
+                toast.error(`Failed to load chat conversations: ${error.message}`);
             } finally {
                 setLoading(false);
             }
         };
 
         initializeChat();
-    }, [currentUser]);const loadUsers = async () => {
-        try {
-            if (!currentUser) {
-                const userId = localStorage.getItem('userId');
-                const token = localStorage.getItem('token');
-                const role = localStorage.getItem('role');
-                
-                if (!userId || !token || !role) {
-                    throw new Error('User not authenticated');
-                }
-                
-                // Fetch current user details
-                const response = await fetch(`http://localhost:8080/users/getUser/${userId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user details');
-                }
-                
-                const userData = await response.json();
-                setCurrentUser({
-                    id: userData.userId.toString(),
-                    name: `${userData.Fname} ${userData.Lname}`,
-                    role: userData.accountType.toLowerCase(),
-                    accountType: userData.accountType
-                });
-                return;
+        
+        // Cleanup navigation state to prevent re-selecting the same user on refresh
+        return () => {
+            if (location.state?.selectedUser) {
+                navigate(location.pathname, { replace: true });
             }
-
-            // Fetch chat users using the chat service
-            const conversations = await fetchUsers(currentUser);
-            setUsers(conversations);
-        } catch (error) {
-            console.error('Error loading users:', error);
-            toast.error('Failed to load users');
-            throw error;
-        }
-    };
-
-    // Function to switch between lawyer and client view for testing
-    const switchUserRole = () => {
-        const newUser = currentUser.role === 'lawyer' ? {
-            id: 'client1',
-            name: 'Sarah Johnson',
-            role: 'client',
-            caseType: 'Family Law'
-        } : {
-            id: 'lawyer123',
-            name: 'John Doe',
-            role: 'lawyer',
-            specialization: 'Criminal Law'
         };
-        setCurrentUser(newUser);
-        setSelectedUser(null); // Clear selected user
-        setLoading(true); // Reload user list
+    }, [chatroomId, loadCurrentUser, location.state, navigate, location.pathname]);
+
+
+    const handleSelectUser = (user) => {
+        setSelectedUser(user);
+        // Update the URL to reflect the selected chatroom, making the URL shareable
+        navigate(`/messages/${user.chatroomId}`);
     };
 
-    return (        <div className="flex w-full h-screen overflow-hidden bg-white">
-            <div className="flex flex-col">
+    return (
+        <div className="flex w-full h-screen bg-white">
+            {/* Sidebar - User List (Active Conversations) */}
+            <div className="flex flex-col border-r w-80">
                 <div className="p-4 border-b">
-                    <div className="mb-4">
-                        <h3 className="text-lg font-semibold">{currentUser.name}</h3>
-                        <p className="text-sm text-gray-600 capitalize">
-                            {currentUser.role} • {currentUser.specialization || currentUser.caseType}
-                        </p>
-                    </div>
-                    <button 
-                        onClick={switchUserRole}
-                        className="w-full px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
-                    >
-                        Switch to {currentUser.role === 'lawyer' ? 'Client' : 'Lawyer'} View
-                    </button>
+                    {currentUser ? (
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold">{currentUser.name}</h3>
+                            <p className="text-sm text-gray-600 capitalize">
+                                {currentUser.role}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="h-14 animate-pulse" /> // Placeholder for loading
+                    )}
                 </div>
-                <UserList 
-                    users={users}
+
+                <UserList
+                    users={conversations}
                     selectedUserId={selectedUser?.id}
-                    onSelectUser={(userId) => {
-                        const user = users.find(u => u.id === userId);
-                        setSelectedUser(user);
-                    }}
+                    onSelectUser={handleSelectUser} // CHANGED: Use a handler to update URL
                 />
             </div>
-            {loading ? (
-                <div className="flex items-center justify-center flex-1">
-                    <div className="text-center">
-                        <div className="mb-4">Loading...</div>
+
+            {/* Chat Area */}
+            <div className="flex flex-col flex-1">
+                {loading ? (
+                    <div className="flex items-center justify-center flex-1">Loading chat...</div>
+                ) : selectedUser && currentUser && selectedUser.id && currentUser.id ? (
+                    <Chat
+                        key={`${currentUser.id}-${selectedUser.id}`}
+                        currentUserId={String(currentUser.id)}
+                        receiverId={String(selectedUser.id)}
+                        currentUserRole={currentUser.accountType}
+                        currentUserName={currentUser.name}
+                        receiverName={selectedUser.name}
+                    />
+                ) : (
+                    <div className="flex items-center justify-center flex-1 bg-gray-50">
+                        {selectedUser && !selectedUser.id ? (
+                            <div className="text-center">
+                                <div className="mb-4 text-5xl">⚠️</div>
+                                <h2 className="text-2xl font-semibold text-gray-700">Invalid conversation</h2>
+                                <p className="mt-2 text-gray-500">
+                                    The selected user is invalid. Please try again.
+                                </p>
+                                <button
+                                    className="px-4 py-2 mt-4 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                                    onClick={() => setSelectedUser(null)}
+                                >
+                                    Back to conversations
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="text-center">
+                                <div className="mb-4 text-5xl">💼</div>
+                                <h2 className="text-2xl font-semibold text-gray-700">Select a conversation</h2>
+                                <p className="mt-2 text-gray-500">
+                                    View your messages with clients or legal professionals.
+                                </p>
+                            </div>
+                        )}
                     </div>
-                </div>
-            ) : selectedUser ? (
-                <Chat 
-                    currentUserId={currentUser.id}
-                    receiverId={selectedUser.id}
-                    currentUserName={currentUser.name}
-                    receiverName={selectedUser.name}
-                    currentUserRole={currentUser.role}
-                    receiverRole={selectedUser.role}
-                />
-            ) : (
-                <div className="flex items-center justify-center flex-1 bg-gray-50">
-                    <div className="text-center">
-                        <div className="mb-4 text-5xl">💼</div>
-                        <h2 className="text-2xl font-semibold text-gray-700">Select a conversation</h2>
-                        <p className="mt-2 text-gray-500">
-                            {currentUser.role === 'lawyer' 
-                                ? 'Connect with your clients' 
-                                : 'Connect with legal professionals'}
-                        </p>
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
