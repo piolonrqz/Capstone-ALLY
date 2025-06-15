@@ -3,6 +3,7 @@ import { X, Clock, Calendar as CalendarIcon, User, Loader2, FileText } from 'luc
 import { Calendar } from './ui/calendar';
 import { scheduleService } from '../services/scheduleService.jsx';
 import { getAuthData, fetchUserDetails } from '../utils/auth.jsx';
+import { getStartOfDay, isPastDate, filterPastTimeSlots, isPastTimeSlot } from '../utils/dateUtils.js';
 
 export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -67,7 +68,9 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
     if (selectedDate && lawyer?.id) {
       checkAvailabilityForDate();
     } else {
-      setAvailableSlots(allTimeSlots);
+      // Filter past time slots even for fallback
+      const filteredFallback = selectedDate ? filterPastTimeSlots(selectedDate, allTimeSlots) : allTimeSlots;
+      setAvailableSlots(filteredFallback);
     }
   }, [selectedDate, lawyer?.id]);
   // Reset form when modal opens
@@ -78,7 +81,7 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
       setConsultationType('in-person');
       setNotes('');
       setError('');
-      setAvailableSlots(allTimeSlots);
+      setAvailableSlots(allTimeSlots); // Will be filtered when date is selected
     }
   }, [isOpen]);
 
@@ -89,32 +92,29 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
     setError('');
     
     try {
-      // Check availability for each time slot
-      const availabilityPromises = allTimeSlots.map(async (timeSlot) => {
-        try {
-          const availability = await scheduleService.checkAvailability(lawyer.id, selectedDate, timeSlot);
-          return { timeSlot, available: availability.available };
-        } catch (error) {
-          console.error(`Error checking availability for ${timeSlot}:`, error);
-          return { timeSlot, available: false };
-        }
-      });
+      // OPTIMIZED: Single API call instead of 9 individual calls
+      const availabilityData = await scheduleService.getAvailableSlots(lawyer.id, selectedDate);
       
-      const availabilityResults = await Promise.all(availabilityPromises);
-      const available = availabilityResults
-        .filter(result => result.available)
-        .map(result => result.timeSlot);
+      // Extract just the time slot strings for the existing UI logic
+      const availableTimeSlots = availabilityData.availableSlots.map(slot => slot.startTime);
       
-      setAvailableSlots(available);
+      // Filter out past time slots for today
+      const filteredTimeSlots = filterPastTimeSlots(selectedDate, availableTimeSlots);
+      setAvailableSlots(filteredTimeSlots);
       
-      // Clear selected time if it's no longer available
-      if (selectedTime && !available.includes(selectedTime)) {
+      // Clear selected time if it's no longer available or is in the past
+      if (selectedTime && (!filteredTimeSlots.includes(selectedTime) || isPastTimeSlot(selectedDate, selectedTime))) {
         setSelectedTime('');
       }
+      
+      // Optional: Store full availability data for enhanced UI features
+      // setFullAvailabilityData(availabilityData);
     } catch (error) {
       console.error('Error checking availability:', error);
       setError('Failed to check availability. Please try again.');
-      setAvailableSlots(allTimeSlots); // Fallback to all slots
+      // Fallback to filtered time slots
+      const fallbackSlots = filterPastTimeSlots(selectedDate, allTimeSlots);
+      setAvailableSlots(fallbackSlots);
     } finally {
       setIsCheckingAvailability(false);
     }
@@ -176,10 +176,8 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
   };
 
   const isDateDisabled = (date) => {
-    // Disable past dates and weekends
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today || date.getDay() === 0 || date.getDay() === 6;
+    // Disable past dates and weekends using timezone-safe comparison
+    return isPastDate(date) || date.getDay() === 0 || date.getDay() === 6;
   };
 
   if (!isOpen) return null;
@@ -278,20 +276,28 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
                     </div>
                   ) : (
                     <div className="grid grid-cols-3 gap-2">
-                      {availableSlots.map((time) => (
-                        <button
-                          key={time}
-                          type="button"
-                          onClick={() => setSelectedTime(time)}
-                          className={`p-2 text-sm border rounded-lg transition-colors ${
-                            selectedTime === time
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                          }`}
-                        >
-                          {time}
-                        </button>
-                      ))}
+                      {availableSlots.map((time) => {
+                        const isPast = isPastTimeSlot(selectedDate, time);
+                        return (
+                          <button
+                            key={time}
+                            type="button"
+                            onClick={() => !isPast && setSelectedTime(time)}
+                            disabled={isPast}
+                            className={`p-2 text-sm border rounded-lg transition-colors ${
+                              isPast
+                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                : selectedTime === time
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                            }`}
+                            title={isPast ? 'This time slot has passed' : ''}
+                          >
+                            {time}
+                            {isPast && <span className="block text-xs text-gray-500">(Past)</span>}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

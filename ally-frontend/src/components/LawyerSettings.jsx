@@ -9,6 +9,84 @@ import NavigationBar from './NavigationBar';
 const LawyerSettings = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+
+  const token = localStorage.getItem('token');
+  
+
+  useEffect(() => {
+  fetch(`http://localhost:8080/users/getUser/${user.id}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  })
+    .then(res => res.json())
+    .then(data => {
+
+      // Update the profile state with the fetched data
+      setProfile({
+        name: `${data.Fname} ${data.Lname}`,
+      });
+      console.log('Profile data:', data);
+
+      // You can also update personalInfo or address if needed
+      setPersonalInfo(prev => ({
+        ...prev,
+        firstName: data.Fname,
+        lastName: data.Lname,
+        email: data.email,
+        phone: data.phoneNumber || '',
+        experience: data.experience || '',
+        barNumber: data.barNumber || '',
+      }));
+    })
+    .catch(error => {
+      console.error('Failed to fetch user:', error);
+    });
+}, []);
+
+const handleUpdate = async () => {
+  const updatedUserData = {
+    ...personalInfo,
+    ...address,
+    phoneNumber: personalInfo.phone,
+    experience: personalInfo.experience,
+    barNumber: personalInfo.barNumber,
+    address: address.line1,
+    province: address.province,
+    zip: address.zipCode,
+  
+    Fname: personalInfo.firstName,
+    Lname: personalInfo.lastName,
+  
+    city: address.cityState,
+    bio: personalInfo.bio,
+
+  };
+
+  console.log('Updated user data:', updatedUserData);
+
+  try {
+    const response = await fetch(`http://localhost:8080/users/lawyerUpdate/${user.id}`, {
+      method: 'PUT', // or POST, depending on your API
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`, // if using JWT
+      },
+      body: JSON.stringify(updatedUserData),
+    });
+
+    if (response.ok) {
+      alert('Profile updated successfully!');
+    } else {
+      alert('Update failed.');
+    }
+  } catch (error) {
+    console.error('Update error:', error);
+    alert('Something went wrong.');
+  }
+};
   // Initialize state from user prop
   const [profile, setProfile] = useState({
     name:
@@ -72,6 +150,8 @@ const LawyerSettings = ({ user }) => {
     setError(null);
     setLoading(false);
   }, [user]);
+
+  console.log('User object:', user);
 
   // Remove sidebar and just render the settings content as a component
   if (loading) {
@@ -169,25 +249,74 @@ const LawyerSettings = ({ user }) => {
         {/* Personal Information */}
         <Section title="Personal Information">
           <div className="grid grid-cols-2 gap-6">
-            <InputField label="First Name" value={personalInfo.firstName} />
-            <InputField label="Last Name" value={personalInfo.lastName} />
-            <InputField label="Email address" value={personalInfo.email} />
-            <InputField label="Phone" value={personalInfo.phone} />
-            <InputField label="Experience" value={personalInfo.experience} />
-            <InputField label="Bar Number" value={personalInfo.barNumber} />
+            <InputField
+                label="First Name"
+                value={personalInfo.firstName}
+                onChange={(e) => setPersonalInfo({ ...personalInfo, firstName: e.target.value })}
+              />
+              <InputField
+                  label="Last Name"
+                  value={personalInfo.lastName}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, lastName: e.target.value })}
+                />
+
+                <InputField
+                  label="Email"
+                  value={personalInfo.email}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, email: e.target.value })}
+                />
+
+                <InputField
+                  label="Phone"
+                  value={personalInfo.phone}
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, phone: e.target.value })}
+                />
+                <InputField 
+                  label="Experience" 
+                  value={personalInfo.experience} 
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, experience: e.target.value })}
+                  />
+                <InputField 
+                  label="Bar Number" 
+                  value={personalInfo.barNumber} 
+                  onChange={(e) => setPersonalInfo({ ...personalInfo, barNumber: e.target.value })}
+                  />
           </div>
         </Section>
 
         {/* Address */}
         <Section title="Address">
           <div className="grid grid-cols-2 gap-6">
-            <InputField label="Address Line 1" value={address.line1} />
-            <InputField label="Province" value={address.province} />
-            <InputField label="ZIP Code" value={address.zipCode} />
-            <InputField label="City/State" value={address.cityState} />
+            <InputField
+                  label="Address Line 1"
+                  value={address.line1}
+                  onChange={(e) => setAddress({ ...address, line1: e.target.value })}
+                />
+                <InputField
+                  label="Province"
+                  value={address.province}
+                  onChange={(e) => setAddress({ ...address, province: e.target.value })}
+                />
+                <InputField
+                  label="ZIP Code"
+                  value={address.zipCode}
+                  onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
+                />
+                <InputField
+                  label="City/State"
+                  value={address.cityState}
+                  onChange={(e) => setAddress({ ...address, cityState: e.target.value })}
+                />
           </div>
         </Section>
-
+        <div className="mt-6">
+            <button
+              onClick={handleUpdate}
+              className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
+            >
+              Update Profile
+            </button>
+        </div>
         {/* Footer */}
         <footer className="pt-8 mt-12 border-t border-gray-200">
           <div className="flex items-center justify-center mb-8">

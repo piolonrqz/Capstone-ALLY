@@ -47,6 +47,71 @@ public class UserController {
     private UserRepo userRepo;
     @Autowired
     private JwtUtil jwtUtil;
+
+    @PutMapping("/adminUpdate/{id}")
+    public ResponseEntity<AdminEntity> updateAdmin(
+            @PathVariable int id,
+            @RequestBody AdminEntity admin
+    ) {
+        AdminEntity updated = userService.updateAdmin(
+                id,
+                admin.getEmail(),
+                admin.getPassword(),
+                admin.getFname(),
+                admin.getLname(),
+                admin.getPhoneNumber(),
+                admin.getAddress(),
+                admin.getCity(),
+                admin.getProvince(),
+                admin.getZip()
+        );
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/clientUpdate/{id}")
+    public ResponseEntity<ClientEntity> updateClient(
+            @PathVariable int id,
+            @RequestBody ClientEntity client
+    ) {
+        ClientEntity updated = userService.updateClient(
+                id,
+                client.getEmail(),
+                client.getPassword(),
+                client.getFname(),
+                client.getLname(),
+                client.getPhoneNumber(),
+                client.getAddress(),
+                client.getCity(),
+                client.getProvince(),
+                client.getZip(),
+                client.getProfilePhoto()
+        );
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/lawyerUpdate/{id}")
+    public ResponseEntity<LawyerEntity> updateLawyer(
+            @PathVariable int id,
+            @RequestBody LawyerEntity lawyer
+    ) {
+        LawyerEntity updated = userService.updateLawyer(
+                id,
+                lawyer.getEmail(),
+                lawyer.getPassword(),
+                lawyer.getFname(),
+                lawyer.getLname(),
+                lawyer.getPhoneNumber(),
+                lawyer.getAddress(),
+                lawyer.getCity(),
+                lawyer.getProvince(),
+                lawyer.getZip(),
+                lawyer.getBarNumber(),
+                lawyer.getSpecialization(),
+                lawyer.getExperience(),
+                lawyer.getCredentials()
+        );
+        return ResponseEntity.ok(updated);
+    }
      
      @PostMapping(value = "/Client", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ClientEntity> createClient(
