@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle, CalendarPlus, Upload, Eye } from 'lucide-react';
 import { BookingModal } from './BookingModal';
 import { documentService } from '../services/documentService';
+import { getAuthData } from '../utils/auth';
 
 const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
   const navigate = useNavigate();
@@ -20,6 +21,13 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
   const loadDocumentCount = async () => {
     try {
       setLoadingDocuments(true);
+      const authData = getAuthData();
+      if (!authData) {
+        console.error('Not authenticated when trying to load document count');
+        setDocumentCount(0);
+        return;
+      }
+
       const count = await documentService.getDocumentCount(case_.caseId);
       setDocumentCount(count);
     } catch (error) {
@@ -105,7 +113,7 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
               <span>Case #{case_.caseId}</span>
             </div>
             {/* Show appointment count if available */}
-            {case_.appointmentCount !== userId.lawyer && (
+            {case_.appointmentCount !== undefined && (
               <div className="flex items-center gap-1">
                 <CalendarPlus className="w-4 h-4" />
                 <span>{case_.appointmentCount} appointment{case_.appointmentCount !== 1 ? 's' : ''}</span>
@@ -186,8 +194,6 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
 
       {/* Additional Status Info */}
       {case_.status === 'ACCEPTED' && (
- <p className="text-sm text-green-800">
-
         <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
           <p className="text-green-800 text-sm mb-3">
             ✓ This case has been accepted and is being processed.
@@ -234,8 +240,8 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
           {userRole === 'CLIENT' && (
             <button
               onClick={handleBookAppointment}
-
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-full justify-center">
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-full justify-center"
+            >
               <CalendarPlus className="w-4 h-4" />
               {case_.appointmentCount > 0 ? 'Book Another Appointment' : 'Book Appointment'}
             </button>
@@ -265,7 +271,6 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
           onSuccess={handleAppointmentBookingSuccess}
         />
       )}
-
     </div>
   );
 };
