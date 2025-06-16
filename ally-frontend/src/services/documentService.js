@@ -243,7 +243,8 @@ export const documentService = {
 
   // Utility functions
   formatFileSize: (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes || bytes === 0) return '0 Bytes';
+    if (typeof bytes !== 'number' || isNaN(bytes)) return 'Unknown size';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -251,7 +252,11 @@ export const documentService = {
   },
 
   getFileType: (fileName) => {
-    return fileName.split('.').pop().toLowerCase();
+    if (!fileName || typeof fileName !== 'string') {
+      return 'unknown';
+    }
+    const parts = fileName.split('.');
+    return parts.length > 1 ? parts.pop().toLowerCase() : 'unknown';
   },
 
   formatDate: (dateString) => {
