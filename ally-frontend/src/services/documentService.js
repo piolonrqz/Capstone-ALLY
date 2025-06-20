@@ -42,7 +42,8 @@ export const documentService = {
     try {
       const authData = getAuthData();
       if (!authData) {
-        throw new Error('Not authenticated');
+        console.error('Not authenticated when trying to get document count');
+        return 0;
       }
 
       const response = await fetch(`${API_BASE_URL}/case/${caseId}/count`, {
@@ -51,11 +52,17 @@ export const documentService = {
           'Authorization': `Bearer ${authData.token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies if any
       });
 
       if (!response.ok) {
         if (response.status === 403) {
-          return 0; // Return 0 if no permission instead of throwing error
+          console.error('Permission denied when getting document count');
+          return 0;
+        }
+        if (response.status === 401) {
+          console.error('Authentication failed when getting document count');
+          return 0;
         }
         throw new Error('Failed to fetch document count');
       }
@@ -64,7 +71,7 @@ export const documentService = {
       return typeof count === 'number' ? count : 0;
     } catch (error) {
       console.error('Error fetching document count:', error);
-      return 0; // Return 0 on error to prevent UI breaking
+      return 0;
     }
   },
 
@@ -236,7 +243,8 @@ export const documentService = {
 
   // Utility functions
   formatFileSize: (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes || bytes === 0) return '0 Bytes';
+    if (typeof bytes !== 'number' || isNaN(bytes)) return 'Unknown size';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -244,7 +252,11 @@ export const documentService = {
   },
 
   getFileType: (fileName) => {
-    return fileName.split('.').pop().toLowerCase();
+    if (!fileName || typeof fileName !== 'string') {
+      return 'unknown';
+    }
+    const parts = fileName.split('.');
+    return parts.length > 1 ? parts.pop().toLowerCase() : 'unknown';
   },
 
   formatDate: (dateString) => {
