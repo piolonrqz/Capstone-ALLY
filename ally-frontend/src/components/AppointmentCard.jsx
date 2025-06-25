@@ -76,26 +76,26 @@ export const AppointmentCard = ({ appointment, onEdit, onCancel, onAccept, onDec
   const endTime = formatDateTime(appointment.bookingEndTime).time;
 
   return (
-    <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
+    <div className="p-6 border border-gray-200 rounded-lg bg-gray-50">
       <div className="flex items-start justify-between">
         {/* Main Information */}
         <div className="flex-1">          
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">
               {appointment.appointmentType || 'Legal Consultation'}
             </h3>
             {/* Case Information */}
             {appointment.legalCase && (
-              <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded">
+              <div className="p-2 mb-2 border border-blue-200 rounded bg-blue-50">
                 <div className="text-sm text-blue-800">
                   <span className="font-medium">Case:</span> {appointment.legalCase.title} (#{appointment.legalCase.caseId})
                 </div>
-                <div className="text-xs text-blue-600 mt-1">
+                <div className="mt-1 text-xs text-blue-600">
                   Status: {appointment.legalCase.status}
                 </div>
               </div>
             )}
-            <div className="flex items-center text-gray-600 mb-2">
+            <div className="flex items-center mb-2 text-gray-600">
               <Calendar className="w-4 h-4 mr-2" />
               <span>{date} | {time} - {endTime}</span>
             </div>
@@ -154,7 +154,7 @@ export const AppointmentCard = ({ appointment, onEdit, onCancel, onAccept, onDec
         </div>
 
         {/* Status and Actions */}
-        <div className="ml-6 flex flex-col items-end space-y-3">
+        <div className="flex flex-col items-end ml-6 space-y-3">
           {/* Status Badge */}
           <div className={`px-4 py-2 rounded-full ${getStatusColor(appointment.status)}`}>
             <span className="text-xs font-semibold">
@@ -170,7 +170,7 @@ export const AppointmentCard = ({ appointment, onEdit, onCancel, onAccept, onDec
                 <button
                   onClick={handleAccept}
                   disabled={isAccepting}
-                  className="flex items-center px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center px-4 py-2 text-sm text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check className="w-4 h-4 mr-1" />
                   {isAccepting ? 'Accepting...' : 'Accept'}
@@ -178,7 +178,7 @@ export const AppointmentCard = ({ appointment, onEdit, onCancel, onAccept, onDec
                 <button
                   onClick={() => setShowDeclineModal(true)}
                   disabled={isDeclining}
-                  className="flex items-center px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center px-4 py-2 text-sm text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <X className="w-4 h-4 mr-1" />
                   Decline
@@ -190,14 +190,14 @@ export const AppointmentCard = ({ appointment, onEdit, onCancel, onAccept, onDec
               <div className="flex space-x-2">
                 <button
                   onClick={() => onEdit(appointment)}
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 bg-white border border-blue-500 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 transition-colors bg-white border border-blue-500 rounded-lg hover:bg-gray-50"
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
                 </button>                
                 <button
                   onClick={() => onCancel(appointment)}
-                  className="flex items-center px-4 py-2 text-sm text-red-700 bg-red-50 border border-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                  className="flex items-center px-4 py-2 text-sm text-red-700 transition-colors border border-red-500 rounded-lg bg-red-50 hover:bg-red-100"
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
                   Cancel
@@ -210,34 +210,34 @@ export const AppointmentCard = ({ appointment, onEdit, onCancel, onAccept, onDec
 
       {/* Decline Modal */}
       {showDeclineModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md p-6 mx-4 bg-white rounded-lg">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
               Decline Appointment
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="mb-4 text-gray-600">
               Please provide a reason for declining this appointment:
             </p>
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg resize-none h-24"
+              className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none"
               placeholder="Enter reason for declining..."
             />
-            <div className="flex space-x-3 mt-4">
+            <div className="flex mt-4 space-x-3">
               <button
                 onClick={() => {
                   setShowDeclineModal(false);
                   setDeclineReason('');
                 }}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex-1 px-4 py-2 text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDecline}
                 disabled={isDeclining || !declineReason.trim()}
-                className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isDeclining ? 'Declining...' : 'Decline Appointment'}
               </button>
