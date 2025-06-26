@@ -4,14 +4,14 @@ import { Loader2, Calendar } from 'lucide-react';
 import { getAuthData } from '../utils/auth.jsx';
 import { scheduleService } from '../services/scheduleService.jsx';
 
-export const AppointmentsList = () => {
+export const AppointmentsList = ({ refreshTrigger = 0 }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchUserAppointments();
-  }, []);  const fetchUserAppointments = async () => {
+  }, [refreshTrigger]);  const fetchUserAppointments = async () => {
     try {
       setLoading(true);
       const authData = getAuthData();
@@ -158,7 +158,7 @@ export const AppointmentsList = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
         <span className="ml-3 text-gray-600">Loading your appointments...</span>
       </div>
     );
@@ -166,7 +166,7 @@ export const AppointmentsList = () => {
 
   if (error) {
     return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+      <div className="p-6 border border-red-200 rounded-lg bg-red-50">
         <div className="flex items-center">
           <div className="ml-3">
             <h3 className="text-sm font-medium text-red-800">Error</h3>
@@ -183,10 +183,10 @@ export const AppointmentsList = () => {
     const isLawyer = authData?.accountType === 'LAWYER';
     
     return (
-      <div className="text-center py-12">
-        <Calendar className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No Appointments Yet</h3>
-        <p className="text-gray-600 mb-6">
+      <div className="py-12 text-center">
+        <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+        <h3 className="mb-2 text-lg font-medium text-gray-900">No Appointments Yet</h3>
+        <p className="mb-6 text-gray-600">
           {isLawyer 
             ? "You don't have any upcoming appointments with clients."
             : "You haven't scheduled any appointments. Browse our lawyer directory to book a consultation."
