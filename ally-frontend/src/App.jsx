@@ -50,8 +50,10 @@ function AppContent() {
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/documents/:caseId" element={<DocumentsPage />} />
         <Route path="/settings" element={<AccountSettings />} />
-        <Route path="/chat" element={<ChatContainer />} />
         <Route path="/lawyer-settings" element={<LawyerSettings />} />
+                  {/* Chat Routes */}
+          <Route path="/chat" element={<ChatContainer />} />
+          <Route path="/messages/:chatroomId" element={<ChatContainer />} />
 
         {/* Admin Routes */}
         <Route

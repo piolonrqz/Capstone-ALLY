@@ -69,7 +69,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Specify allowed origins
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174")); // Specify allowed origins
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

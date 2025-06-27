@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle, CalendarPlus, Upload, Eye } from 'lucide-react';
 import { BookingModal } from './BookingModal';
 import { documentService } from '../services/documentService';
+import { getAuthData } from '../utils/auth';
 
 const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
   const navigate = useNavigate();
@@ -20,6 +21,13 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
   const loadDocumentCount = async () => {
     try {
       setLoadingDocuments(true);
+      const authData = getAuthData();
+      if (!authData) {
+        console.error('Not authenticated when trying to load document count');
+        setDocumentCount(0);
+        return;
+      }
+
       const count = await documentService.getDocumentCount(case_.caseId);
       setDocumentCount(count);
     } catch (error) {
@@ -88,11 +96,11 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
   };
 
   return (
-    <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+    <div className="p-6 transition-shadow bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">
             {case_.title}
           </h3>
           <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -125,7 +133,7 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
 
       {/* Description */}
       <div className="mb-4">
-        <p className="text-gray-700 text-sm leading-relaxed">
+        <p className="text-sm leading-relaxed text-gray-700">
           {case_.description}
         </p>
       </div>
@@ -137,7 +145,7 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-500" />
             <span className="text-gray-600">Client:</span>
-            <span className="text-gray-900 font-medium">
+            <span className="font-medium text-gray-900">
               {case_.client.Fname} {case_.client.Lname}
             </span>
           </div>
@@ -148,7 +156,7 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-500" />
             <span className="text-gray-600">Assigned Lawyer:</span>
-            <span className="text-gray-900 font-medium">
+            <span className="font-medium text-gray-900">
               {case_.lawyer.Fname} {case_.lawyer.Lname}
             </span>
           </div>
@@ -159,24 +167,24 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-500" />
             <span className="text-gray-600">Status:</span>
-            <span className="text-gray-500 italic">Waiting for lawyer assignment</span>
+            <span className="italic text-gray-500">Waiting for lawyer assignment</span>
           </div>
         )}
       </div>
 
       {/* Action Buttons (for lawyers only) */}
       {userRole === 'LAWYER' && case_.status === 'PENDING' && (
-        <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+        <div className="flex gap-3 pt-4 mt-6 border-t border-gray-200">
           <button
             onClick={() => handleStatusChange('ACCEPTED')}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
           >
             <CheckCircle className="w-4 h-4" />
             Accept Case
           </button>
           <button
             onClick={() => handleStatusChange('DECLINED')}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
           >
             <XCircle className="w-4 h-4" />
             Decline Case
@@ -242,8 +250,8 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
       )}
 
       {case_.status === 'DECLINED' && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">
+        <div className="p-3 mt-4 border border-red-200 rounded-lg bg-red-50">
+          <p className="text-sm text-red-800">
             ✗ This case has been declined. You may submit a new case or contact support.
           </p>
         </div>
@@ -263,7 +271,6 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
           onSuccess={handleAppointmentBookingSuccess}
         />
       )}
-
     </div>
   );
 };
