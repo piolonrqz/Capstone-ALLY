@@ -16,12 +16,19 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
   const [lawyers, setLawyers] = useState([]);
   const [lawyerId, setLawyerId] = useState('');
   useEffect(() => {
-    // Fetch verified lawyers directly here
-    fetch('http://localhost:8080/lawyers/verified')
-      .then(res => res.json())
-      .then(setLawyers)
-      .catch(() => setLawyers([]));
-  }, []);
+  const token = localStorage.getItem('token');
+
+  fetch('http://localhost:8080/lawyers/verified', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then(res => res.json())
+    .then(setLawyers)
+    .catch(() => setLawyers([]));
+}, []);
   useEffect(() => {
     // Pre-select lawyer if provided
     if (selectedLawyer && selectedLawyer.id) {

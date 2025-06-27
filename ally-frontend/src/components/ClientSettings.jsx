@@ -12,19 +12,59 @@ const ClientSettings = ({ user }) => {
     location: user?.location || user?.city || '',
   });
 
+   const token = localStorage.getItem('token');
+    
+  
+    useEffect(() => {
+    fetch(`http://localhost:8080/users/getUser/${user.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+  
+        // Update the profile state with the fetched data
+        setProfile({
+          name: `${data.Fname} ${data.Lname}`,
+        });
+        console.log('Profile data:', data);
+  
+        setPersonalInfo(prev => ({
+          ...prev,
+          firstName: data.Fname,
+          lastName: data.Lname,
+          email: data.email,
+          phone: data.phoneNumber || '',
+         
+        }));
+      })
+      .catch(error => {
+        console.error('Failed to fetch user:', error);
+      });
+  }, []);
+
   const handleUpdate = async () => {
   const updatedUserData = {
     ...personalInfo,
     ...address,
+    phoneNumber: personalInfo.phone,
+    address: address.line1,
+    province: address.province,
+    zip: address.zipCode,
+  
     Fname: personalInfo.firstName,
     Lname: personalInfo.lastName,
-    location: address.cityState,
+  
+    city: address.cityState,
+   
   };
 
   try {
     const response = await fetch(`http://localhost:8080/users/clientUpdate/${user.id}`, {
       method: 'PUT', // or POST, depending on your API
-      headers: {
+      headers: { 
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`, // if using JWT
       },
