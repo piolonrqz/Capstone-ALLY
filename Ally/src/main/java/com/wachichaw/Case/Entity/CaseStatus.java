@@ -5,5 +5,5 @@ public enum CaseStatus {
     ACCEPTED,
     DECLINED,
     COMPLETED,
-    CANCELLED
+    CANCELLED,
 }

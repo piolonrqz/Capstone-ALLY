@@ -13,29 +13,50 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 
 @Configuration
 public class SecurityConfig {
 
+    private final OAuth2LoginSuccessHandler oauthLogin;
+
+    public SecurityConfig(OAuth2LoginSuccessHandler oauthLogin) {
+                this.oauthLogin = oauthLogin;
+        }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(
-                    "/api-docs/**",
-                    "/swagger-ui/**",
-                    "/api-docs/**",
-                    "/swagger-resources/**",
-                    "/swagger-ui.html","/users/Client","/users/Lawyer","/users/login"
-                ).permitAll() 
-                .anyRequest().permitAll()
-                
-            )
-            .httpBasic(Customizer.withDefaults()) 
-            .csrf(csrf -> csrf.disable()); 
-            
-        return http.build();
-    }
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // <-- Change this!
+        .authorizeHttpRequests(authorize -> authorize
+            .requestMatchers(
+                "/api-docs/**",
+                "/swagger-ui/**",
+                "/api-docs/**",
+                "/swagger-resources/**",
+                "/swagger-ui.html",
+                "/users/Client",
+                "/users/Lawyer",
+                "/users/login",
+                "/users/**",
+                "/login/oauth2/code/google",
+                "/error", "/login**", "/oauth2/**"
+            ).permitAll()
+            .anyRequest().permitAll())
+        .oauth2Login(oauth2 -> oauth2
+            .successHandler(oauthLogin)
+            .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService())))
+        .httpBasic(Customizer.withDefaults());
+
+    return http.build();
+}
+     @Bean
+        public OidcUserService oidcUserService() {
+            return new OidcUserService();
+        }
      @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -53,7 +74,6 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
-        // Register CORS for all paths
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // For all paths
         source.registerCorsConfiguration("/uploads/**", configuration); 

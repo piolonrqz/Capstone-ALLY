@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
-
+import { useSearchParams } from 'react-router-dom';
 const SignUpPage = () => {
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState(null);
+  const [searchParams] = useSearchParams();
+  const oemail = searchParams.get("email");
+  const fname = searchParams.get("fname");
+  const lname = searchParams.get("lname");
+  localStorage.setItem('email', oemail || '');
+  localStorage.setItem('fName', fname || '');
+  localStorage.setItem('lName', lname || ''); 
   return (   
      <div className="fixed inset-0 flex flex-col items-center min-h-screen p-4 pt-8 overflow-y-auto bg-white sm:p-6 sm:pt-16 md:pt-24">
       <div className="w-16 h-16 sm:w-20 sm:h-20">
