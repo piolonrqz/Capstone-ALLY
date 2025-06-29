@@ -3,10 +3,16 @@ import { useNavigate } from "react-router-dom";
 import Logo from './Logo';
 
 export default function LawyerRegistrationForm() {const [step, setStep] = useState(1); // Start with step 1 for proper form flow
+  const oemail = localStorage.getItem("email");
+  const fname = localStorage.getItem("fName");
+  const lname = localStorage.getItem("lName");
+  console.log("Initial email from search params:", oemail);
+  console.log("Initial first name from search params:", fname);
+  console.log("Initial last name from search params:", lname);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
+    firstName: fname || "",
+    lastName: lname || "",
+    email: oemail || "",
     password: "",
     confirmPassword: "",
     profilePhoto: null,

@@ -21,6 +21,7 @@ import NavigationBar from './components/NavigationBar'
 import MyCasesPage from './pages/MyCasesPage'
 import { shouldShowNavigation } from './utils/navigation.js'
 import LawyerSettings from './components/LawyerSettings'
+import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler'
 
 // Custom hook to determine if navigation bar should be visible
 const useNavigationVisibility = () => {
@@ -36,6 +37,7 @@ function AppContent() {
       <NavigationBar />
       <div className={showNavigation ? "pt-[104px]" : ""}>
         <Routes>
+        <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/signup/client" element={<ClientRegistrationForm />} />

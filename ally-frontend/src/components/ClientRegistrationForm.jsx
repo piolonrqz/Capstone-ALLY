@@ -2,13 +2,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from './Logo';
 
+
 export default function ClientRegistrationForm() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const oemail = localStorage.getItem("email");
+  const fname = localStorage.getItem("fName");
+  const lname = localStorage.getItem("lName");
+  console.log("Initial email from search params:", oemail);
+  console.log("Initial first name from search params:", fname);
+  console.log("Initial last name from search params:", lname);
   const [formData, setFormData] = useState({
-    fName: "",
-    lName: "",
-    email: "",
+    fName: fname || "",
+    lName: lname || "",
+    email: oemail || "",
     password: "",
     confirmPassword: "",
     phoneNumber: "",

@@ -127,8 +127,12 @@ const Login = () => {
         </div>
 
         <div className="flex space-x-4">
-          <button className="block w-full py-2 text-sm transition border border-gray-300 rounded-md sm:text-base hover:bg-gray-50">
+          <button className="block w-full py-2 text-sm transition border border-gray-300 rounded-md sm:text-base hover:bg-gray-50"
+          onClick={() => {
+          window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    }}>
             Google
+            
           </button>
         </div>
       </div>

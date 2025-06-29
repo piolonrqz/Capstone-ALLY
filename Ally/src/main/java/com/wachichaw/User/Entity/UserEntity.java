@@ -73,6 +73,7 @@ public abstract class UserEntity {
     
 
     public UserEntity() {
+        super();
     }
 
     public UserEntity(int userId, String email, String password, String Fname,String Lname, LocalDateTime createdAt, boolean isVerified, Long phoneNumber, String address, String city, String province, String zip) {

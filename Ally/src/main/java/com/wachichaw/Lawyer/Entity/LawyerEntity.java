@@ -40,7 +40,9 @@ public class LawyerEntity extends UserEntity{
     private String credentials;
 
     @Column(name = "credentials_verified", nullable = true)
-    private Boolean credentialsVerified = false;    @OneToMany(mappedBy = "lawyer")
+    private Boolean credentialsVerified = false;    
+    
+    @OneToMany(mappedBy = "lawyer")
     @JsonManagedReference(value = "lawyer-case")
     private List<LegalCasesEntity> cases;
 
