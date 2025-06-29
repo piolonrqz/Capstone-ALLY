@@ -24,6 +24,9 @@ public class LegalCasesEntity {
     @Column(name = "title", nullable = true)
     private String title;
 
+    @Column(name = "case_type", nullable = true)
+    private String caseType;
+
     @Column(name = "case_no", nullable = true, unique = true)
     private long caseNumber;
 
@@ -33,6 +36,10 @@ public class LegalCasesEntity {
     @CreationTimestamp
     @Column(name = "date_submitted", updatable = false)
     private LocalDateTime dateSubmitted;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "urgency_level", nullable = true)
+    private UrgencyLevel urgencyLevel;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -52,9 +59,11 @@ public class LegalCasesEntity {
     private List<MessageEntity> messages;
 
     public LegalCasesEntity(){}    
-    public LegalCasesEntity(int caseId, String title, long caseNumber, String description, LocalDateTime dateSubmitted, CaseStatus status, LawyerEntity lawyer, ClientEntity client) {
+    public LegalCasesEntity(int caseId, String title, String caseType, UrgencyLevel urgencyLevel, long caseNumber, String description, LocalDateTime dateSubmitted, CaseStatus status, LawyerEntity lawyer, ClientEntity client) {
         this.caseId = caseId;
         this.title = title;
+        this.caseType = caseType;
+        this.urgencyLevel = urgencyLevel;
         this.caseNumber = caseNumber;
         this.description = description;
         this.dateSubmitted = dateSubmitted;
@@ -79,12 +88,28 @@ public class LegalCasesEntity {
         this.title = title;
     }
 
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
+    }
+
     public long getCaseNumber() {
         return caseNumber;
     }
 
     public void setCaseNumber(long caseNumber) {
         this.caseNumber = caseNumber;
+    }
+
+    public UrgencyLevel getUrgencyLevel() {
+        return urgencyLevel;
+    }
+
+    public void setUrgencyLevel(UrgencyLevel urgencyLevel) {
+        this.urgencyLevel = urgencyLevel;
     }
 
     public String getDescription() {

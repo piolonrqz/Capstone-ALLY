@@ -4,6 +4,8 @@ package com.wachichaw.Case.Entity;
 public class LegalCaseRequestDTO {
 
     private String title;
+    private String caseType;
+    private UrgencyLevel urgencyLevel; // e.g., "High", "Medium", "Low"
     private String description;
     private CaseStatus status;
     private int lawyerId;
@@ -13,8 +15,26 @@ public class LegalCaseRequestDTO {
 
     public String getTitle() {
         return title;
-    }    public void setTitle(String title) {
+    }    
+    
+    public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
+    }
+
+    public UrgencyLevel getUrgencyLevel() {
+        return urgencyLevel;
+    }
+
+    public void setUrgencyLevel(UrgencyLevel urgencyLevel) {
+        this.urgencyLevel = urgencyLevel;
     }
 
     public String getDescription() {
