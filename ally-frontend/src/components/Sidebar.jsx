@@ -21,6 +21,12 @@ const Sidebar = ({ onCloseMobile }) => {
       group: 'Main',
       items: [
         {
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          path: '/admin',
+          active: path === '/admin' || path === '/admin/'
+        },
+        {
           label: 'Reports & Analytics',
           icon: BarChart2,
           path: '/admin/analytics',
