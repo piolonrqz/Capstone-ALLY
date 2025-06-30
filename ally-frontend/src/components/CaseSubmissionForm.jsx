@@ -15,26 +15,83 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
   const [errors, setErrors] = useState({});
   const [lawyers, setLawyers] = useState([]);
   const [lawyerId, setLawyerId] = useState('');
+  const [caseType, setCaseType] = useState('');
+  const [availableCaseTypes, setAvailableCaseTypes] = useState([]);
+  const [filteredLawyers, setFilteredLawyers] = useState([]);
   useEffect(() => {
-  const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
-  fetch('http://localhost:8080/lawyers/verified', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  })
-    .then(res => res.json())
-    .then(setLawyers)
-    .catch(() => setLawyers([]));
-}, []);
+    fetch('http://localhost:8080/lawyers/verified', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => res.json())
+      .then(lawyersData => {
+        setLawyers(lawyersData);
+        
+        // Extract unique case types from lawyer specializations
+        const caseTypesSet = new Set();
+        lawyersData.forEach(lawyer => {
+          if (lawyer.specialization && lawyer.specialization.length > 0) {
+            lawyer.specialization.forEach(spec => {
+              if (spec && spec.trim()) {
+                caseTypesSet.add(spec.trim());
+              }
+            });
+          }
+        });
+        
+        const sortedCaseTypes = Array.from(caseTypesSet).sort();
+        setAvailableCaseTypes(sortedCaseTypes);
+      })
+      .catch(() => {
+        setLawyers([]);
+        setAvailableCaseTypes([]);
+      });
+  }, []);
   useEffect(() => {
-    // Pre-select lawyer if provided
-    if (selectedLawyer && selectedLawyer.id) {
-      setLawyerId(selectedLawyer.id.toString());
+    // Pre-select lawyer if provided and filter case types to lawyer's specializations
+    if (selectedLawyer && selectedLawyer.id && lawyers.length > 0) {
+      const lawyer = lawyers.find(l => l.userId.toString() === selectedLawyer.id.toString());
+      if (lawyer && lawyer.specialization && lawyer.specialization.length > 0) {
+        // Filter available case types to only show this lawyer's specializations
+        const lawyerSpecializations = lawyer.specialization.filter(spec => spec && spec.trim());
+        setAvailableCaseTypes(lawyerSpecializations.sort());
+        setLawyerId(selectedLawyer.id.toString());
+        setFilteredLawyers([lawyer]); // Only show this lawyer
+        // Don't auto-set case type - let user choose
+      }
     }
-  }, [selectedLawyer]);
+  }, [selectedLawyer, lawyers]);
+
+  // Filter lawyers based on selected case type
+  useEffect(() => {
+    if (caseType) {
+      const filtered = lawyers.filter(lawyer =>
+        lawyer.specialization &&
+        lawyer.specialization.includes(caseType)
+      );
+      setFilteredLawyers(filtered);
+      
+      // Reset lawyer selection if current lawyer doesn't match case type
+      // BUT only if it's not a pre-selected lawyer
+      if (lawyerId && !selectedLawyer) {
+        const currentLawyer = lawyers.find(l => l.userId.toString() === lawyerId);
+        if (!currentLawyer || !currentLawyer.specialization.includes(caseType)) {
+          setLawyerId('');
+        }
+      }
+    } else {
+      setFilteredLawyers([]);
+      // Don't reset lawyer ID if it's pre-selected
+      if (!selectedLawyer) {
+        setLawyerId('');
+      }
+    }
+  }, [caseType, lawyers, lawyerId, selectedLawyer]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -44,13 +101,20 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
     } else if (formData.title.trim().length < 5) {
       newErrors.title = 'Case title must be at least 5 characters long';
     }
-      if (!formData.description.trim()) {
+    
+    if (!formData.description.trim()) {
       newErrors.description = 'Case description is required';
     } else if (formData.description.trim().length < 20) {
       newErrors.description = 'Case description must be at least 20 characters long';
     } else if (formData.description.trim().length > 1000) {
       newErrors.description = 'Case description must be less than 1000 characters';
-    }if (!lawyerId) {
+    }
+    
+    if (!caseType) {
+      newErrors.caseType = 'Please select a case type';
+    }
+    
+    if (!lawyerId) {
       newErrors.lawyerId = 'Please select a lawyer';
     }
 
@@ -88,11 +152,16 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
       const authData = getAuthData();
       if (!authData) {
         throw new Error('You must be logged in to submit a case');
-      }      const caseData = {
+      }
+      
+      const caseData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
+        caseType: caseType,
         lawyerId: Number(lawyerId)
-      };      await caseService.createCase(authData.userId, caseData);
+      };
+      
+      await caseService.createCase(authData.userId, caseData);
       
       // Call success callback
       if (onSuccess) {
@@ -133,8 +202,41 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
               <p className="ml-3 text-sm text-red-700">{error}</p>
             </div>
           </div>
-        )}        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">          {/* Lawyer Selection */}
+        )}
+        
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Case Type Selection */}
+          <div>
+            <label htmlFor="caseType" className="block text-sm font-medium text-gray-700 mb-2">
+              Case Type *
+            </label>
+            <select
+              id="caseType"
+              name="caseType"
+              value={caseType}
+              onChange={e => setCaseType(e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.caseType ? 'border-red-300' : 'border-gray-300'}`}
+              disabled={isSubmitting || availableCaseTypes.length === 0}
+            >
+              <option value="">-- Select case type --</option>
+              {availableCaseTypes.map(type => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            {selectedLawyer && (
+              <p className="mt-1 text-sm text-blue-600">
+                Showing case types available for {selectedLawyer.name}
+              </p>
+            )}
+            {errors.caseType && (
+              <p className="mt-1 text-sm text-red-600">{errors.caseType}</p>
+            )}
+          </div>
+
+          {/* Lawyer Selection */}
           <div>
             <label htmlFor="lawyerId" className="block text-sm font-medium text-gray-700 mb-2">
               Select a Lawyer *
@@ -145,12 +247,17 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
               value={lawyerId}
               onChange={e => setLawyerId(e.target.value)}
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.lawyerId ? 'border-red-300' : 'border-gray-300'}`}
-              disabled={isSubmitting || lawyers.length === 0 || selectedLawyer}
+              disabled={isSubmitting || selectedLawyer || (!selectedLawyer && (!caseType || filteredLawyers.length === 0))}
             >
-              <option value="">-- Select a lawyer --</option>
-              {lawyers.map(lawyer => (
+              <option value="">
+                {selectedLawyer ? `${selectedLawyer.name} (Pre-selected)` :
+                 !caseType ? "-- Select case type first --" :
+                 filteredLawyers.length === 0 ? "-- No lawyers available for this case type --" :
+                 "-- Select a lawyer --"}
+              </option>
+              {!selectedLawyer && filteredLawyers.map(lawyer => (
                 <option key={lawyer.userId} value={lawyer.userId}>
-                  {lawyer.Fname} {lawyer.Lname} ({lawyer.specialization && lawyer.specialization.length > 0 ? lawyer.specialization.join(', ') : 'No specialty'})
+                  {lawyer.Fname} {lawyer.Lname}
                 </option>
               ))}
             </select>
@@ -162,6 +269,7 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
             {errors.lawyerId && (
               <p className="mt-1 text-sm text-red-600">{errors.lawyerId}</p>
             )}
+            
           </div>
 
           {/* Case Title */}
