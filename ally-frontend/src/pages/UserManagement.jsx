@@ -4,16 +4,14 @@ import UserManagementTable from '../components/UserManagementTable';
 
 const UserManagement = () => {
   return (
-    <div className="px-4 mx-auto space-y-4 sm:px-6 lg:px-8 sm:space-y-6 max-w-7xl">
-      <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
-        <h1 className="mt-4 text-xl font-bold text-gray-800 sm:text-2xl lg:text-3xl sm:mt-8">User Management</h1>
+    <div className="space-y-6 p-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
       </div>
       
-      <div className="w-full overflow-hidden">
-        <StatsOverview />
-      </div>
+      <StatsOverview />
       
-      <div className="w-full overflow-x-auto">
+      <div className="mt-8">
         <UserManagementTable />
       </div>
     </div>
