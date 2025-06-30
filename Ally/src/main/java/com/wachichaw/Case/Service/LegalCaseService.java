@@ -30,7 +30,9 @@ public class LegalCaseService {
 
     public LegalCaseService(LegalCaseRepo legalCaseRepo) {
         this.legalCaseRepo = legalCaseRepo;
-    }    public LegalCasesEntity createLegalCase(int clientId, LawyerEntity lawyer, String title, String caseDescription, LocalDateTime caseDate, CaseStatus status) {
+    }
+    
+    public LegalCasesEntity createLegalCase(int clientId, LawyerEntity lawyer, String title, String caseType, String caseDescription, LocalDateTime caseDate, CaseStatus status) {
         ClientEntity client = clientRepo.findById(clientId)
                 .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
         
@@ -46,10 +48,11 @@ public class LegalCaseService {
         legalCase.setClient(client);
         legalCase.setLawyer(lawyer);
         legalCase.setTitle(title);
+        legalCase.setCaseType(caseType);
         legalCase.setCaseNumber(nextCaseNumber);
         legalCase.setDescription(caseDescription);
         legalCase.setDateSubmitted(caseDate);
-        legalCase.setStatus(status);        
+        legalCase.setStatus(status);
         return legalCaseRepo.save(legalCase);
     }
     
