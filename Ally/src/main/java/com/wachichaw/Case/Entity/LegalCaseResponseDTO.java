@@ -9,6 +9,8 @@ import com.wachichaw.Lawyer.Entity.LawyerEntity;
 public class LegalCaseResponseDTO {
     private int caseId;
     private String title;
+    private String caseType;
+    private String urgencyLevel; // e.g., "High", "Medium", "Low"
     private long caseNumber;
     private String description;
     private LocalDateTime dateSubmitted;
@@ -91,6 +93,8 @@ public class LegalCaseResponseDTO {
     public LegalCaseResponseDTO(LegalCasesEntity legalCase) {
         this.caseId = legalCase.getCaseId();
         this.title = legalCase.getTitle();
+        this.caseType = legalCase.getCaseType() != null ? legalCase.getCaseType() : "Civil"; // Default to "Civil" if null
+        this.urgencyLevel = legalCase.getUrgencyLevel() != null ? legalCase.getUrgencyLevel().toString() : null;
         this.caseNumber = legalCase.getCaseNumber();
         this.description = legalCase.getDescription();
         this.dateSubmitted = legalCase.getDateSubmitted();
@@ -113,6 +117,12 @@ public class LegalCaseResponseDTO {
     
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getCaseType() { return caseType; }
+    public void setCaseType(String caseType) { this.caseType = caseType; }
+
+    public String getUrgencyLevel() { return urgencyLevel; }
+    public void setUrgencyLevel(String urgencyLevel) { this.urgencyLevel = urgencyLevel; }
     
     public long getCaseNumber() { return caseNumber; }
     public void setCaseNumber(long caseNumber) { this.caseNumber = caseNumber; }
