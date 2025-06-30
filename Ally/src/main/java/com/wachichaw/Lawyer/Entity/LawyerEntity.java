@@ -27,7 +27,7 @@ public class LawyerEntity extends UserEntity{
 
     @ElementCollection
     @CollectionTable(name = "lawyer_specializations", joinColumns = @JoinColumn(name = "lawyer_id"))
-@   Column(name = "specialization")
+    @Column(name = "specialization")
     private List<String> specialization = new ArrayList<>();
 
     @Column(name = "experience")
@@ -97,8 +97,10 @@ public class LawyerEntity extends UserEntity{
         this.credentials = credentials;
     }
     public boolean getCredentialsVerified() {
-        return credentialsVerified;
-    }    public void setCredentialsVerified(Boolean credentialsVerified) {
+        return credentialsVerified != null ? credentialsVerified : false;
+    }
+    
+    public void setCredentialsVerified(Boolean credentialsVerified) {
         this.credentialsVerified = credentialsVerified;
     }
 
@@ -111,7 +113,7 @@ public class LawyerEntity extends UserEntity{
     }
 
     public int getCasesHandled() {
-        return casesHandled;
+        return casesHandled != null ? casesHandled : 0;
     }
 
     public void setCasesHandled(Integer casesHandled) {

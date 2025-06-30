@@ -40,7 +40,7 @@ spring.ai.openai.chat.options.model=gemini-2.0-flash
 
 #for local development
 firebase.service.account.path=ally-firebasesdk.json
-firebase.bucket.name=ally-1d4e6.firebasestorage.app
+firebase.storage.bucket=ally-1d4e6.firebasestorage.app
 
 # Firebase Configuration
 firebase.storage.weka.data.folder=weka/data
