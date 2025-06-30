@@ -1,108 +1,97 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Users, UserCheck, UserX, Scale, CheckCircle, Clock, ArrowUp, ArrowDown } from 'lucide-react';
+import { Users, UserCheck, UserX, Scale, Clock } from 'lucide-react';
 
 const StatsOverview = () => {
   const location = useLocation();
-  const isUserManagement = location.pathname === '/admin/users';
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    inactiveUsers: 0,
+    verifiedLawyers: 0,
+    pendingVerifications: 0
+  });
 
-  const stats = isUserManagement ? [
+  useEffect(() => {
+    // TODO: Replace with actual API call
+    setStats({
+      totalUsers: 1230,
+      activeUsers: 1180,
+      inactiveUsers: 50,
+      verifiedLawyers: 342,
+      pendingVerifications: 20
+    });
+  }, []);
+
+  const statsCards = [
     {
       title: 'Total Users',
-      value: '1,230',
-      change: '12',
-      isIncrease: true,
+      value: stats.totalUsers,
+      change: '+12%',
       icon: Users,
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      borderColor: 'border-blue-100'
+      color: 'blue'
     },
     {
       title: 'Active Users',
-      value: '1,180',
-      change: '5',
-      isIncrease: true,
+      value: stats.activeUsers,
+      change: '+5%',
       icon: UserCheck,
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600',
-      borderColor: 'border-green-100'
+      color: 'green'
     },
     {
       title: 'Inactive Users',
-      value: '50',
-      change: '2',
-      isIncrease: false,
+      value: stats.inactiveUsers,
+      change: '-2%',
       icon: UserX,
-      bgColor: 'bg-red-50',
-      iconColor: 'text-red-600',
-      borderColor: 'border-red-100'
-    }
-  ] : [
-    {
-      title: 'Total Users',
-      value: '1,230',
-      change: '12',
-      isIncrease: true,
-      icon: Users,
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      borderColor: 'border-blue-100'
+      color: 'red'
     },
     {
       title: 'Verified Lawyers',
-      value: '342',
-      change: '8',
-      isIncrease: true,
+      value: stats.verifiedLawyers,
+      change: '+8%',
       icon: Scale,
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600',
-      borderColor: 'border-green-100'
-    },
-    {
-      title: 'Pending Verifications',
-      value: '1',
-      change: '5',
-      isIncrease: true,
-      icon: Clock,
-      bgColor: 'bg-yellow-50',
-      iconColor: 'text-yellow-600',
-      borderColor: 'border-yellow-100'
+      color: 'purple'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {stats.map((stat, index) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {statsCards.map((card, index) => (
         <div
           key={index}
-          className={`bg-white p-6 rounded-xl border ${stat.borderColor} shadow-sm 
-            transition-all duration-300 ease-in-out hover:shadow-md hover:scale-[1.02] 
-            hover:border-opacity-75`}
+          className={`bg-${card.color}-50 p-6 rounded-xl border border-${card.color}-100 
+            transition-all duration-300 ease-in-out hover:shadow-md`}
         >
           <div className="flex justify-between items-start">
-            <div className={`${stat.bgColor} p-3 rounded-lg`}>
-              <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+            <div className={`p-3 rounded-lg bg-${card.color}-100`}>
+              <card.icon className={`w-6 h-6 text-${card.color}-600`} />
             </div>
-            <div className={`flex items-center px-2 py-1 rounded-full ${
-              stat.isIncrease ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-            }`}>
-              {stat.isIncrease ? (
-                <ArrowUp className="w-4 h-4 mr-1" />
-              ) : (
-                <ArrowDown className="w-4 h-4 mr-1" />
-              )}
-              <span className="text-xs font-medium">{stat.change}%</span>
-            </div>
+            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+              ${card.change.startsWith('+') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+              {card.change}
+            </span>
           </div>
           <div className="mt-4">
-            <h3 className="text-sm font-medium text-gray-600">{stat.title}</h3>
-            <p className="mt-2 text-2xl font-bold text-gray-900">{stat.value}</p>
-            <p className="mt-1 text-sm text-gray-500">
-              vs. previous month
-            </p>
+            <h3 className="text-sm font-medium text-gray-600">{card.title}</h3>
+            <p className="mt-2 text-2xl font-bold text-gray-900">{card.value.toLocaleString()}</p>
           </div>
         </div>
       ))}
+
+      {/* Pending Verifications Card */}
+      {stats.pendingVerifications > 0 && (
+        <div className="lg:col-span-4 bg-yellow-50 p-4 rounded-xl border border-yellow-100 flex items-center justify-between">
+          <div className="flex items-center">
+            <Clock className="w-5 h-5 text-yellow-600 mr-2" />
+            <span className="text-sm font-medium text-yellow-800">
+              {stats.pendingVerifications} lawyer verification{stats.pendingVerifications !== 1 ? 's' : ''} pending review
+            </span>
+          </div>
+          <button className="px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors">
+            Review
+          </button>
+        </div>
+      )}
     </div>
   );
 };
