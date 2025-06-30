@@ -114,4 +114,32 @@ public class LegalCaseService {
         legalCase.setStatus(CaseStatus.DECLINED);
         return legalCaseRepo.save(legalCase);
     }
+
+    // Weka 
+
+    // Find a legal case by its ID
+    public LegalCasesEntity findById(int caseId) {
+        return legalCaseRepo.findById(caseId)
+                .orElseThrow(() -> new RuntimeException("Case not found with ID: " + caseId));
+    }
+
+    // Find a legal case by its ID (Long version for compatibility)
+    public LegalCasesEntity findById(Long caseId) {
+        return findById(caseId.intValue());
+    }
+
+    // Save or update a legal case
+    public LegalCasesEntity save(LegalCasesEntity legalCase) {
+        return legalCaseRepo.save(legalCase);
+    }
+
+    // Get all legal cases
+    public List<LegalCasesEntity> findAll() {
+        return legalCaseRepo.findAll();
+    }
+
+    // Check if a case exists by ID
+    public boolean existsById(int caseId) {
+        return legalCaseRepo.existsById(caseId);
+    }
 }

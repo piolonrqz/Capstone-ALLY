@@ -3,6 +3,8 @@ package com.wachichaw.Lawyer.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.units.qual.C;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.User.Entity.AccountType;
@@ -31,6 +33,9 @@ public class LawyerEntity extends UserEntity{
     @Column(name = "experience")
     private String experience;
 
+    @Column(name = "cases_handled")
+    private Integer casesHandled;
+
     @Column(name = "credentials", nullable = true)
     private String credentials;
 
@@ -49,31 +54,33 @@ public class LawyerEntity extends UserEntity{
     int userId, String email, String password, String Fname, String Lname,
     Long phoneNumber, String address, String city, String province, String zip,
     String barNumber,
-    List<String> specialization, String experience, String credentials,
+    List<String> specialization, String experience, int casesHandled, String credentials,
     boolean isVerified, AccountType accountType 
-) {
+    ) {
     super(userId, email, password, Fname, Lname, null, isVerified, phoneNumber, address, city, province, zip);
     this.setAccountType(accountType);
     this.barNumber = barNumber;
     this.specialization = specialization;
     this.experience = experience;
+    this.casesHandled = casesHandled;
     this.credentials = credentials;
-}
+    }
 
-public String getBarNumber() {
-    return barNumber;
-}
-public void setBarNumber(String barNumber) {
-    this.barNumber = barNumber;
-}
+    public String getBarNumber() {
+        return barNumber;
+    }
+    public void setBarNumber(String barNumber) {
+        this.barNumber = barNumber;
+    }
 
-  public List<String> getSpecialization() {
-    return specialization;
-}
+    public List<String> getSpecialization() {
+        return specialization;
+    }
 
-public void setSpecialization(List<String> specialization) {
-    this.specialization = specialization;
-}
+    public void setSpecialization(List<String> specialization) {
+        this.specialization = specialization;
+    }
+
     public String getExperience() {
         return experience;
     }
@@ -101,5 +108,13 @@ public void setSpecialization(List<String> specialization) {
 
     public void setCases(List<LegalCasesEntity> cases) {
         this.cases = cases;
+    }
+
+    public int getCasesHandled() {
+        return casesHandled;
+    }
+
+    public void setCasesHandled(Integer casesHandled) {
+        this.casesHandled = casesHandled;
     }
 }

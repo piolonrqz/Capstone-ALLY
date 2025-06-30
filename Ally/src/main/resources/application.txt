@@ -15,9 +15,9 @@ spring.application.name=ally
 server.port=8080
 
 # Railway Database Configuration
-spring.datasource.url=jdbc:mysql://shortline.proxy.rlwy.net:34153/railway
+spring.datasource.url=jdbc:mysql://tramway.proxy.rlwy.net:25250/railway
 spring.datasource.username=root
-spring.datasource.password=kOWGxOjnBYeizKpONdSNcffVEDXBAhLR
+spring.datasource.password=cZlTJUPGhePipIRtbLFHXFtsgQJSaZpS
 
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 logging.level.org.springframework.security=DEBUG
@@ -39,7 +39,12 @@ spring.ai.openai.chat.options.model=gemini-2.0-flash
 # firebase.service.account.path=file:/etc/secrets/studyspace-firebasesdk.json
 
 #for local development
-firebase.service.account.path=classpath:ally-firebasesdk.json
+firebase.service.account.path=ally-firebasesdk.json
 firebase.bucket.name=ally-1d4e6.firebasestorage.app
 
-storage.type=firebase
+# Firebase Configuration
+firebase.storage.weka.data.folder=weka/data
+firebase.storage.weka.models.folder=weka/models
+
+# Temporary directory to store downloads/models locally
+weka.temp.path=${java.io.tmpdir}/weka
