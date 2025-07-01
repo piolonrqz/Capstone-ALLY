@@ -38,29 +38,29 @@ function AppContent() {
       <NavigationBar />
       <div className={showNavigation ? "pt-[104px]" : ""}>
         <Routes>
-        <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/signup/client" element={<ClientRegistrationForm />} />
-        <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
-        <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
-        <Route path="/login" element={<Login />} />          
-        <Route path="/lawyers" element={<LawyerDirectoryPage />} />
-        <Route path="/appointments" element={<AppointmentsPage />} />
-        <Route path="/my-cases" element={<MyCasesPage />} />
-        <Route path="/documents" element={<DocumentsPage />} />
-        <Route path="/documents/:caseId" element={<DocumentsPage />} />
-        <Route path="/settings" element={<AccountSettings />} />
-        <Route path="/lawyer-settings" element={<LawyerSettings />} />
-                  {/* Chat Routes */}
+          <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signup/client" element={<ClientRegistrationForm />} />
+          <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
+          <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
+          <Route path="/login" element={<Login />} />          
+          <Route path="/lawyers" element={<LawyerDirectoryPage />} />
+          <Route path="/appointments" element={<AppointmentsPage />} />
+          <Route path="/my-cases" element={<MyCasesPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/documents/:caseId" element={<DocumentsPage />} />
+          <Route path="/settings" element={<AccountSettings />} />
+          <Route path="/lawyer-settings" element={<LawyerSettings />} />
+          {/* Chat Routes */}
           <Route path="/chat" element={<ChatContainer />} />
           <Route path="/messages/:chatroomId" element={<ChatContainer />} />
 
           {/* Admin Routes */}
           <Route
-            path="/admin"
+            path="/admin/*"
             element={
-              <ProtectedRoute allowedRole="admin">
+              <ProtectedRoute allowedRole="ADMIN">
                 <Admin />
               </ProtectedRoute>
             }

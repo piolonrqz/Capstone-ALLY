@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, ChevronDown, ChevronUp, MoreVertical, Trash2, UserCheck, UserX, Download, UserPlus, RefreshCw, Edit, Key, Ban, Mail } from 'lucide-react';
+import { Search, Filter, ChevronDown, ChevronUp, MoreVertical, Trash2, UserCheck, UserX, Download, UserPlus, RefreshCw, Edit, Key, Ban, Mail, AlertTriangle } from 'lucide-react';
+import { userService } from '../services/userService';
+import { adminService } from '../services/adminService';
 
 const UserManagementTable = () => {
   const [users, setUsers] = useState([]);
@@ -14,53 +16,39 @@ const UserManagementTable = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [error, setError] = useState(null);
 
   // Fetch users data
-  useEffect(() => {
-    // TODO: Replace with actual API call
-    setUsers([
-      {
-        id: 1,
-        name: 'John Smith',
-        email: 'john.smith@example.com',
-        role: 'client',
-        joinDate: '2024-03-15',
-        status: 'active',
-        verificationStatus: 'verified',
-        avatar: 'JS'
-      },
-      {
-        id: 2,
-        name: 'Elena Martinez',
-        email: 'elena.m@example.com',
-        role: 'lawyer',
-        joinDate: '2024-04-20',
-        status: 'active',
-        verificationStatus: 'pending',
-        avatar: 'EM'
-      },
-      {
-        id: 3,
-        name: 'Michael Chen',
-        email: 'm.chen@example.com',
-        role: 'admin',
-        joinDate: '2024-02-10',
-        status: 'active',
-        verificationStatus: 'verified',
-        avatar: 'MC'
-      },
-      {
-        id: 4,
-        name: 'Sarah Johnson',
-        email: 'sarah.j@example.com',
-        role: 'lawyer',
-        joinDate: '2024-03-01',
-        status: 'inactive',
-        verificationStatus: 'unverified',
-        avatar: 'SJ'
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await userService.getUsers();
+      const formattedUsers = data.map(user => ({
+        id: user.userId,
+        name: `${user.fname} ${user.lname}`,
+        email: user.email,
+        role: user.accountType.toLowerCase(),
+        joinDate: user.createdAt || new Date().toISOString(),
+        status: user.status || 'active',
+        verificationStatus: user.credentialsVerified ? 'verified' : 'pending',
+        avatar: `${user.fname[0]}${user.lname[0]}`
+      }));
+      setUsers(formattedUsers);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+      if (err.message === 'No users found') {
+        setUsers([]); // Set empty array instead of showing error
+      } else {
+        setError(err.message || 'Failed to load users. Please try again later.');
       }
-    ]);
-    setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   const handleSearch = (e) => {
@@ -90,22 +78,29 @@ const UserManagementTable = () => {
     );
   };
 
-  const handleBulkAction = (action) => {
-    switch (action) {
-      case 'activate':
-        // TODO: Implement bulk activate
-        break;
-      case 'deactivate':
-        // TODO: Implement bulk deactivate
-        break;
-      case 'delete':
-        // TODO: Implement bulk delete
-        break;
-      case 'export':
-        // TODO: Implement export
-        break;
-      default:
-        break;
+  const handleBulkAction = async (action) => {
+    try {
+      switch (action) {
+        case 'activate':
+          await userService.bulkUpdateStatus(selectedUsers, 'active');
+          break;
+        case 'deactivate':
+          await userService.bulkUpdateStatus(selectedUsers, 'inactive');
+          break;
+        case 'delete':
+          await Promise.all(selectedUsers.map(id => userService.deleteUser(id)));
+          break;
+        case 'export':
+          await userService.exportUsers({ userIds: selectedUsers });
+          break;
+        default:
+          break;
+      }
+      fetchUsers(); // Refresh the list
+      setSelectedUsers([]); // Clear selection
+    } catch (err) {
+      console.error(`Failed to perform bulk action ${action}:`, err);
+      setError(`Failed to perform bulk ${action}. Please try again later.`);
     }
   };
 
@@ -122,30 +117,33 @@ const UserManagementTable = () => {
     return colors[index];
   };
 
-  const handleAction = (action, userId) => {
-    switch (action) {
-      case 'edit':
-        // TODO: Implement edit action
-        console.log('Edit user:', userId);
-        break;
-      case 'resetPassword':
-        // TODO: Implement reset password
-        console.log('Reset password for user:', userId);
-        break;
-      case 'activate':
-        // TODO: Implement activate
-        console.log('Activate user:', userId);
-        break;
-      case 'deactivate':
-        // TODO: Implement deactivate
-        console.log('Deactivate user:', userId);
-        break;
-      case 'delete':
-        // TODO: Implement delete
-        console.log('Delete user:', userId);
-        break;
-      default:
-        break;
+  const handleAction = async (action, userId) => {
+    try {
+      switch (action) {
+        case 'edit':
+          // TODO: Implement edit action when form is ready
+          console.log('Edit user:', userId);
+          break;
+        case 'resetPassword':
+          // TODO: Implement reset password when endpoint is available
+          console.log('Reset password for user:', userId);
+          break;
+        case 'activate':
+          await userService.updateUserStatus(userId, 'active');
+          break;
+        case 'deactivate':
+          await userService.updateUserStatus(userId, 'inactive');
+          break;
+        case 'delete':
+          await userService.deleteUser(userId);
+          break;
+        default:
+          break;
+      }
+      fetchUsers(); // Refresh the list
+    } catch (err) {
+      console.error(`Failed to perform action ${action}:`, err);
+      setError(`Failed to perform ${action}. Please try again later.`);
     }
     setActiveDropdown(null);
   };
@@ -168,6 +166,32 @@ const UserManagementTable = () => {
       }
       return direction * (new Date(a[sort.field]) - new Date(b[sort.field]));
     });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="flex flex-col items-center">
+          <AlertTriangle className="w-12 h-12 text-red-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Error</h3>
+          <p className="text-gray-500 text-sm">{error}</p>
+          <button
+            onClick={fetchUsers}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200">

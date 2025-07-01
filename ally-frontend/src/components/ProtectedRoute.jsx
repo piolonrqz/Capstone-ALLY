@@ -1,16 +1,30 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom';
+import { getAuthData, isAdmin } from '../utils/auth';
 
 const ProtectedRoute = ({ children, allowedRole }) => {
-  // Temporarily disabled authentication check for development
-  // const user = JSON.parse(localStorage.getItem('user'))
-  // if (!user) {
-  //   return <Navigate to="/login" replace />
-  // }
-  // if (allowedRole && user.role !== allowedRole) {
-  //   return <Navigate to="/" replace />
-  // }
+  const location = useLocation();
+  const authData = getAuthData();
 
-  return children
-}
+  // Check if user is authenticated
+  if (!authData) {
+    // Save the attempted URL for redirecting after login
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
 
-export default ProtectedRoute
+  // Special check for admin routes
+  if (allowedRole === 'ADMIN') {
+    if (!isAdmin()) {
+      // If user is not an admin with ADMIN department, redirect to home
+      return <Navigate to="/" replace />;
+    }
+  }
+  // For other roles, just check the role
+  else if (allowedRole && authData.accountType !== allowedRole.toUpperCase()) {
+    // If user is logged in but doesn't have the right role, redirect to home
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+export default ProtectedRoute;

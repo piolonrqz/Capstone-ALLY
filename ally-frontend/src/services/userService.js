@@ -1,15 +1,76 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+// Add request interceptor to include auth token
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle common errors
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      switch (error.response.status) {
+        case 401:
+          // Unauthorized - clear token and redirect to login
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          break;
+        case 403:
+          // Forbidden - user doesn't have required permissions
+          console.error('Access denied:', error.response.data);
+          break;
+        case 404:
+          // Not found
+          console.error('Resource not found:', error.response.data);
+          break;
+        default:
+          console.error('Server error:', error.response.data);
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received:', error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error setting up request:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const userService = {
   // Get all users with optional filters
   async getUsers(filters = {}) {
     try {
-      const response = await axios.get(`${API_URL}/users/getAll`, { params: filters });
+      const response = await axios.get(`${API_URL}/users/getAll`, { 
+        params: filters,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching users:', error);
+      if (error.response?.status === 404) {
+        throw new Error('No users found');
+      } else if (error.response?.status === 401) {
+        throw new Error('Please log in to access this resource');
+      } else if (!error.response) {
+        throw new Error('Unable to connect to the server. Please check your connection and try again.');
+      }
       throw error;
     }
   },
