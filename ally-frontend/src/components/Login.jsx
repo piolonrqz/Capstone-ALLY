@@ -27,6 +27,8 @@ const Login = () => {
       const data = await response.json();
       localStorage.setItem('token', data.token); 
       localStorage.setItem('role', data.accountType);
+      localStorage.setItem('profile_photo', data.profilePhoto);
+      console.log(data);
       
       // If user is admin, fetch department information
       if (data.accountType === 'ADMIN') {
