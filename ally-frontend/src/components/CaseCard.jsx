@@ -1,46 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle, CalendarPlus, Upload, Eye } from 'lucide-react';
-import { BookingModal } from './BookingModal';
-import { documentService } from '../services/documentService';
-import { getAuthData } from '../utils/auth';
+import React, { useState } from 'react';
+import { Calendar, User, FileText, Clock, CheckCircle, XCircle, AlertCircle, Check, X } from 'lucide-react';
 
-const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
-  const navigate = useNavigate();
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [documentCount, setDocumentCount] = useState(0);
-  const [loadingDocuments, setLoadingDocuments] = useState(false);
-
-  // Load document count for accepted cases
-  useEffect(() => {
-    if (case_.status === 'ACCEPTED') {
-      loadDocumentCount();
-    }
-  }, [case_.caseId, case_.status]);
-
-  const loadDocumentCount = async () => {
-    try {
-      setLoadingDocuments(true);
-      const authData = getAuthData();
-      if (!authData) {
-        console.error('Not authenticated when trying to load document count');
-        setDocumentCount(0);
-        return;
-      }
-
-      const count = await documentService.getDocumentCount(case_.caseId);
-      setDocumentCount(count);
-    } catch (error) {
-      console.error('Error loading document count:', error);
-      setDocumentCount(0);
-    } finally {
-      setLoadingDocuments(false);
-    }
-  };
-
-  const handleNavigateToDocuments = () => {
-    navigate(`/documents/${case_.caseId}`);
-  };
+const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked, onCardClick }) => {
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -78,199 +41,124 @@ const CaseCard = ({ case_, userRole, onStatusChange, onAppointmentBooked }) => {
     }
   };
 
-  const handleStatusChange = (newStatus) => {
-    if (onStatusChange) {
-      onStatusChange(case_.caseId, newStatus);
+  const handleStatusChange = async (newStatus, e) => {
+    e.stopPropagation(); // Prevent card click when button is clicked
+    if (!onStatusChange) return;
+    
+    if (newStatus === 'ACCEPTED') {
+      setIsAccepting(true);
+    } else if (newStatus === 'DECLINED') {
+      setIsDeclining(true);
+    }
+    
+    try {
+      await onStatusChange(case_.caseId, newStatus);
+    } catch (error) {
+      console.error('Error changing case status:', error);
+    } finally {
+      setIsAccepting(false);
+      setIsDeclining(false);
     }
   };
 
-  const handleBookAppointment = () => {
-    setIsBookingModalOpen(true);
+  const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick(case_);
+    }
   };
 
-  const handleAppointmentBookingSuccess = () => {
-    setIsBookingModalOpen(false);
-    if (onAppointmentBooked) {
-      onAppointmentBooked(case_.caseId);
+  // Get participant name based on user role
+  const getParticipantName = () => {
+    if (userRole === 'LAWYER' && case_.client) {
+      return `${case_.client.Fname} ${case_.client.Lname}`;
+    } else if (userRole === 'CLIENT' && case_.lawyer) {
+      return `${case_.lawyer.Fname} ${case_.lawyer.Lname}`;
+    } else if (userRole === 'CLIENT' && !case_.lawyer && case_.status === 'PENDING') {
+      return 'Awaiting assignment';
     }
+    return 'N/A';
+  };
+
+  const getParticipantLabel = () => {
+    if (userRole === 'LAWYER') {
+      return 'Client';
+    } else if (userRole === 'CLIENT' && case_.lawyer) {
+      return 'Lawyer';
+    } else if (userRole === 'CLIENT' && !case_.lawyer) {
+      return 'Status';
+    }
+    return 'Participant';
   };
 
   return (
-    <div className="p-6 transition-shadow bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <h3 className="mb-2 text-lg font-semibold text-gray-900">
-            {case_.title}
-          </h3>
-          <div className="flex items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              <span>Submitted: {formatDate(case_.dateSubmitted)}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <FileText className="w-4 h-4" />
-              <span>Case #{case_.caseId}</span>
-            </div>
-            {/* Show appointment count if available */}
-            {case_.appointmentCount !== undefined && (
-              <div className="flex items-center gap-1">
-                <CalendarPlus className="w-4 h-4" />
-                <span>{case_.appointmentCount} appointment{case_.appointmentCount !== 1 ? 's' : ''}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Status Badge */}
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${getStatusColor(case_.status)}`}>
-          {getStatusIcon(case_.status)}
-          <span className="text-xs font-medium capitalize">
-            {case_.status?.toLowerCase()}
-          </span>
-        </div>
-      </div>
-
-      {/* Description */}
-      <div className="mb-4">
-        <p className="text-sm leading-relaxed text-gray-700">
-          {case_.description}
-        </p>
-      </div>
-
-      {/* Case Details */}
-      <div className="space-y-2 text-sm">
-        {/* Client Information (for lawyers) */}
-        {userRole === 'LAWYER' && case_.client && (
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500" />
-            <span className="text-gray-600">Client:</span>
-            <span className="font-medium text-gray-900">
-              {case_.client.Fname} {case_.client.Lname}
+    <div
+      className="p-4 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 cursor-pointer transition-colors"
+      onClick={handleCardClick}
+    >
+      <div className="flex items-center justify-between">
+        {/* Main Information */}
+        <div className="flex-1 min-w-0">
+          {/* Case Title and ID */}
+          <div className="flex items-center space-x-2 mb-2">
+            <span className="text-sm font-medium text-blue-600">
+              #{case_.caseId}
+            </span>
+            <span className="text-sm text-gray-500">•</span>
+            <span className="text-sm font-medium text-gray-900 truncate">
+              {case_.title}
             </span>
           </div>
-        )}
-
-        {/* Lawyer Information (for clients) */}
-        {userRole === 'CLIENT' && case_.lawyer && (
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500" />
-            <span className="text-gray-600">Assigned Lawyer:</span>
-            <span className="font-medium text-gray-900">
-              {case_.lawyer.Fname} {case_.lawyer.Lname}
-            </span>
-          </div>
-        )}
-
-        {/* No lawyer assigned message for clients */}
-        {userRole === 'CLIENT' && !case_.lawyer && case_.status === 'PENDING' && (
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500" />
-            <span className="text-gray-600">Status:</span>
-            <span className="italic text-gray-500">Waiting for lawyer assignment</span>
-          </div>
-        )}
-      </div>
-
-      {/* Action Buttons (for lawyers only) */}
-      {userRole === 'LAWYER' && case_.status === 'PENDING' && (
-        <div className="flex gap-3 pt-4 mt-6 border-t border-gray-200">
-          <button
-            onClick={() => handleStatusChange('ACCEPTED')}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700"
-          >
-            <CheckCircle className="w-4 h-4" />
-            Accept Case
-          </button>
-          <button
-            onClick={() => handleStatusChange('DECLINED')}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
-          >
-            <XCircle className="w-4 h-4" />
-            Decline Case
-          </button>
-        </div>
-      )}
-
-      {/* Additional Status Info */}
-      {case_.status === 'ACCEPTED' && (
-        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-800 text-sm mb-3">
-            ✓ This case has been accepted and is being processed.
-          </p>
           
-          {/* Document Management Section */}
-          <div className="flex items-center justify-between mb-3 p-2 bg-white rounded border">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-700">
-                {loadingDocuments ? (
-                  'Loading documents...'
-                ) : (
-                  `${documentCount} document${documentCount !== 1 ? 's' : ''}`
-                )}
-              </span>
+          {/* Participant and Date Information */}
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <User className="w-4 h-4 mr-2 text-blue-400" />
+                <span>
+                  {getParticipantLabel()}: {getParticipantName()}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                <span>{formatDate(case_.dateSubmitted)}</span>
+              </div>
             </div>
-            
-            {/* Document Management Button */}
-            {userRole === 'CLIENT' && (
-              <button
-                onClick={handleNavigateToDocuments}
-                className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
-                disabled={loadingDocuments}
-              >
-                <Upload className="w-3 h-3" />
-                {documentCount > 0 ? 'Manage Documents' : 'Upload Documents'}
-              </button>
-            )}
-            
-            {userRole === 'LAWYER' && documentCount > 0 && (
-              <button
-                onClick={handleNavigateToDocuments}
-                className="flex items-center gap-2 px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-sm"
-                disabled={loadingDocuments}
-              >
-                <Eye className="w-3 h-3" />
-                View Documents
-              </button>
-            )}
+          </div>
+        </div>
+
+        {/* Status and Actions */}
+        <div className="flex items-center space-x-3 ml-4">
+          {/* Status Badge */}
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-medium ${getStatusColor(case_.status)}`}>
+            {getStatusIcon(case_.status)}
+            <span className="capitalize">
+              {case_.status?.toLowerCase()}
+            </span>
           </div>
 
-          {/* Book Appointment Button for Clients */}
-          {userRole === 'CLIENT' && (
-            <button
-              onClick={handleBookAppointment}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-full justify-center"
-            >
-              <CalendarPlus className="w-4 h-4" />
-              {case_.appointmentCount > 0 ? 'Book Another Appointment' : 'Book Appointment'}
-            </button>
+          {/* Action Buttons - Only show for pending cases and lawyers */}
+          {case_.status === 'PENDING' && userRole === 'LAWYER' && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={(e) => handleStatusChange('ACCEPTED', e)}
+                disabled={isAccepting}
+                className="flex items-center px-3 py-1.5 text-xs text-white transition-colors bg-green-600 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Check className="w-3 h-3 mr-1" />
+                {isAccepting ? 'Accepting...' : 'Accept'}
+              </button>
+              <button
+                onClick={(e) => handleStatusChange('DECLINED', e)}
+                disabled={isDeclining}
+                className="flex items-center px-3 py-1.5 text-xs text-white transition-colors bg-red-600 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <X className="w-3 h-3 mr-1" />
+                {isDeclining ? 'Declining...' : 'Decline'}
+              </button>
+            </div>
           )}
         </div>
-      )}
-
-      {case_.status === 'DECLINED' && (
-        <div className="p-3 mt-4 border border-red-200 rounded-lg bg-red-50">
-          <p className="text-sm text-red-800">
-            ✗ This case has been declined. You may submit a new case or contact support.
-          </p>
-        </div>
-      )}
-
-      {/* Booking Modal */}
-      {isBookingModalOpen && case_.lawyer && (
-        <BookingModal
-          lawyer={{
-            id: case_.lawyer.userId,
-            name: `${case_.lawyer.Fname} ${case_.lawyer.Lname}`,
-            fee: case_.lawyer.fee || 'Consultation Fee Available'
-          }}
-          caseInfo={case_}
-          isOpen={isBookingModalOpen}
-          onClose={() => setIsBookingModalOpen(false)}
-          onSuccess={handleAppointmentBookingSuccess}
-        />
-      )}
+      </div>
     </div>
   );
 };

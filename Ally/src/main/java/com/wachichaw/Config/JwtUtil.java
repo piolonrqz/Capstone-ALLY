@@ -74,7 +74,4 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
     }
 
-    public String extractProfilePhoto(String token) {
-        return (String) extractAllClaims(token).get("profile_photo");
-    }
 }
