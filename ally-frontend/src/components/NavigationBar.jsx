@@ -105,6 +105,28 @@ const NavigationBar = () => {
     return 'U';
   };
 
+  // Get user type for badge display
+  const getUserType = () => {
+    const accountType = userDetails?.accountType;
+    if (!accountType) return null;
+    
+    // Convert to title case for display
+    return accountType.charAt(0).toUpperCase() + accountType.slice(1).toLowerCase();
+  };
+
+  // UserTypeBadge component
+  const UserTypeBadge = () => {
+    const userType = getUserType();
+    
+    if (!userType) return null;
+
+    return (
+      <div className={`px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-white/30 transition-all duration-200 hover:shadow-md relative z-10 bg-gradient-to-r from-blue-500 to-teal-500 text-white`}>
+        <span className="tracking-wide whitespace-nowrap">{userType}</span>
+      </div>
+    );
+  };
+
   return (
     <nav className="fixed top-0 bg-[#F7FBFF] w-full h-[104px] px-8 flex justify-between items-center z-50" style={{boxShadow: '0px 0px 4px 0px rgba(0, 0, 0, 0.25)'}}>
       {/* Logo */}
@@ -160,25 +182,26 @@ const NavigationBar = () => {
       </div>        
       
       {/* Right Side Buttons */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {isLoggedIn ? (
           <>
             {/* Message and Notification Icons */}
             <div className="relative" ref={notificationRef}>
-              <button 
+              <button
                 onClick={toggleNotifications}
                 className="relative flex items-center justify-center w-11 h-11 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8F2FF] hover:border-[#2B62C4]/30 hover:bg-white hover:shadow-lg transition-all duration-300 ease-in-out group"
               >
                 <Bell className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors duration-200" strokeWidth={1.8} />
-                {/* Notification badge */}
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
               </button>
-              <NotificationDropdown 
-                isOpen={isNotificationOpen} 
+              <NotificationDropdown
+                isOpen={isNotificationOpen}
                 onClose={() => setIsNotificationOpen(false)}
                 currentUser={userDetails}
               />
             </div>
+            
+            {/* User Type Badge */}
+            <UserTypeBadge />
             
             <div className="relative" ref={dropdownRef}>
               <button

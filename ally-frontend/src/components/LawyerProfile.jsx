@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, MessageCircle, X, FileText } from 'lucide-react';
 
 import ChatModal from './ChatModal';
+import CaseSubmissionForm from './CaseSubmissionForm';
 import useCurrentUser from '../hooks/useCurrentUser';
 
 export const LawyerProfile = ({ lawyer, onClose }) => {
@@ -148,6 +149,21 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
                     currentUserRole={currentUser.role}
                     currentUserName={currentUser.name}
                     receiverName={lawyer ? `${lawyer?.firstName || ''} ${lawyer?.lastName || ''}`.trim() : 'Unknown Lawyer'}
+                />
+            )}
+
+            {isCaseSubmissionOpen && (
+                <CaseSubmissionForm
+                    onClose={() => setIsCaseSubmissionOpen(false)}
+                    onSuccess={() => {
+                        setIsCaseSubmissionOpen(false);
+                        // Optionally close the lawyer profile modal as well
+                        onClose();
+                    }}
+                    selectedLawyer={{
+                        id: lawyer?.userId || lawyer?.id,
+                        name: lawyer?.name || `${lawyer?.firstName || ''} ${lawyer?.lastName || ''}`.trim()
+                    }}
                 />
             )}
         </>

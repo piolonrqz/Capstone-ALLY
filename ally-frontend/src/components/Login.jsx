@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,21 +27,42 @@ const Login = () => {
       const data = await response.json();
       localStorage.setItem('token', data.token); 
       localStorage.setItem('role', data.accountType);
-      console.log('Login response:', data);
-      console.log('Login successful:', data);
-
       
-      alert('Login successful!');
-       if (data.accountType === 'ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/'); 
+      // If user is admin, fetch department information
+      if (data.accountType === 'ADMIN') {
+        try {
+          const adminResponse = await fetch(`http://localhost:8080/admins/${data.id}`, {
+            headers: {
+              Authorization: `Bearer ${data.token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (adminResponse.ok) {
+            const adminData = await adminResponse.json();
+            localStorage.setItem('department', adminData.department);
+            
+            // Only redirect to admin if department is ADMIN
+            if (adminData.department === 'ADMIN') {
+              navigate('/admin', { replace: true });
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching admin details:', error);
+        }
       }
+
+      // For non-admin users or admins without ADMIN department
+      const from = location.state?.from || '/';
+      navigate(from, { replace: true });
     } catch (error) {
       console.error('Login failed:', error);
       alert('Login failed. Please check your credentials.');
     }
-  };  return (    
+  };
+
+  return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50 font-['Poppins'] relative p-4">
       {/* Logo in upper left corner */}
       <div className="absolute flex items-center gap-2 top-4 left-4 md:left-8">
@@ -130,9 +152,8 @@ const Login = () => {
           <button className="block w-full py-2 text-sm transition border border-gray-300 rounded-md sm:text-base hover:bg-gray-50"
           onClick={() => {
           window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-    }}>
+          }}>
             Google
-            
           </button>
         </div>
       </div>
