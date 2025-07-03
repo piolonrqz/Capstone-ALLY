@@ -26,6 +26,7 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
         claims.put("accountType", user.getAccountType());
+        claims.put("profilePhoto", user.getProfilePhoto());
         return createToken(claims, String.valueOf(user.getUserId()));
     }
 
@@ -46,6 +47,9 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return (String) extractAllClaims(token).get("username");
+    }
+    public String extractProfilePhoto(String token) {
+        return (String) extractAllClaims(token).get("profilePhoto");
     }
     public String extractEmail(String token) {
         return (String) extractAllClaims(token).get("email");

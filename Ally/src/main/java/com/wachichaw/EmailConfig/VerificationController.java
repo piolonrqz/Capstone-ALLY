@@ -46,16 +46,7 @@ public class VerificationController {
     public ResponseEntity<?> verifyAccountClient(@RequestParam int token) throws AccessDeniedException {
         System.out.println("Received token: " + token);
         ClientEntity client = tempClientStorageService.getUnverifiedUser(token);
-        System.out.println("Client retrieved: " + client.getEmail());
-        System.out.println("Client password: " + client.getPassword());
-        System.out.println("Client first name: " + client.getFname());
-        System.out.println("Client last name: " + client.getLname());   
-        System.out.println("Client phone number: " + client.getPhoneNumber());
-        System.out.println("Client address: " + client.getAddress());
-        System.out.println("Client city: " + client.getCity());
-        System.out.println("Client province: " + client.getProvince());
-        System.out.println("Client zip: " + client.getZip());
-        System.out.println("Client profile photo: " + client.getProfilePhoto());
+        
     
          
         userService.saveClient(
@@ -79,16 +70,7 @@ public class VerificationController {
     public ResponseEntity<?> verifyAccountLawyer(@RequestParam int token) throws AccessDeniedException {
         System.out.println("Received token: " + token);
         LawyerEntity lawyer = tempLawyerStorageService.getUnverifiedUser(token);
-        System.out.println("Client retrieved: " + lawyer.getEmail());
-        System.out.println("Client password: " + lawyer.getPassword());
-        System.out.println("Client first name: " + lawyer.getFname());
-        System.out.println("Client last name: " + lawyer.getLname());   
-        System.out.println("Client phone number: " + lawyer.getPhoneNumber());
-        System.out.println("Client address: " + lawyer.getAddress());
-        System.out.println("Client city: " + lawyer.getCity());
-        System.out.println("Client province: " + lawyer.getProvince());
-        System.out.println("Client zip: " + lawyer.getZip());
-        System.out.println("Client profile photo: " + lawyer.getProfilePhoto());
+        
     
          
         userService.saveLawyer(
@@ -104,7 +86,9 @@ public class VerificationController {
         lawyer.getBarNumber(),
         lawyer.getSpecialization(),
         lawyer.getExperience(),
-        lawyer.getCredentials()
+        lawyer.getCredentials(),
+        lawyer.getEducationInstitution(),
+        lawyer.getProfilePhoto()
         );
         userService.verifyLawyer(lawyer.getEmail()); 
         tempClientStorageService.removeUnverifiedUser(token);

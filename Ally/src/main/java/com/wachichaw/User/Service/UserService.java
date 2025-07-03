@@ -101,9 +101,6 @@ public class UserService {
     }
     public void verifyClient(String email) {
         Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
-
-    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials, String educationInstitution) {
-
         if (!optionalUser.isPresent() || !(optionalUser.get() instanceof ClientEntity)) {
             throw new RuntimeException("User not found with email: " + email);
         }
@@ -112,6 +109,8 @@ public class UserService {
         user.setVerified(true); 
         userRepo.save(user);
     }
+
+    public LawyerEntity saveLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials, String educationInstitution,String profilePhoto) {
         LawyerEntity lawyer = new LawyerEntity();
         lawyer.setEmail(email);
         lawyer.setPassword(passwordEncoder.encode(pass));
@@ -127,10 +126,11 @@ public class UserService {
         lawyer.setExperience(experience);
         lawyer.setCredentials(credentials); 
         lawyer.setEducationInstitution(educationInstitution);
+        lawyer.setProfilePhoto(profilePhoto);
         lawyer.setAccountType(AccountType.LAWYER);
         return userRepo.save(lawyer);
     }
-    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials) {
+    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials,String educationInstitution, String profilePhoto) {
         LawyerEntity lawyer = new LawyerEntity();
         lawyer.setEmail(email);
         lawyer.setPassword(pass);
@@ -145,10 +145,16 @@ public class UserService {
         lawyer.setSpecialization(specialization);
         lawyer.setExperience(experience);
         lawyer.setCredentials(credentials); 
+        lawyer.setEducationInstitution(educationInstitution);
+        lawyer.setProfilePhoto(profilePhoto);
         lawyer.setAccountType(AccountType.LAWYER);
         int token = (int)(Math.random() * 900000) + 100000;
         tempLawyerStorageService.saveUnverifiedUser(token, lawyer);
         tempLawyerStorageService.getUnverifiedUser(token);
+        System.out.println("Lawyer retrieved: " + profilePhoto);
+        System.out.println("Lawyer email: " + lawyer.getEmail());
+        System.out.println("Lawyer first name: " + Fname);
+        System.out.println("Lawyer password: " + token);
         LawyerEntity savedLawyer = lawyer;
         verificationService.sendVerificationEmail(savedLawyer.getEmail(), savedLawyer.getFname(), token);
         return savedLawyer;

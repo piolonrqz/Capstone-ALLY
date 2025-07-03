@@ -101,7 +101,8 @@ export default function ClientRegistrationForm() {
           body.append("email", formData.email);
           body.append("password", formData.password);
           body.append("Fname", formData.fName);
-          body.append("Lname", formData.lName);          body.append("phoneNumber", formData.phoneNumber);
+          body.append("Lname", formData.lName);          
+          body.append("phoneNumber", formData.phoneNumber);
           body.append("address", formData.address);
           body.append("city", formData.city);
           body.append("province", formData.province);

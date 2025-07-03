@@ -1,5 +1,6 @@
 package com.wachichaw.User.Controller;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
@@ -15,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Blob;
+import com.google.firebase.cloud.StorageClient;
 import com.wachichaw.Admin.Entity.AdminEntity;
 import com.wachichaw.Admin.Service.AdminService;
 import com.wachichaw.Client.Entity.ClientEntity;
@@ -32,6 +36,7 @@ import org.springframework.http.MediaType;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.net.URLEncoder;
 
 
 
@@ -128,23 +133,25 @@ public class UserController {
         @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhotoFile
     ) throws java.io.IOException {
         
-        String profilePhotoPath = null;
-        
-        // Handle profile photo upload if provided
-        if (profilePhotoFile != null && !profilePhotoFile.isEmpty()) {
-            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/profile_pictures";
-            Files.createDirectories(Paths.get(uploadDir)); // Ensure directory exists
+        String profilePhotoUrl = null;
 
-            String uniqueFileName = UUID.randomUUID() + "_" + profilePhotoFile.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, uniqueFileName);
-            Files.copy(profilePhotoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    if (profilePhotoFile != null && !profilePhotoFile.isEmpty()) {
+        String fileName = UUID.randomUUID() + "_" + profilePhotoFile.getOriginalFilename();
 
-            // Save the relative path to DB
-            profilePhotoPath = "/static/profile_pictures/" + uniqueFileName;
-        }
-        
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.create("profile_pictures/" + fileName,
+                                  profilePhotoFile.getBytes(),
+                                  profilePhotoFile.getContentType());
+
+        String encodedFileName = URLEncoder.encode(blob.getName(), StandardCharsets.UTF_8);
+profilePhotoUrl = String.format(
+    "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
+    bucket.getName(),
+    encodedFileName
+);
+    }
         ClientEntity client = userService.createClient(email, password, fname, lname, 
-                                        phoneNumber, address, city, province, zip, profilePhotoPath);
+                                        phoneNumber, address, city, province, zip, profilePhotoUrl);
         return ResponseEntity.ok(client);
     }
 
@@ -170,8 +177,27 @@ public class UserController {
     @RequestParam("specialization") List<String> specialization,
     @RequestParam("experience") String experience,
     @RequestParam("credentials") MultipartFile credentialsFile,
-    @RequestParam(value = "educationInstitution", required = false) String educationInstitution
+    @RequestParam(value = "educationInstitution", required = false) String educationInstitution,
+    @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhotoFile
 ) throws java.io.IOException {
+    
+    String profilePhotoUrl = null;
+
+    if (profilePhotoFile != null && !profilePhotoFile.isEmpty()) {
+        String fileName = UUID.randomUUID() + "_" + profilePhotoFile.getOriginalFilename();
+
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.create("profile_pictures/" + fileName,
+                                  profilePhotoFile.getBytes(),
+                                  profilePhotoFile.getContentType());
+
+        String encodedFileName = URLEncoder.encode(blob.getName(), StandardCharsets.UTF_8);
+profilePhotoUrl = String.format(
+    "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
+    bucket.getName(),
+    encodedFileName
+);
+    }
 
     String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/credentials";
     Files.createDirectories(Paths.get(uploadDir)); // Ensure directory exists
@@ -197,7 +223,8 @@ public class UserController {
         specialization,
         experience,
         relativePath,
-        educationInstitution
+        educationInstitution,
+        profilePhotoUrl
     );
 
     return ResponseEntity.ok(lawyer);
@@ -212,11 +239,13 @@ public class UserController {
         int id = Integer.parseInt(jwtUtil.extractUserId(token));
         String email = jwtUtil.extractEmail(token);
         String accountType = jwtUtil.extractAccountType(token);
+        String profilePhoto = jwtUtil.extractProfilePhoto(token);
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("id", id);
         response.put("email", email);
         response.put("accountType", accountType);
+        response.put("profilePhoto", profilePhoto);
         return ResponseEntity.ok(response);
     }    
     @GetMapping("/getAll")

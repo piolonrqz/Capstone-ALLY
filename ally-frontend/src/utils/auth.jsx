@@ -1,15 +1,10 @@
+import { jwtDecode } from "jwt-decode";
+
 export const decodeJWT = (token) => {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      throw new Error('Invalid JWT format');
-    }
 
-    const payload = parts[1];
-    const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
-    const decoded = atob(paddedPayload);
-
-    return JSON.parse(decoded);
+  
+ try {
+    return jwtDecode(token); // ✅ use jwtDecode (not jwt_decode)
   } catch (error) {
     console.error('Error decoding JWT:', error);
     throw error;
