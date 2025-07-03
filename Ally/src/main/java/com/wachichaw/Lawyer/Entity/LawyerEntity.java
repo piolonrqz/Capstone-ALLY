@@ -42,6 +42,9 @@ public class LawyerEntity extends UserEntity{
     @Column(name = "credentials_verified", nullable = true)
     private Boolean credentialsVerified = false;    
     
+    @Column(name = "education_institution", nullable = true)
+    private String educationInstitution;
+
     @OneToMany(mappedBy = "lawyer")
     @JsonManagedReference(value = "lawyer-case")
     private List<LegalCasesEntity> cases;
@@ -118,5 +121,12 @@ public class LawyerEntity extends UserEntity{
 
     public void setCasesHandled(Integer casesHandled) {
         this.casesHandled = casesHandled;
+    }
+
+    public String getEducationInstitution() {
+        return educationInstitution;
+    }
+    public void setEducationInstitution(String educationInstitution) {
+        this.educationInstitution = educationInstitution;
     }
 }
