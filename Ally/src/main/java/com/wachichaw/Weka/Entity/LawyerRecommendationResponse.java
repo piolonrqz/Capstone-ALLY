@@ -1,4 +1,4 @@
-package com.wachichaw.AI.Entity;
+package com.wachichaw.Weka.Entity;
 
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 
-const VerifyLawyer = () => {
+const VerifyClient = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
@@ -29,7 +29,7 @@ const VerifyLawyer = () => {
     setTimeout(async () => {
       setIsLoading(false);
       // Frontend
-await fetch("http://localhost:8080/verifyLawyer?token=" + verificationCode, {
+await fetch("http://localhost:8080/verifyClient?token=" + verificationCode, {
   method: "POST"
 });
 navigate('/login')
@@ -118,4 +118,4 @@ navigate('/login')
   );
 };
 
-export default VerifyLawyer;
+export default VerifyClient;

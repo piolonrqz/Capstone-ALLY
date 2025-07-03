@@ -1,4 +1,4 @@
-package com.wachichaw.AI.Controller;
+package com.wachichaw.Weka.Controller;
 
 import java.util.List;
 
@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.wachichaw.AI.Entity.LawyerRecommendationRequest;
-import com.wachichaw.AI.Entity.LawyerRecommendationResponse;
-import com.wachichaw.AI.Service.LawyerRecommendationService;
+import com.wachichaw.Weka.Entity.LawyerRecommendationRequest;
+import com.wachichaw.Weka.Entity.LawyerRecommendationResponse;
+import com.wachichaw.Weka.Service.LawyerRecommendationService;
 
 import jakarta.validation.Valid;
 

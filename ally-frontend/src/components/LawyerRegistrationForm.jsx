@@ -179,8 +179,12 @@ export default function LawyerRegistrationForm() {
         });
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.log("Form submitted with:", body);
-        alert("Registration successful!");
-        navigate('/login');
+     //   alert("Registration successful!");
+     //   navigate('/login');
+
+      alert("Registration successful!");
+      navigate('/signup/verifyLawyer', { state: { email: formData.email } });
+
       } catch (error) {
         console.error('Error submitting form:', error);
         alert("Error submitting form. Please try again.");

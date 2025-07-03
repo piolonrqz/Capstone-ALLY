@@ -4,10 +4,12 @@ import LandingPage from './pages/LandingPage'
 import SignUpPage from './pages/SignupPage'
 import ClientRegistrationForm from './components/ClientRegistrationForm'
 import LawyerRegistrationForm from './components/LawyerRegistrationForm'
+import VerifyClient from './components/VerifyClient'
 import VerifyLawyer from './components/VerifyLawyer'
 import Login from './components/Login'
 import Admin from './pages/Admin'
-import AdminDashboard from './components/AdminDashboard'
+import DashboardOverview from './components/DashboardOverview'
+import LawyerVerification from './components/LawyerVerification'
 import UserManagement from './pages/UserManagement'
 import AnalyticsDashboard from './components/AnalyticsDashboard'
 import SettingsDashboard from './components/SettingsDashboard'
@@ -37,12 +39,14 @@ function AppContent() {
       <NavigationBar />
       <div className={showNavigation ? "pt-[104px]" : ""}>
         <Routes>
+
         <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
         <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
-        <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
+        <Route path="/signup/verifyClient" element={<VerifyClient/>} />
+        <Route path="/signup/verifyLawyer" element={<VerifyLawyer/>} />
         <Route path="/login" element={<Login />} />          
         <Route path="/lawyers" element={<LawyerDirectoryPage />} />
         <Route path="/appointments" element={<AppointmentsPage />} />
@@ -52,24 +56,27 @@ function AppContent() {
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/lawyer-settings" element={<LawyerSettings />} />
                   {/* Chat Routes */}
+
+
           <Route path="/chat" element={<ChatContainer />} />
           <Route path="/messages/:chatroomId" element={<ChatContainer />} />
 
-        {/* Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRole="admin">
-              <Admin />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="analytics" element={<AnalyticsDashboard />} />
-          <Route path="settings" element={<SettingsDashboard />} />     
+          {/* Admin Routes */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute allowedRole="ADMIN">
+                <Admin />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardOverview />} />
+            <Route path="verification" element={<LawyerVerification />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="analytics" element={<AnalyticsDashboard />} />
+            <Route path="settings" element={<SettingsDashboard />} />     
           </Route>
-      </Routes>
+        </Routes>
       </div>
     </>
   );

@@ -43,7 +43,8 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 "/users/login",
                 "/users/**",
                 "/login/oauth2/code/google",
-                "/error", "/login**", "/oauth2/**"
+                "/error", "/login**", "/oauth2/**",
+                "/verifyClient","/api/email/send"
             ).permitAll()
             .anyRequest().permitAll())
         .oauth2Login(oauth2 -> oauth2

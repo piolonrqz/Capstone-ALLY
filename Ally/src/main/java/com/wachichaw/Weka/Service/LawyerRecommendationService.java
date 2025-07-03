@@ -1,4 +1,4 @@
-package com.wachichaw.AI.Service;
+package com.wachichaw.Weka.Service;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import com.wachichaw.AI.Controller.LawyerRecommendationController.ModelInfo;
-import com.wachichaw.AI.Entity.LawyerRecommendationRequest;
-import com.wachichaw.AI.Entity.LawyerRecommendationResponse;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Lawyer.Repo.LawyerRepo;
+import com.wachichaw.Weka.Controller.LawyerRecommendationController.ModelInfo;
+import com.wachichaw.Weka.Entity.LawyerRecommendationRequest;
+import com.wachichaw.Weka.Entity.LawyerRecommendationResponse;
 
 import java.util.Arrays;
 import jakarta.annotation.PostConstruct;
