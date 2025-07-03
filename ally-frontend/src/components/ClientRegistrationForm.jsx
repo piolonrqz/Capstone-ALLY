@@ -119,7 +119,7 @@ export default function ClientRegistrationForm() {
           body: body
         })
         console.log("Form submitted with:", body);
-      alert("Registration successful! Please login.");
+      alert("Registration successful! Please verify the email.");
       navigate('/signup/verifyClient' , { state: { email: formData.email } });
       }
       catch (error) {

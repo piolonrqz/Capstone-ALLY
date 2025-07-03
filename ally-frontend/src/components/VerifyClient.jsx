@@ -32,6 +32,7 @@ const VerifyClient = () => {
 await fetch("http://localhost:8080/verifyClient?token=" + verificationCode, {
   method: "POST"
 });
+alert("Registration successful! Please login.");
 navigate('/login')
     }, 1500);
   };
