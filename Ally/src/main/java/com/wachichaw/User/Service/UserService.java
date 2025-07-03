@@ -102,6 +102,7 @@ public class UserService {
     public void verifyClient(String email) {
         Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
         if (!optionalUser.isPresent() || !(optionalUser.get() instanceof ClientEntity)) {
+
             throw new RuntimeException("User not found with email: " + email);
         }
 
@@ -130,6 +131,7 @@ public class UserService {
         lawyer.setAccountType(AccountType.LAWYER);
         return userRepo.save(lawyer);
     }
+
     public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials,String educationInstitution, String profilePhoto) {
         LawyerEntity lawyer = new LawyerEntity();
         lawyer.setEmail(email);

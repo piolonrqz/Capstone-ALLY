@@ -1,5 +1,6 @@
 # -> Create your own "application.properties"
 # -> located at: "wachichaw\src\main\resources"
+coauthors: agramon, enriquez, largoza, malagapo, pangalay.
 
 # Swagger UI configuration
 springdoc.swagger-ui.path=/swagger-ui.html
@@ -80,3 +81,14 @@ spring.cloud.gcp.core.enabled=true
 # Logging for debugging
 logging.level.com.google.cloud=DEBUG
 logging.level.com.wachichaw=DEBUG
+
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=allylegal.cit@gmail.com
+spring.mail.protocol=smtp
+spring.mail.password=hbhe jhvq dsil pgsa
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.debug=true
+spring.mail.properties.mail.smtp.starttls.enabled=true
+spring.mail.properties.mail.smtp.starttls.required=true

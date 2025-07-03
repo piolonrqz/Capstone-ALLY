@@ -42,7 +42,9 @@ const NavigationBar = () => {
 
     getUserDetails();
   }, [isLoggedIn, authData?.userId]);
-
+  
+    const profilePhoto = localStorage.getItem("profile_photo");
+    
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -208,6 +210,7 @@ const NavigationBar = () => {
                 onClick={toggleDropdown}
                 className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-[#E8F2FF] transition-all duration-200 ease-in-out hover:shadow-md"
               >
+
                 {localStorage.getItem('profilePhoto') ? (
                   <img
                     src={localStorage.getItem('profilePhoto')}
@@ -219,6 +222,7 @@ const NavigationBar = () => {
                     {getUserInitials()}
                   </div>
                 )}
+
                 <ChevronDown className={`w-5 h-5 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
             
@@ -240,9 +244,9 @@ const NavigationBar = () => {
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors group"
+                    className="flex items-center w-full gap-3 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50 group"
                   >
-                    <LogOut className="w-5 h-5 text-red-500 group-hover:text-red-600 transition-colors" />
+                    <LogOut className="w-5 h-5 text-red-500 transition-colors group-hover:text-red-600" />
                     <span className="font-medium">Logout</span>
                   </button>              
                 </div>
