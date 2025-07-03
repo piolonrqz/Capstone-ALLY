@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from './Logo';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from '../firebase/config';
 
-export default function LawyerRegistrationForm() {const [step, setStep] = useState(1); // Start with step 1 for proper form flow
+export default function LawyerRegistrationForm() {
+  const [step, setStep] = useState(1); // Start with step 1 for proper form flow
   const oemail = localStorage.getItem("email");
   const fname = localStorage.getItem("fName");
   const lname = localStorage.getItem("lName");
@@ -15,7 +18,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
     email: oemail || "",
     password: "",
     confirmPassword: "",
-    profilePhoto: null,
+    profile_photo: null,
     phoneNumber: "",
     address: "",
     city: "",
@@ -34,6 +37,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
     },
     otherPracticeArea: "",
     yearsOfExperience: "",
+    educationInstitution: "",
     professionalBio: "",
     credentials: null,
     agreeToTerms: false
@@ -111,6 +115,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
   const validateStep3 = () => {
     const newErrors = {};
     // Disabled: if (!formData.prcNumber.trim()) newErrors.prcNumber = "Bar Number is required";
+    if (!formData.educationInstitution.trim()) newErrors.educationInstitution = "Education institution is required";
     if (!formData.yearsOfExperience.trim()) newErrors.yearsOfExperience = "Years of experience is required";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms";
     setErrors(newErrors);
@@ -137,44 +142,54 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
     e.preventDefault();
     if (validateStep3()) {
       try {
+        let profilePhotoUrl = "";
+        if (formData.profile_photo) {
+          // Upload profile photo to Firebase Storage
+          const file = formData.profile_photo;
+          const storageRef = ref(storage, `profile_photo/${Date.now()}_${file.name}`);
+          await uploadBytes(storageRef, file);
+          profilePhotoUrl = await getDownloadURL(storageRef);
+        }
         const body = new FormData();
         body.append("email", formData.email);
         body.append("password", formData.password);
-        body.append("Fname", formData.firstName);             
-        body.append("Lname", formData.lastName);               
-        body.append("phoneNumber", formData.phoneNumber);      
+        body.append("Fname", formData.firstName);
+        body.append("Lname", formData.lastName);
+        body.append("phoneNumber", formData.phoneNumber);
         body.append("address", formData.address);
         body.append("city", formData.city);
-        body.append("province", formData.province);              
-        body.append("zip", formData.zipCode);                  
-        body.append("barNumber", formData.prcNumber);          
+        body.append("province", formData.province);
+        body.append("zip", formData.zipCode);
+        body.append("barNumber", formData.prcNumber);
         body.append("experience", formData.yearsOfExperience);
-
-
+        body.append("educationInstitution", formData.educationInstitution);
+        if (profilePhotoUrl) {
+          body.append("profilePhotoUrl", profilePhotoUrl);
+        }
         const practiceAreas = formData.practiceAreas;
-
         Object.keys(practiceAreas).forEach(area => {
-       if (practiceAreas[area]) {
-    body.append("specialization", area);
-  }
-});
-        body.append("credentials", formData.credentials); 
-
-        fetch("http://localhost:8080/users/Lawyer", {
-        method: "POST",
-        body: body 
-      })
+          if (practiceAreas[area]) {
+            body.append("specialization", area);
+          }
+        });
+        body.append("credentials", formData.credentials);
+        await fetch("http://localhost:8080/users/Lawyer", {
+          method: "POST",
+          body: body
+        });
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.log("Form submitted with:", body);
-      alert("Registration successful!");
-      // navigate('/signup/lawyer/verify-lawyer', { state: { email: formData.email } });
-      navigate('/login');
+        alert("Registration successful!");
+        navigate('/login');
       } catch (error) {
         console.error('Error submitting form:', error);
+        alert("Error submitting form. Please try again.");
       }
     }
   };
-  return (      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-6 bg-white">
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-6 bg-white">
       <Logo className="hidden mb-6 md:block" />
       <div className={`bg-stone-100 p-4 sm:p-6 md:p-8 rounded-lg shadow-sm w-full ${
         step === 3 
@@ -208,9 +223,9 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                 <label className="block text-sm font-medium text-gray-700 text-start">Profile Photo</label>
                 <div className="flex flex-row items-center gap-6 mt-2">
                   <div className="relative flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
-                    {formData.profilePhoto ? (
+                    {formData.profile_photo ? (
                       <img 
-                        src={URL.createObjectURL(formData.profilePhoto)} 
+                        src={URL.createObjectURL(formData.profile_photo)} 
                         alt="Profile" 
                         className="object-cover w-full h-full rounded-full"
                       />
@@ -234,7 +249,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                           if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
                             setFormData({
                               ...formData,
-                              profilePhoto: file
+                              profile_photo: file
                             });
                           } else {
                             alert("File size should not exceed 5MB");
@@ -581,23 +596,23 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
                   </div>
                   <p className="mb-2 text-gray-600">Drag and drop files here or</p>
                   <label className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600">
-                         Browse Files
-                           <input
-                            type="file"
-                            className="hidden"
-                              onChange={(e) => {
-                                  setFormData({
-                                          ...formData,  
-                                            credentials: e.target.files[0]
-                                              });
-                                            }}
-                                          />
-                                          </label>
-                                  {formData.credentials && (
-                                        <p className="mt-2 text-xs text-gray-700">
-                                        Selected file: {formData.credentials.name}
-                                              </p>
-                                )}
+                    Browse Files
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          credentials: e.target.files[0]
+                        });
+                      }}
+                    />
+                  </label>
+                  {formData.credentials && (
+                    <p className="mt-2 text-xs text-gray-700">
+                      Selected file: {formData.credentials.name}
+                    </p>
+                  )}
                   <p className="mt-2 text-xs text-gray-500">PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB each)</p>
                 </div>
               </div>
