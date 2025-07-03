@@ -14,7 +14,7 @@ const EditProfile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [imgSrc, setImgSrc] = useState('/api/placeholder/100/100');
+  const profilePhoto = localStorage.get('profilePhoto')
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
   // Load current user details from localStorage
@@ -71,7 +71,7 @@ const EditProfile = () => {
   };
 
   const uploadImageToFirebase = async (file) => {
-    const storageRef = ref(storage, `profilePhotos/${currentUser.id}_${Date.now()}_${file.name}`);
+    const storageRef = ref(storage, `profile_pictures/${currentUser.id}_${Date.now()}_${file.name}`);
     await uploadBytes(storageRef, file);
     return await getDownloadURL(storageRef);
   };
@@ -113,11 +113,11 @@ const EditProfile = () => {
         throw new Error('Invalid user ID');
       }
 
-      let profilePhotoUrl = currentUser.prof_pic || '';
+      let profilePhoto = currentUser.prof_pic || '';
       if (formData.file) {
         // Upload to Firebase Storage
         profilePhotoUrl = await uploadImageToFirebase(formData.file);
-        setImgSrc(profilePhotoUrl); // Update preview immediately
+        setImgSrc(profilePhoto); // Update preview immediately
       }
 
       const formDataPayload = new FormData();

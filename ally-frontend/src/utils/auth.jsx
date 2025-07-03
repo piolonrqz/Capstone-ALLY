@@ -17,7 +17,7 @@ export const getAuthData = () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     const department = localStorage.getItem('department');
-
+    const profilePhoto = localStorage.getItem('profilePhoto');
     if (!token) {
       return null;
     }
@@ -31,6 +31,7 @@ export const getAuthData = () => {
       accountType: payload.accountType || role || 'unknown',
       department: department || null,
       isAuthenticated: true,
+      profilePhoto: payload.profilePhoto
     };
   } catch (error) {
     console.error('Error getting auth data:', error);

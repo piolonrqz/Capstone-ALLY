@@ -12,7 +12,7 @@ const ClientSettings = ({ user }) => {
     location: user?.location || user?.city || '',
   });
 
-
+  const profilePhoto = localStorage.getItem('profilePhoto');
    const token = localStorage.getItem('token');
     
   
@@ -130,6 +130,24 @@ const ClientSettings = ({ user }) => {
     });
   }, [user]);
 
+  // Handler for profile photo change
+  const handleProfilePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const { storage } = await import('../firebase/config');
+      const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+      const storageRef = ref(storage, `profile_pictures/${user.id}_${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      localStorage.setItem('profilePhoto', url);
+      window.location.reload();
+    } catch (err) {
+      alert('Failed to upload profile photo.');
+      console.error(err);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}      <aside className="fixed top-0 left-0 flex flex-col w-64 h-screen bg-white shadow-lg">
@@ -176,19 +194,43 @@ const ClientSettings = ({ user }) => {
 
           {/* Profile Section */}
           <Section title="My Profile">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full">
-                <span className="text-xl font-semibold text-blue-600">
-                  {(
-                    (personalInfo.firstName?.charAt(0) || '') +
-                    (personalInfo.lastName?.charAt(0) || '')
-                  ).toUpperCase() || 'U'}
-                </span>
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center">
+                <div className="flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full">
+                  {profilePhoto ? (
+                    <img
+                      src={profilePhoto}
+                      alt="Profile"
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <span className="text-xl font-semibold text-blue-600">
+                      {(
+                        (personalInfo.firstName?.charAt(0) || '') +
+                        (personalInfo.lastName?.charAt(0) || '')
+                      ).toUpperCase() || 'U'}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h4 className="ml-4 font-semibold text-gray-800">{profile.name}</h4>
+                </div>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-800">{profile.name}</h4>
-                <p className="text-gray-600">{profile.title}</p>
-                <p className="text-gray-500">{profile.location}</p>
+                <input
+                  id="profile-photo-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleProfilePhotoChange}
+                />
+                <button
+                  className='px-4 py-3 mb-4 text-white bg-blue-600 rounded-lg hover:bg-blue-700'
+                  onClick={() => document.getElementById('profile-photo-input').click()}
+                  type="button"
+                >
+                  Change Profile
+                </button>
               </div>
             </div>
           </Section>
