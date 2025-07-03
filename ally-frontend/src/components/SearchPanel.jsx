@@ -13,22 +13,45 @@ export const SearchPanel = ({
   const [filteredLawyers, setFilteredLawyers] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [yearsOptions, setYearsOptions] = useState([]); // <-- Add this
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  // Initialize filtered lawyers and extract unique specializations and locations
-  useEffect(() => {
-    if (lawyers && lawyers.length > 0) {
-      setFilteredLawyers(lawyers);
-      
-      // Extract unique specializations
-      const specs = [...new Set(lawyers.map(lawyer => lawyer.specialty).filter(Boolean))];
-      setSpecializations(specs);
-      
-      // Extract unique locations
-      const locs = [...new Set(lawyers.map(lawyer => lawyer.location).filter(Boolean))];
-      setLocations(locs);
-    }
-  }, [lawyers]);
+  const experienceRanges = [
+  { label: "All Years", value: "All Years" },
+  { label: "1-3 years", value: "1-3" },
+  { label: "4-7 years", value: "4-7" },
+  { label: "8+ years", value: "8+" }
+];
+
+  // Initialize filtered lawyers and extract unique specializations, locations, and years of experience
+  
+useEffect(() => {
+  if (lawyers && lawyers.length > 0) {
+    setFilteredLawyers(lawyers);
+
+    // Extract unique specializations
+    const specs = [...new Set(lawyers.map(lawyer => lawyer.specialty).filter(Boolean))];
+    setSpecializations(specs);
+
+    // Extract unique locations
+    const locs = [...new Set(lawyers.map(lawyer => lawyer.location).filter(Boolean))];
+    setLocations(locs);
+
+    // Extract unique years of experience
+    const years = [
+  ...new Set(
+    lawyers
+      .map(lawyer => lawyer.experience)
+      .filter(val => val !== undefined && val !== null && val !== '')
+  ),
+].sort((a, b) => a - b);
+    setYearsOptions(years);
+
+    // Print the years to the console for debugging
+    console.log('Extracted experience:', years);
+  }
+}, [lawyers]);
+
   // Apply filters function
   const applyFilters = () => {
     if (!lawyers || lawyers.length === 0) {
@@ -36,7 +59,25 @@ export const SearchPanel = ({
       return;
     }
 
-    let filtered = [...lawyers];
+      const isDefault =
+    (!searchQuery || searchQuery.trim() === '') &&
+    (!filters.specialty || filters.specialty === 'All Specialties') &&
+    (!filters.location || filters.location === 'All Locations') &&
+    (!filters.experience || filters.experience === 'All Years') &&
+    (!filters.availability || filters.availability === 'Any Day');
+
+  let filtered = [...lawyers];
+
+  if (isDefault) {
+    filtered.sort((a, b) => {
+      const aYears = Number(typeof a.experience === 'string' ? a.experience.replace(/\D/g, '') : a.experience);
+      const bYears = Number(typeof b.experience === 'string' ? b.experience.replace(/\D/g, '') : b.experience);
+      return bYears - aYears;
+    });
+    setFilteredLawyers(filtered);
+    return;
+  }
+
 
     // Apply search query filter
     if (searchQuery && searchQuery.trim()) {
@@ -44,7 +85,8 @@ export const SearchPanel = ({
       filtered = filtered.filter(lawyer => 
         lawyer.name?.toLowerCase().includes(query) ||
         lawyer.specialty?.toLowerCase().includes(query) ||
-        lawyer.location?.toLowerCase().includes(query)
+        lawyer.location?.toLowerCase().includes(query) ||
+        (lawyer.experience && lawyer.experience.toString().includes(query))
       );
     }
 
@@ -62,16 +104,25 @@ export const SearchPanel = ({
       );
     }
 
-    // Apply rating filter
-    if (filters.rating && filters.rating !== 'Any Rating') {
-      const minRating = filters.rating === '4+ Stars' ? 4 : 4.5;
-      filtered = filtered.filter(lawyer => 
-        lawyer.rating && lawyer.rating >= minRating
-      );
-    }
+    // Apply years of experience filter
+  if (filters.experience && filters.experience !== 'All Years') {
+  filtered = filtered.filter(lawyer => {
+    // Extract the number from "5 years", "1 years", etc.
+    const years = Number(
+      typeof lawyer.experience === 'string'
+        ? lawyer.experience.replace(/\D/g, '')
+        : lawyer.experience
+    );
+    if (filters.experience === '1-3') return years >= 1 && years <= 3;
+    if (filters.experience === '4-7') return years >= 4 && years <= 7;
+    if (filters.experience === '8+') return years >= 8;
+    return true;
+  });
+}
 
     setFilteredLawyers(filtered);
   };
+
   // Auto-apply filters when search query or filters change
   useEffect(() => {
     applyFilters();
@@ -83,8 +134,8 @@ export const SearchPanel = ({
     setFilters({
       specialty: 'All Specialties',
       location: 'All Locations',
+      experience: 'All Years',
       availability: 'Any Day',
-      rating: 'Any Rating'
     });
   };
 
@@ -120,18 +171,20 @@ export const SearchPanel = ({
         <h3 className="font-semibold">Filter Lawyers</h3>
         
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Specialty</label>
-          <select 
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={filters.specialty}
-            onChange={(e) => setFilters({...filters, specialty: e.target.value})}
-          >
-            <option value="All Specialties">All Specialties</option>
-            {specializations.map((spec, index) => (
-              <option key={index} value={spec}>{spec}</option>
-            ))}
-          </select>
-        </div>
+  <label className="block mb-1 text-sm font-medium text-gray-700">Specialty</label>
+  <select 
+    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+    value={filters.specialty}
+    onChange={(e) => setFilters({...filters, specialty: e.target.value})}
+  >
+    <option value="All Specialties">All Specialties</option>
+    <option value="familyLaw">Family Law</option>
+    <option value="realEstate">Real Estate</option>
+    <option value="businessLaw">Business Law</option>
+    <option value="estatePlanning">Estate Planning</option>
+    <option value="criminalDefense">Criminal Defense</option>
+  </select>
+</div>
 
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">Location</label>
@@ -147,6 +200,20 @@ export const SearchPanel = ({
           </select>
         </div>
 
+        {/* Years of Experience Filter */}
+        <div>
+  <label className="block mb-1 text-sm font-medium text-gray-700">Years of Experience</label>
+  <select
+    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+    value={filters.experience || 'All Years'}
+    onChange={(e) => setFilters({...filters, experience: e.target.value})}
+  >
+    {experienceRanges.map((range) => (
+      <option key={range.value} value={range.value}>{range.label}</option>
+    ))}
+  </select>
+</div>
+
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">Availability</label>
           <select 
@@ -159,19 +226,7 @@ export const SearchPanel = ({
             <option>Weekends</option>
           </select>
         </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Minimum Rating</label>
-          <select 
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={filters.rating}
-            onChange={(e) => setFilters({...filters, rating: e.target.value})}
-          >
-            <option>Any Rating</option>
-            <option>4+ Stars</option>
-            <option>4.5+ Stars</option>
-          </select>
-        </div>        <div className="flex space-x-2">
+        <div className="flex space-x-2">
           <button 
             className="flex-1 px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
             onClick={applyFilters}
@@ -185,7 +240,8 @@ export const SearchPanel = ({
             Reset
           </button>
         </div>
-      </div>      {/* Results count */}
+      </div>
+      {/* Results count */}
       <div className="mb-4">
         <p className="text-sm text-gray-600">
           Showing {filteredLawyers.length} lawyer{filteredLawyers.length !== 1 ? 's' : ''}
