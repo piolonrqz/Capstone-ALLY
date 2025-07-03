@@ -9,90 +9,9 @@ import NavigationBar from './NavigationBar';
 const LawyerSettings = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-
+  const profilePhoto = localStorage.getItem('profilePhoto');
   const token = localStorage.getItem('token');
-  
 
-  useEffect(() => {
-    fetch(`http://localhost:8080/users/getUser/${user.id}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        setProfile({
-          name: `${data.Fname} ${data.Lname}`,
-        });
-        console.log('Profile data:', data);
-        setPersonalInfo(prev => ({
-          ...prev,
-          firstName: data.Fname || '',
-          lastName: data.Lname || '',
-          email: data.email || '',
-          phone: data.phoneNumber || '',
-          experience: data.experience || '',
-          barNumber: data.barNumber || '',
-          // If backend returns an array, join to string for display
-          practiceAreas: Array.isArray(data.practiceAreas) ? data.practiceAreas.join(', ') : (data.practiceAreas || ''),
-          educationInstitution: data.educationInstitution || '',
-        }));
-        setAddress(prev => ({
-          ...prev,
-          line1: data.address || '',
-          province: data.province || '',
-          zipCode: data.zipCode || data.zip || '',
-          cityState: data.cityState || data.city || '',
-        }));
-      })
-      .catch(error => {
-        console.error('Failed to fetch user:', error);
-      });
-  }, []);
-
-const handleUpdate = async () => {
-  const updatedUserData = {
-    ...personalInfo,
-    ...address,
-    phoneNumber: personalInfo.phone,
-    experience: personalInfo.experience,
-    barNumber: personalInfo.barNumber,
-    address: address.line1,
-    province: address.province,
-    zip: address.zipCode,
-    Fname: personalInfo.firstName,
-    Lname: personalInfo.lastName,
-    city: address.cityState,
-    practiceAreas: personalInfo.practiceAreas,
-    educationInstitution: personalInfo.educationInstitution,
-  };
-
-  console.log('Updated user data:', updatedUserData);
-
-  try {
-    const response = await fetch(`http://localhost:8080/users/lawyerUpdate/${user.id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(updatedUserData),
-      }
-    );
-
-    if (response.ok) {
-      alert('Profile updated successfully!');
-    } else {
-      alert('Update failed.');
-    }
-  } catch (error) {
-    console.error('Update error:', error);
-    alert('Something went wrong.');
-  }
-};
   // Initialize state from user prop
   const [profile, setProfile] = useState({
     name:
@@ -123,11 +42,142 @@ const handleUpdate = async () => {
 
   const [loading, setLoading] = useState(!user);
   const [error, setError] = useState(null);
+  const [practiceAreaOptions, setPracticeAreaOptions] = useState([]);
+  const [currentProfilePhoto, setCurrentProfilePhoto] = useState(profilePhoto);
+
+  // Convert specialization to array for chips
+  const [practiceAreasChips, setPracticeAreasChips] = useState(() => {
+    if (Array.isArray(personalInfo.specialization)) return personalInfo.specialization;
+    if (typeof personalInfo.specialization === 'string') {
+      return personalInfo.specialization.split(',').map((s) => s.trim()).filter(Boolean);
+    }
+    return [];
+  });
+
+  // Fetch user data
+  const fetchUserData = () => {
+    if (!user?.id || !token) return;
+    fetch(`http://localhost:8080/users/getUser/${user.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        setProfile({
+          name: `${data.Fname} ${data.Lname}`,
+        });
+        setPersonalInfo(prev => ({
+          ...prev,
+          firstName: data.Fname || '',
+          lastName: data.Lname || '',
+          email: data.email || '',
+          phone: data.phoneNumber || '',
+          experience: data.experience || '',
+          barNumber: data.barNumber || '',
+          specialization: Array.isArray(data.specialization) ? data.specialization : (typeof data.specialization === 'string' ? data.specialization.split(',').map(s => s.trim()).filter(Boolean) : []),
+          educationInstitution: data.educationInstitution || '',
+        }));
+        setAddress(prev => ({
+          ...prev,
+          line1: data.address || '',
+          province: data.province || '',
+          zipCode: data.zipCode || data.zip || '',
+          cityState: data.cityState || data.city || '',
+        }));
+        // Update practice areas chips
+        if (data.specialization) {
+          const areas = Array.isArray(data.specialization)
+            ? data.specialization
+            : data.specialization.split(',').map(s => s.trim()).filter(Boolean);
+          setPracticeAreasChips(areas);
+        } else {
+          setPracticeAreasChips([]);
+        }
+      })
+      .catch(error => {
+        setError(`Failed to fetch user data: ${error.message}`);
+      });
+  };
+
+  useEffect(() => {
+    fetchUserData();
+    // eslint-disable-next-line
+  }, [user?.id, token]);
+
+  // Fetch available practice areas from backend
+  useEffect(() => {
+    if (!token) {
+      console.log('No token available for fetching specializations');
+      return;
+    }
+
+    console.log('Fetching specializations...');
+    fetch('http://localhost:8080/users/specializations', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => {
+        console.log('Specializations response status:', res.status);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log('Specializations data received:', data);
+        // Handle different response formats
+        if (Array.isArray(data)) {
+          setPracticeAreaOptions(data);
+        } else if (data.specializations && Array.isArray(data.specializations)) {
+          setPracticeAreaOptions(data.specializations);
+        } else if (data.data && Array.isArray(data.data)) {
+          setPracticeAreaOptions(data.data);
+        } else {
+          console.warn('Unexpected specializations data format:', data);
+          setPracticeAreaOptions([]);
+        }
+      })
+      .catch(error => {
+        console.error('Failed to fetch practice areas:', error);
+        setError(`Failed to fetch practice areas: ${error.message}`);
+        // Set some default practice areas as fallback
+        setPracticeAreaOptions([
+          'Criminal Law',
+          'Civil Law',
+          'Family Law',
+          'Corporate Law',
+          'Real Estate Law',
+          'Immigration Law',
+          'Employment Law',
+          'Personal Injury',
+          'Tax Law',
+          'Intellectual Property'
+        ]);
+      });
+  }, [token]);
+
+  // Keep chips and personalInfo.specialization in sync
+  useEffect(() => {
+    setPersonalInfo((prev) => ({
+      ...prev,
+      specialization: practiceAreasChips
+    }));
+  }, [practiceAreasChips]);
 
   // Optionally, update state if user prop changes
   useEffect(() => {
     if (!user) {
-      setError(null); // Don't show error immediately, just show loading
+      setError(null);
       setLoading(true);
       return;
     }
@@ -159,63 +209,78 @@ const handleUpdate = async () => {
     setLoading(false);
   }, [user]);
 
-  // Fetch available practice areas from backend
-  const [practiceAreaOptions, setPracticeAreaOptions] = useState([]);
-  useEffect(() => {
-    fetch('http://localhost:8080/users/specializations', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(res => res.json())
-      .then(data => {
-        setPracticeAreaOptions(data || []);
-      })
-      .catch(error => {
-        console.error('Failed to fetch practice areas:', error);
+  const handleUpdate = async () => {
+    const finalPracticeAreas = practiceAreasChips.length > 0 ? practiceAreasChips : [];
+    const updatedUserData = {
+      ...personalInfo,
+      ...address,
+      phoneNumber: personalInfo.phone,
+      experience: personalInfo.experience,
+      barNumber: personalInfo.barNumber,
+      address: address.line1,
+      province: address.province,
+      zip: address.zipCode,
+      Fname: personalInfo.firstName,
+      Lname: personalInfo.lastName,
+      city: address.cityState,
+      specialization: finalPracticeAreas, // use 'specialization' for backend
+      educationInstitution: personalInfo.educationInstitution,
+      prof_pic: currentProfilePhoto,
+    };
+    try {
+      const response = await fetch(`http://localhost:8080/users/lawyerUpdate/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(updatedUserData),
       });
-  }, []);
+      if (response.ok) {
+        alert('Profile updated successfully!');
+        fetchUserData(); // re-fetch user data to update UI
+      } else {
+        const errorData = await response.text();
+        alert(`Update failed: ${errorData}`);
+      }
+    } catch (error) {
+      alert('Something went wrong.');
+    }
+  };
 
-  console.log('User object:', user);
-
-  // Remove sidebar and just render the settings content as a component
-  if (loading) {
-    return (
-      <>
-        <NavigationBar />
-        <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
-          <div className="flex items-center justify-center py-20">
-            <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
-            <span className="ml-3 text-gray-600">Loading your profile...</span>
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <>
-        <NavigationBar />
-        <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
-          <div className="container max-w-5xl px-4 py-8 mx-auto">
-            <div className="p-6 border border-red-200 rounded-lg bg-red-50">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" /></svg>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error</h3>
-                  <div className="mt-2 text-sm text-red-700">
-                    <p>{error}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
+  // Handler for profile photo change
+  const handleProfilePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    try {
+      const { storage } = await import('../firebase/config');
+      const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+      const storageRef = ref(storage, `profile_pictures/${user.id}_${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      
+      // Update localStorage
+      localStorage.setItem('profilePhoto', url);
+      
+      // Update local state to immediately show the new photo
+      setCurrentProfilePhoto(url);
+      
+      // Optionally update the user object in localStorage if you have currentUser
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (currentUser.id) {
+        localStorage.setItem('currentUser', JSON.stringify({
+          ...currentUser,
+          prof_pic: url
+        }));
+      }
+      
+      alert('Profile photo updated successfully!');
+    } catch (err) {
+      alert('Failed to upload profile photo.');
+      console.error(err);
+    }
+  };
 
   // Chips-style multi-select for Practice Areas
   const ChipsInput = ({ label, values, setValues, options, placeholder }) => {
@@ -239,6 +304,11 @@ const handleUpdate = async () => {
       }
     };
 
+    const handleOptionClick = (option) => {
+      addChip(option);
+      setInput('');
+    };
+
     return (
       <div className="space-y-1">
         <label className="block text-sm font-medium text-gray-700">{label}</label>
@@ -258,51 +328,76 @@ const handleUpdate = async () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleInputKeyDown}
           placeholder={placeholder}
-          list="practice-areas-list"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-        <datalist id="practice-areas-list">
-          {options.map((option, idx) => (
-            <option value={option} key={idx} />
-          ))}
-        </datalist>
+        {/* Show available options */}
+        {options.length > 0 && (
+          <div className="mt-2">
+            <p className="mb-1 text-xs text-gray-500">Available options:</p>
+            <div className="flex flex-wrap gap-1">
+              {options.map((option, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleOptionClick(option)}
+                  className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+                  disabled={values.includes(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
 
-  // In main component body, convert practiceAreas to array for chips
-  const [practiceAreasChips, setPracticeAreasChips] = useState(() => {
-    if (Array.isArray(personalInfo.practiceAreas)) return personalInfo.practiceAreas;
-    if (typeof personalInfo.practiceAreas === 'string' && personalInfo.practiceAreas.trim()) {
-      return personalInfo.practiceAreas.split(',').map(s => s.trim()).filter(Boolean);
-    }
-    return [];
-  });
-  // Keep chips and personalInfo.practiceAreas in sync
-  useEffect(() => {
-    setPersonalInfo((prev) => ({ ...prev, practiceAreas: practiceAreasChips }));
-    // eslint-disable-next-line
-  }, [practiceAreasChips]);
+  console.log('User object:', user);
+  console.log('Practice area options:', practiceAreaOptions);
+  console.log('Practice areas chips:', practiceAreasChips);
 
-  // Custom AutocompleteInputField for practice areas
-  const AutocompleteInputField = ({ label, value, onChange, options, placeholder }) => (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        list="practice-areas-list"
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
-      <datalist id="practice-areas-list">
-        {options.map((option, idx) => (
-          <option value={option} key={idx} />
-        ))}
-      </datalist>
-    </div>
-  );
+  if (loading) {
+    return (
+      <>
+        <NavigationBar />
+        <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
+          <div className="flex items-center justify-center py-20">
+            <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <span className="ml-3 text-gray-600">Loading your profile...</span>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <NavigationBar />
+        <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
+          <div className="container max-w-5xl px-4 py-8 mx-auto">
+            <div className="p-6 border border-red-200 rounded-lg bg-red-50">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+                </svg>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Error</h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <p>{error}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -312,27 +407,43 @@ const handleUpdate = async () => {
 
         {/* Profile Section */}
         <Section title="My Profile">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full">
-              {user?.profilePhotoUrl ? (
-                <img
-                  src={user.profilePhotoUrl}
-                  alt="Profile"
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <span className="text-xl font-semibold text-blue-600">
-                  {(
-                    (personalInfo.firstName?.charAt(0) || '') +
-                    (personalInfo.lastName?.charAt(0) || '')
-                  ).toUpperCase() || 'U'}
-                </span>
-              )}
+          <div className="flex items-center justify-between space-x-4">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full">
+                {profilePhoto ? (
+                  <img
+                    src={profilePhoto}
+                    alt="Profile"
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <span className="text-xl font-semibold text-blue-600">
+                    {(
+                      (personalInfo.firstName?.charAt(0) || '') +
+                      (personalInfo.lastName?.charAt(0) || '')
+                    ).toUpperCase() || 'U'}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h4 className="ml-4 font-semibold text-gray-800">{profile.name}</h4>
+              </div>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-800">{profile.name}</h4>
-              <p className="text-gray-600">{profile.title}</p>
-              <p className="text-gray-500">{profile.location}</p>
+              <input
+                id="profile-photo-input"
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleProfilePhotoChange}
+              />
+              <button
+                className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
+                onClick={() => document.getElementById('profile-photo-input').click()}
+                type="button"
+              >
+                Change Profile
+              </button>
             </div>
           </div>
         </Section>
@@ -350,13 +461,11 @@ const handleUpdate = async () => {
               value={personalInfo.lastName}
               onChange={(e) => setPersonalInfo({ ...personalInfo, lastName: e.target.value })}
             />
-
             <InputField
               label="Email"
               value={personalInfo.email}
               onChange={(e) => setPersonalInfo({ ...personalInfo, email: e.target.value })}
             />
-
             <InputField
               label="Phone"
               value={personalInfo.phone}
@@ -366,12 +475,12 @@ const handleUpdate = async () => {
               label="Years of Experience" 
               value={personalInfo.experience} 
               onChange={(e) => setPersonalInfo({ ...personalInfo, experience: e.target.value })}
-              />
+            />
             <InputField 
               label="Bar Number" 
               value={personalInfo.barNumber} 
               onChange={(e) => setPersonalInfo({ ...personalInfo, barNumber: e.target.value })}
-              />
+            />
             {/* Practice Areas with chips */}
             <ChipsInput
               label="Practice Areas"
@@ -393,35 +502,46 @@ const handleUpdate = async () => {
         <Section title="Address">
           <div className="grid grid-cols-2 gap-6">
             <InputField
-                  label="Address Line 1"
-                  value={address.line1}
-                  onChange={(e) => setAddress({ ...address, line1: e.target.value })}
-                />
-                <InputField
-                  label="Province"
-                  value={address.province}
-                  onChange={(e) => setAddress({ ...address, province: e.target.value })}
-                />
-                <InputField
-                  label="ZIP Code"
-                  value={address.zipCode}
-                  onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
-                />
-                <InputField
-                  label="City/State"
-                  value={address.cityState}
-                  onChange={(e) => setAddress({ ...address, cityState: e.target.value })}
-                />
+              label="Address Line 1"
+              value={address.line1}
+              onChange={(e) => setAddress({ ...address, line1: e.target.value })}
+            />
+            <InputField
+              label="Province"
+              value={address.province}
+              onChange={(e) => setAddress({ ...address, province: e.target.value })}
+            />
+            <InputField
+              label="ZIP Code"
+              value={address.zipCode}
+              onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
+            />
+            <InputField
+              label="City/State"
+              value={address.cityState}
+              onChange={(e) => setAddress({ ...address, cityState: e.target.value })}
+            />
           </div>
         </Section>
+
         <div className="mt-6">
-            <button
-              onClick={handleUpdate}
-              className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
-            >
-              Update Profile
-            </button>
+          <button
+            onClick={handleUpdate}
+            className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
+          >
+            Update Profile
+          </button>
         </div>
+
+        {/* Debug Information (remove in production) */}
+        <div className="p-4 mt-6 bg-gray-100 rounded">
+          <h3 className="font-semibold text-gray-800">Debug Information:</h3>
+          <p className="text-sm text-gray-600">Practice Area Options: {practiceAreaOptions.length} items</p>
+          <p className="text-sm text-gray-600">Available Options: {practiceAreaOptions.join(', ')}</p>
+          <p className="text-sm text-gray-600">Selected Practice Areas: {practiceAreasChips.join(', ')}</p>
+          <p className="text-sm text-gray-600">Personal Info Practice Areas: {Array.isArray(personalInfo.practiceAreas) ? personalInfo.practiceAreas.join(', ') : personalInfo.practiceAreas}</p>
+        </div>
+
         {/* Footer */}
         <footer className="pt-8 mt-12 border-t border-gray-200">
           <div className="flex items-center justify-center mb-8">
@@ -431,7 +551,9 @@ const handleUpdate = async () => {
               </div>
               <div>
                 <h5 className="text-lg font-semibold text-gray-800">ALLY</h5>
-                <p className="max-w-md text-sm text-gray-500">Making legal help accessible to everyone through our innovative platform that connects clients with qualified legal professionals and AI.</p>
+                <p className="max-w-md text-sm text-gray-500">
+                  Making legal help accessible to everyone through our innovative platform that connects clients with qualified legal professionals and AI.
+                </p>
               </div>
             </div>
           </div>
