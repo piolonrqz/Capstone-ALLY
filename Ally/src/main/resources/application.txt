@@ -34,7 +34,7 @@ scrt: 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
 
 server.error.include-stacktrace=never
 
-# AI - Gemini Flash 2.0
+# TEST AI - Gemini Flash 2.0
 spring.ai.openai.chat.base-url=https://generativelanguage.googleapis.com
 spring.ai.openai.chat.completions-path=/v1beta/openai/chat/completions
 spring.ai.openai.api-key= 
@@ -46,8 +46,9 @@ spring.ai.openai.chat.options.model=gemini-2.0-flash
 # firebase.service.account.path=file:/etc/secrets/studyspace-firebasesdk.json
 
 #for local development
-firebase.service.account.path=ally-firebasesdk.json
-firebase.bucket.name=ally-1d4e6.firebasestorage.app
+firebase.service.account.path=classpath:ally-firebasesdk.json
+firebase.storage.bucket=ally-1d4e6.firebasestorage.app
+storage.type=firebase
 
 # Firebase Configuration
 firebase.storage.weka.data.folder=weka/data
@@ -57,6 +58,25 @@ firebase.storage.weka.models.folder=weka/models
 weka.temp.path=${java.io.tmpdir}/weka
 
 # Vertex AI Configuration
-vertex.ai.project-id=839498679598
+vertex.ai.project-id=gen-lang-client-0059670674
 vertex.ai.location=us-central1
-vertex.ai.endpoint-id=5504468569460572160
+vertex.ai.model.endpoint=5483076471230562304
+
+# For fine-tuned models deployed to endpoints, use the base model name
+# Your fine-tuned model is based on Gemini, so use the base model
+vertex.ai.model.name=gemini-1.5-flash-002
+
+# The actual fine-tuned model will be accessed via the endpoint
+# vertex.ai.model.endpoint=5483076471230562304
+
+# Service Account Key for Google Cloud
+google.cloud.credentials.location=classpath:service-account-key.json
+
+# Spring Cloud GCP (Optional - can be removed if not used)
+spring.cloud.gcp.credentials.location=classpath:service-account-key.json
+spring.cloud.gcp.project-id=839498679598
+spring.cloud.gcp.core.enabled=true
+
+# Logging for debugging
+logging.level.com.google.cloud=DEBUG
+logging.level.com.wachichaw=DEBUG

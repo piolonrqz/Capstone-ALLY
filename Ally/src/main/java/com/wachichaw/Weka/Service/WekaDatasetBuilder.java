@@ -1,4 +1,4 @@
-package com.wachichaw.AI.Service;
+package com.wachichaw.Weka.Service;
 
 import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
