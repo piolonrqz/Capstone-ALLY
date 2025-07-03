@@ -32,8 +32,9 @@ public class EmailService {
             helper.setSubject(subject);
             helper.setText(body, true); // Set the body as HTML
 
+            
             // You might want to set a from address
-            helper.setFrom("vicci.agramon@gmail.com"); // or another valid email
+            helper.setFrom("allylegal.cit@gmail.com"); // or another valid email
 
             mailSender.send(message);
             System.out.println("Email sent successfully to: " + to);

@@ -101,7 +101,8 @@ export default function ClientRegistrationForm() {
           body.append("email", formData.email);
           body.append("password", formData.password);
           body.append("Fname", formData.fName);
-          body.append("Lname", formData.lName);          body.append("phoneNumber", formData.phoneNumber);
+          body.append("Lname", formData.lName);          
+          body.append("phoneNumber", formData.phoneNumber);
           body.append("address", formData.address);
           body.append("city", formData.city);
           body.append("province", formData.province);
@@ -119,7 +120,7 @@ export default function ClientRegistrationForm() {
           body: body
         })
         console.log("Form submitted with:", body);
-      alert("Registration successful! Please login.");
+      alert("Registration successful! Please verify the email.");
       navigate('/signup/verifyClient' , { state: { email: formData.email } });
       }
       catch (error) {

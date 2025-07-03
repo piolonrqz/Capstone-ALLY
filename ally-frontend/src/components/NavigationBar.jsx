@@ -210,9 +210,19 @@ const NavigationBar = () => {
                 onClick={toggleDropdown}
                 className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-[#E8F2FF] transition-all duration-200 ease-in-out hover:shadow-md"
               >
-                <div className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg bg-gradient-to-br">
-                  {profilePhoto}
-                </div>
+
+                {localStorage.getItem('profilePhoto') ? (
+                  <img
+                    src={localStorage.getItem('profilePhoto')}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover shadow-md border border-blue-200"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-base font-semibold shadow-lg">
+                    {getUserInitials()}
+                  </div>
+                )}
+
                 <ChevronDown className={`w-5 h-5 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
             

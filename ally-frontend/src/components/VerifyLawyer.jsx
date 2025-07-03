@@ -32,6 +32,7 @@ const VerifyLawyer = () => {
 await fetch("http://localhost:8080/verifyLawyer?token=" + verificationCode, {
   method: "POST"
 });
+alert("Registration successful! Please login.");
 navigate('/login')
     }, 1500);
   };

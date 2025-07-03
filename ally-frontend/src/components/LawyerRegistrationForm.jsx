@@ -142,14 +142,7 @@ export default function LawyerRegistrationForm() {
     e.preventDefault();
     if (validateStep3()) {
       try {
-        let profilePhotoUrl = "";
-        if (formData.profile_photo) {
-          // Upload profile photo to Firebase Storage
-          const file = formData.profile_photo;
-          const storageRef = ref(storage, `profile_photo/${Date.now()}_${file.name}`);
-          await uploadBytes(storageRef, file);
-          profilePhotoUrl = await getDownloadURL(storageRef);
-        }
+       
         const body = new FormData();
         body.append("email", formData.email);
         body.append("password", formData.password);
@@ -163,9 +156,13 @@ export default function LawyerRegistrationForm() {
         body.append("barNumber", formData.prcNumber);
         body.append("experience", formData.yearsOfExperience);
         body.append("educationInstitution", formData.educationInstitution);
-        if (profilePhotoUrl) {
-          body.append("profilePhotoUrl", profilePhotoUrl);
-        }
+        if (formData.profile_photo) {
+            body.append("profilePhoto", formData.profile_photo);
+            console.log("Profile photo added to FormData:", formData.profile_photo);
+          } else {
+            console.log("No profile photo to add");
+          }
+          
         const practiceAreas = formData.practiceAreas;
         Object.keys(practiceAreas).forEach(area => {
           if (practiceAreas[area]) {
@@ -173,16 +170,14 @@ export default function LawyerRegistrationForm() {
           }
         });
         body.append("credentials", formData.credentials);
+        console.log("Submitting form with:", body);
         await fetch("http://localhost:8080/users/Lawyer", {
           method: "POST",
           body: body
         });
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.log("Form submitted with:", body);
-     //   alert("Registration successful!");
-     //   navigate('/login');
-
-      alert("Registration successful!");
+      alert("Registration successful!, Please verify the email");
       navigate('/signup/verifyLawyer', { state: { email: formData.email } });
 
       } catch (error) {
@@ -619,6 +614,20 @@ export default function LawyerRegistrationForm() {
                   )}
                   <p className="mt-2 text-xs text-gray-500">PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB each)</p>
                 </div>
+              </div>
+              <div>
+                <label htmlFor="email" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                  Education Institution
+                </label>
+                <input
+                  id="educationInstitution"
+                  type="educationInstitution"
+                  name="educationInstitution"
+                  className={`w-full p-2.5 border rounded-md ${errors.educationInstitution ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  value={formData.educationInstitution}
+                  onChange={handleChange}
+                />
+                {errors.educationInstitution && <p className="mt-1 text-xs text-red-500">{errors.educationInstitution}</p>}
               </div>
               
               <div className="flex items-center mt-4">
