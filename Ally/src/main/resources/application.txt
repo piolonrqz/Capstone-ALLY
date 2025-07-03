@@ -27,9 +27,10 @@ spring.jpa.show-sql=true
 
 # OAuth2 Client Configuration
 spring.security.oauth2.client.registration.google.client-id=839498679598-stcj9sb9foc1nhme126av9bfgk38do19.apps.googleusercontent.com
-spring.security.oauth2.client.registration.google.client-secret=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
+spring.security.oauth2.client.registration.google.client-secret=
 spring.security.oauth2.client.registration.google.scope=https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile,https://www.googleapis.com/auth/contacts,https://www.googleapis.com/auth/contacts.readonly,profile
 spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/login/oauth2/code/google
+scrt: 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
 
 server.error.include-stacktrace=never
 
