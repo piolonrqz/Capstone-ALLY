@@ -212,11 +212,14 @@ public class UserController {
         int id = Integer.parseInt(jwtUtil.extractUserId(token));
         String email = jwtUtil.extractEmail(token);
         String accountType = jwtUtil.extractAccountType(token);
+        String profilePhoto = jwtUtil.extractProfilePhoto(token);
+        System.out.println(profilePhoto + "this is the profile photo");
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("id", id);
         response.put("email", email);
         response.put("accountType", accountType);
+        response.put("profile_photo", profilePhoto);
         return ResponseEntity.ok(response);
     }    
     @GetMapping("/getAll")

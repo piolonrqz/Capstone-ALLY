@@ -104,7 +104,8 @@ public class VerificationController {
         lawyer.getBarNumber(),
         lawyer.getSpecialization(),
         lawyer.getExperience(),
-        lawyer.getCredentials()
+        lawyer.getCredentials(),
+        lawyer.getEducationInstitution()
         );
         userService.verifyLawyer(lawyer.getEmail()); 
         tempClientStorageService.removeUnverifiedUser(token);
