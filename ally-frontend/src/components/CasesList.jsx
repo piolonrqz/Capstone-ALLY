@@ -5,7 +5,7 @@ import CaseCard from './CaseCard.jsx';
 const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => {
   if (cases.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="py-12 text-center">
         <div className="mb-4">
           {userRole === 'CLIENT' ? (
             <FileX className="w-16 h-16 mx-auto text-gray-400" />
@@ -13,10 +13,10 @@ const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => 
             <Briefcase className="w-16 h-16 mx-auto text-gray-400" />
           )}
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <h3 className="mb-2 text-lg font-medium text-gray-900">
           {userRole === 'CLIENT' ? 'No Cases Submitted Yet' : 'No Cases Assigned Yet'}
         </h3>
-        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+        <p className="max-w-md mx-auto mb-6 text-gray-600">
           {userRole === 'CLIENT' 
             ? 'You haven\'t submitted any legal cases yet. Click "Submit New Case" to get started and connect with qualified legal professionals.'
             : 'You don\'t have any cases assigned to you yet. Cases will appear here when clients submit requests that match your expertise.'
@@ -46,23 +46,11 @@ const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => 
           Showing {cases.length} {cases.length === 1 ? 'case' : 'cases'}
         </p>
       </div>
-      {/* Cases Grid */}
-      <div className="grid gap-4">
-        {sortedCases.map((case_) => (
-          <CaseCard
-            key={case_.caseId}
-            case_={case_}
-            userRole={userRole}
-            onStatusChange={onStatusChange}
-            onAppointmentBooked={onAppointmentBooked}
-          />
-        ))}
-      </div>
-
-      {/* Summary Stats */}
+      
+      {/* Summary Stats - Now moved above case grid */}
       {cases.length > 0 && (
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+        <div className="p-4 mb-6 rounded-lg bg-gray-50">
+          <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-3">
             <div>
               <p className="text-2xl font-bold text-yellow-600">
                 {cases.filter(c => c.status === 'PENDING').length}
@@ -84,6 +72,19 @@ const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => 
           </div>
         </div>
       )}
+      
+      {/* Cases Grid */}
+      <div className="grid gap-4">
+        {sortedCases.map((case_) => (
+          <CaseCard
+            key={case_.caseId}
+            case_={case_}
+            userRole={userRole}
+            onStatusChange={onStatusChange}
+            onAppointmentBooked={onAppointmentBooked}
+          />
+        ))}
+      </div>
     </div>
   );
 };

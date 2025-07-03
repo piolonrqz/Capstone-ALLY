@@ -12,6 +12,7 @@ const ClientSettings = ({ user }) => {
     location: user?.location || user?.city || '',
   });
 
+
    const token = localStorage.getItem('token');
     
   
@@ -45,10 +46,12 @@ const ClientSettings = ({ user }) => {
       });
   }, []);
 
+
   const handleUpdate = async () => {
   const updatedUserData = {
     ...personalInfo,
     ...address,
+
     phoneNumber: personalInfo.phone,
     address: address.line1,
     province: address.province,
@@ -59,12 +62,15 @@ const ClientSettings = ({ user }) => {
   
     city: address.cityState,
    
+
   };
 
   try {
     const response = await fetch(`http://localhost:8080/users/clientUpdate/${user.id}`, {
       method: 'PUT', // or POST, depending on your API
+
       headers: { 
+
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`, // if using JWT
       },
