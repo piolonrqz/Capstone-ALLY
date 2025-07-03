@@ -1,6 +1,6 @@
 # -> Create your own "application.properties"
 # -> located at: "wachichaw\src\main\resources"
-coauthors: agramon, enriquez, largoza, malagapo, pangalay
+coauthors: agramon, enriquez, largoza, malagapo, pangalay.
 
 # Swagger UI configuration
 springdoc.swagger-ui.path=/swagger-ui.html
