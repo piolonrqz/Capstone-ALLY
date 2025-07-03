@@ -27,6 +27,7 @@ public class JwtUtil {
         claims.put("email", user.getEmail());
         claims.put("accountType", user.getAccountType());
         claims.put("profilePhoto", user.getProfilePhoto());
+
         return createToken(claims, String.valueOf(user.getUserId()));
     }
 
@@ -71,5 +72,9 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
+    }
+
+    public String extractProfilePhoto(String token) {
+        return (String) extractAllClaims(token).get("profile_photo");
     }
 }

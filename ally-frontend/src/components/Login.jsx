@@ -29,6 +29,7 @@ const Login = () => {
       localStorage.setItem('role', data.accountType);
       localStorage.setItem('profilePhoto', data.profilePhoto);
       console.log('Login successful:', data);
+
       
       // If user is admin, fetch department information
       if (data.accountType === 'ADMIN') {
