@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from '../firebase/config';
 
 const EditProfile = () => {
   const [formData, setFormData] = useState({
@@ -22,13 +24,26 @@ const EditProfile = () => {
       window.location.href = '/login';
       return;
     }
-
-    setFormData(prev => ({
-      ...prev,
-      name: currentUser.name || '',
-      email: currentUser.email || ''
-    }));
-    setImgSrc(currentUser.prof_pic || '/api/placeholder/100/100'); // Set the profile image if available
+    // Fetch lawyer settings from backend
+    fetch(`http://localhost:8080/users/getUser/${currentUser.id}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(res => res.json())
+      .then(data => {
+        setFormData(prev => ({
+          ...prev,
+          name: data.Fname || '',
+          email: data.email || '',
+          // Add more fields as needed from lawyer settings
+        }));
+        setImgSrc(data.profilePhoto || '/api/placeholder/100/100');
+      })
+      .catch(error => {
+        console.error('Failed to fetch lawyer settings:', error);
+      });
   }, []);
 
   const handleChange = (e) => {
@@ -53,6 +68,12 @@ const EditProfile = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const uploadImageToFirebase = async (file) => {
+    const storageRef = ref(storage, `profilePhotos/${currentUser.id}_${Date.now()}_${file.name}`);
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
   };
 
   const validateForm = () => {
@@ -92,6 +113,13 @@ const EditProfile = () => {
         throw new Error('Invalid user ID');
       }
 
+      let profilePhotoUrl = currentUser.prof_pic || '';
+      if (formData.file) {
+        // Upload to Firebase Storage
+        profilePhotoUrl = await uploadImageToFirebase(formData.file);
+        setImgSrc(profilePhotoUrl); // Update preview immediately
+      }
+
       const formDataPayload = new FormData();
       formDataPayload.append('userId', currentUser.id);
       formDataPayload.append('name', formData.name);
@@ -100,8 +128,9 @@ const EditProfile = () => {
       if (formData.newPassword) {
         formDataPayload.append('newPassword', formData.newPassword);
       }
-      if (formData.file) {
-        formDataPayload.append('file', formData.file);
+      // Send the Firebase URL to backend
+      if (profilePhotoUrl) {
+        formDataPayload.append('prof_pic', profilePhotoUrl);
       }
 
       const response = await fetch(`http://localhost:8080/user/update`, {
