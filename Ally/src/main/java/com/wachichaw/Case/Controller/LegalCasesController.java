@@ -47,10 +47,13 @@ public class LegalCasesController {
             System.out.println("Lawyer ID: " + lawyerId);
         
         LawyerEntity lawyer = (LawyerEntity) userRepo.findById(request.getLawyerId())
-            .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + request.getLawyerId()));        LegalCasesEntity legalCase = LegalCaseService.createLegalCase(
+            .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + request.getLawyerId()));
+        
+        LegalCasesEntity legalCase = LegalCaseService.createLegalCase(
             clientId,
             lawyer,
             request.getTitle(),
+            request.getCaseType(),
             request.getDescription(),
             LocalDateTime.now(),
             request.getStatus()

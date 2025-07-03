@@ -10,8 +10,7 @@ export const LawyerCard = ({ lawyer, onClick }) => (
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold">{lawyer.name}</h3>
           <div className="flex items-center space-x-1">
-            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-            <span className="text-sm font-medium">{lawyer.rating}</span>
+
           </div>
         </div>
         <p className="text-sm font-medium text-blue-600">{lawyer.specialty}</p>
@@ -20,8 +19,7 @@ export const LawyerCard = ({ lawyer, onClick }) => (
           {lawyer.location}
         </p>
         <p className="mt-2 text-sm text-gray-700">{lawyer.experience} of experience handling {(lawyer.specialty || 'various cases').toLowerCase()}</p>
-        <div className="flex items-center justify-between mt-3">
-          <span className="font-semibold text-blue-600">{lawyer.fee} case</span>
+        <div className="flex items-center justify-end mt-3">
           <button className="px-4 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
             View Profile
           </button>

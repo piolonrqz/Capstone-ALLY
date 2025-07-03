@@ -8,7 +8,8 @@ import VerifyClient from './components/VerifyClient'
 import VerifyLawyer from './components/VerifyLawyer'
 import Login from './components/Login'
 import Admin from './pages/Admin'
-import AdminDashboard from './components/AdminDashboard'
+import DashboardOverview from './components/DashboardOverview'
+import LawyerVerification from './components/LawyerVerification'
 import UserManagement from './pages/UserManagement'
 import AnalyticsDashboard from './components/AnalyticsDashboard'
 import SettingsDashboard from './components/SettingsDashboard'
@@ -38,6 +39,7 @@ function AppContent() {
       <NavigationBar />
       <div className={showNavigation ? "pt-[104px]" : ""}>
         <Routes>
+
         <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />
@@ -54,24 +56,27 @@ function AppContent() {
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/lawyer-settings" element={<LawyerSettings />} />
                   {/* Chat Routes */}
+
+
           <Route path="/chat" element={<ChatContainer />} />
           <Route path="/messages/:chatroomId" element={<ChatContainer />} />
 
-        {/* Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRole="admin">
-              <Admin />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="analytics" element={<AnalyticsDashboard />} />
-          <Route path="settings" element={<SettingsDashboard />} />     
+          {/* Admin Routes */}
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute allowedRole="ADMIN">
+                <Admin />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardOverview />} />
+            <Route path="verification" element={<LawyerVerification />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="analytics" element={<AnalyticsDashboard />} />
+            <Route path="settings" element={<SettingsDashboard />} />     
           </Route>
-      </Routes>
+        </Routes>
       </div>
     </>
   );

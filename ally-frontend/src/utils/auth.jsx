@@ -21,6 +21,7 @@ export const getAuthData = () => {
   try {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
+    const department = localStorage.getItem('department');
 
     if (!token) {
       return null;
@@ -33,6 +34,7 @@ export const getAuthData = () => {
       userId: payload.sub,
       email: payload.email || '',
       accountType: payload.accountType || role || 'unknown',
+      department: department || null,
       isAuthenticated: true,
     };
   } catch (error) {
@@ -45,6 +47,11 @@ export const getAuthData = () => {
 export const isAuthenticated = () => {
   const authData = getAuthData();
   return !!authData?.isAuthenticated;
+};
+
+export const isAdmin = () => {
+  const authData = getAuthData();
+  return authData?.accountType === 'ADMIN' && authData?.department === 'ADMIN';
 };
 
 export const fetchUserDetails = async (userId) => {
@@ -78,6 +85,22 @@ export const fetchUserDetails = async (userId) => {
 
     const userData = await response.json();
 
+    // If user is admin, fetch department information
+    let department = null;
+    if (userData.accountType === 'ADMIN') {
+      const adminResponse = await fetch(`http://localhost:8080/admins/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (adminResponse.ok) {
+        const adminData = await adminResponse.json();
+        department = adminData.department;
+        localStorage.setItem('department', department);
+      }
+    }
+
     return {
       id: userData.userId,
       firstName: userData.Fname || userData.fname || '',
@@ -87,6 +110,7 @@ export const fetchUserDetails = async (userId) => {
         userData.Lname || userData.lname || ''
       }`.trim(),
       accountType: userData.accountType || 'unknown',
+      department: department,
       phoneNumber: userData.phoneNumber || '+63',
       address: userData.address || '',
       city: userData.city || '',
@@ -103,5 +127,6 @@ export const fetchUserDetails = async (userId) => {
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
+  localStorage.removeItem('department');
   window.location.href = '/login';
 };
