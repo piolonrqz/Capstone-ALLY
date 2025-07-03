@@ -1,4 +1,4 @@
-package com.wachichaw.AI.Controller;
+package com.wachichaw.Weka.Controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.wachichaw.AI.CaseSubmissionIntegrationService;
-import com.wachichaw.AI.CaseSubmissionIntegrationService.CaseSubmissionRequest;
-import com.wachichaw.AI.CaseSubmissionIntegrationService.CaseSubmissionResult;
-import com.wachichaw.AI.Entity.LawyerRecommendationResponse;
+import com.wachichaw.Weka.CaseSubmissionIntegrationService;
+import com.wachichaw.Weka.CaseSubmissionIntegrationService.CaseSubmissionRequest;
+import com.wachichaw.Weka.CaseSubmissionIntegrationService.CaseSubmissionResult;
+import com.wachichaw.Weka.Entity.LawyerRecommendationResponse;
 
 import jakarta.validation.Valid;
 import java.util.List;

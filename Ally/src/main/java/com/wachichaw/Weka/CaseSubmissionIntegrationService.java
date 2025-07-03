@@ -1,18 +1,18 @@
-package com.wachichaw.AI;
+package com.wachichaw.Weka;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.wachichaw.AI.Entity.LawyerRecommendationRequest;
-import com.wachichaw.AI.Entity.LawyerRecommendationResponse;
-import com.wachichaw.AI.Service.LawyerRecommendationService;
 import com.wachichaw.Case.Entity.CaseStatus;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.Case.Entity.UrgencyLevel;
 import com.wachichaw.Case.Service.LegalCaseService;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Client.Repo.ClientRepo;
+import com.wachichaw.Weka.Entity.LawyerRecommendationRequest;
+import com.wachichaw.Weka.Entity.LawyerRecommendationResponse;
+import com.wachichaw.Weka.Service.LawyerRecommendationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
