@@ -45,13 +45,13 @@ public class CaseSubmissionIntegrationService {
                 request.getClientId().intValue(), // Convert Long to int
                 null, // No lawyer assigned yet
                 request.getTitle(),
+                request.getCaseType(),
                 request.getDescription(),
                 LocalDateTime.now(),
                 CaseStatus.PENDING
             );
             
             // Step 2: Update additional fields that createLegalCase doesn't handle
-            savedCase.setCaseType(request.getCaseType());
             savedCase.setUrgencyLevel(request.getUrgencyLevel());
             
             // Step 3: Create recommendation request based on the case

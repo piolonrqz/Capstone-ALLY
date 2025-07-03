@@ -17,14 +17,24 @@ const DocumentsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [userRole, setUserRole] = useState('');
   const [authData, setAuthData] = useState(null);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
 
   // Get auth data on component mount
   useEffect(() => {
     const auth = getAuthData();
+    
     if (!auth) {
+      toast.error('Please log in to access documents');
       navigate('/login');
       return;
     }
+    
+    if (!auth.userId || !auth.accountType) {
+      toast.error('Invalid authentication data. Please log in again.');
+      navigate('/login');
+      return;
+    }
+    
     setAuthData(auth);
     setUserRole(auth.accountType);
   }, [navigate]);
@@ -39,6 +49,19 @@ const DocumentsPage = () => {
       }
     }
   }, [authData, caseId]);
+
+  // Add timeout for loading to prevent indefinite loading
+  useEffect(() => {
+    if (caseId && loading) {
+      const timeout = setTimeout(() => {
+        setLoadingTimeout(true);
+        setLoading(false);
+        toast.error('Loading timeout. Please try refreshing the page.');
+      }, 15000); // 15 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [caseId, loading]);
 
   const loadCasesWithDocuments = async () => {
     try {
@@ -78,6 +101,8 @@ const DocumentsPage = () => {
 
   const loadCaseInfo = async () => {
     try {
+      setLoading(true);
+      
       let allCases = [];
       if (authData.accountType === 'CLIENT') {
         allCases = await caseService.getClientCases(authData.userId);
@@ -86,17 +111,28 @@ const DocumentsPage = () => {
       }
       
       const currentCase = allCases.find(c => c.caseId === parseInt(caseId));
+      
       if (!currentCase) {
-        toast.error('Case not found or access denied');
+        toast.error(`Case #${caseId} not found or access denied`);
+        navigate('/documents');
+        return;
+      }
+      
+      // Additional validation for case access
+      if (currentCase.status !== 'ACCEPTED') {
+        toast.error('Document access is only available for accepted cases');
         navigate('/documents');
         return;
       }
       
       setCaseInfo(currentCase);
+      
     } catch (error) {
       console.error('Error loading case info:', error);
-      toast.error('Failed to load case information');
+      toast.error(`Failed to load case information: ${error.message}`);
       navigate('/documents');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -234,9 +270,58 @@ const DocumentsPage = () => {
   if (!caseInfo) {
     return (
       <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <span className="ml-3 text-gray-600">Loading case information...</span>
+        <div className="container max-w-6xl px-4 mx-auto py-8">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <span className="ml-3 text-gray-600">Loading case information...</span>
+              <div className="mt-4 text-sm text-gray-500 text-center">
+                <p>Loading case #{caseId}...</p>
+                <p>If this takes too long, please check the browser console for errors.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="text-center">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  {loadingTimeout ? 'Loading Timeout' : 'Case Not Found'}
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  {loadingTimeout
+                    ? `Loading timed out for case #${caseId}. This might be due to network issues or server problems.`
+                    : `Case #${caseId} could not be loaded or you don't have access to it.`
+                  }
+                </p>
+                {loadingTimeout && (
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Troubleshooting tips:</strong>
+                    </p>
+                    <ul className="text-sm text-yellow-700 mt-1 list-disc list-inside">
+                      <li>Check your internet connection</li>
+                      <li>Make sure the case exists and you have access to it</li>
+                      <li>Try refreshing the page</li>
+                      <li>Check the browser console for error messages</li>
+                    </ul>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <button
+                    onClick={() => navigate('/documents')}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Back to Documents
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="ml-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
