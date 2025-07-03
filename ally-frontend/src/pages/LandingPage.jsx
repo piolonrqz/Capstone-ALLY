@@ -5,7 +5,11 @@ import Footer from '../components/Footer';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  
+  const isLoggedIn = !!localStorage.getItem("token");
+  const isLawyer =  localStorage.getItem("role")  ;
+
+
+
   const companies = [
     { name: "LegalCorp", icon: "/legal_corp.png" },
     { name: "JusticeFirm", icon: "/justice_firm.png" },
@@ -75,18 +79,22 @@ const LandingPage = () => {
             
             {/* Buttons */}
             <div className="flex justify-center gap-6 mb-12">
+              {isLawyer !== "LAWYER" &&  (
               <button
                 onClick={() => navigate('/lawyers')}
                 className="bg-[#1A6EFF] text-white px-8 py-5 rounded-lg text-2xl font-normal hover:bg-blue-700 transition-colors"
               >
                 Get Legal Help Now
               </button>
-              <button
-                onClick={() => navigate('/signup/lawyer')}
-                className="bg-white text-[#363636] px-8 py-5 rounded-lg border border-[#ADADAD] text-2xl font-normal hover:bg-gray-50 transition-colors"
-              >
-                Join as Lawyer
-              </button>
+              )}
+              {!isLoggedIn && (
+                <button
+                  onClick={() => navigate('/signup/lawyer')}
+                  className="bg-white text-[#363636] px-8 py-5 rounded-lg border border-[#ADADAD] text-2xl font-normal hover:bg-gray-50 transition-colors"
+                >
+                  Join as Lawyer
+                </button>
+              )}
             </div>
               {/* Feature Badges */}
             <div className="flex justify-center gap-12">

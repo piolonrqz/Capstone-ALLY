@@ -120,7 +120,7 @@ export default function ClientRegistrationForm() {
         })
         console.log("Form submitted with:", body);
       alert("Registration successful! Please login.");
-      navigate('/login');
+      navigate('/signup/verifyClient' , { state: { email: formData.email } });
       }
       catch (error) {
         console.error("Error submitting form:", error);
@@ -365,7 +365,7 @@ export default function ClientRegistrationForm() {
                   className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
                   onClick={handleSubmit}
                 >
-                  Register →
+                  Generate Verification Code →
                 </button>
               </div>
             </div>

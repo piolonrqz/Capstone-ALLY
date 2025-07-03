@@ -2,6 +2,7 @@ package com.wachichaw.User.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,8 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.wachichaw.Admin.Entity.AdminEntity;
 import com.wachichaw.Client.Entity.ClientEntity;
+import com.wachichaw.Client.Entity.TempClient;
 import com.wachichaw.Config.JwtUtil;
+import com.wachichaw.EmailConfig.VerificationService;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
+import com.wachichaw.Lawyer.Entity.TempLawyer;
 import com.wachichaw.User.Entity.AccountType;
 import com.wachichaw.User.Entity.UserEntity;
 import com.wachichaw.User.Repo.UserRepo;
@@ -30,6 +34,12 @@ public class UserService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private TempClient tempClientStorageService;
+    @Autowired
+    private TempLawyer tempLawyerStorageService;
+    @Autowired
+    private VerificationService verificationService;
      
 
     public UserService(UserRepo userRepo,PasswordEncoder passwordEncoder) {
@@ -52,8 +62,8 @@ public class UserService {
         admin.setDepartment("General"); 
         return userRepo.save(admin);
     }    
-    
-    public ClientEntity createClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String profilePhoto) {
+
+    public ClientEntity saveClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String profilePhoto) {
         ClientEntity client = new ClientEntity();
         client.setEmail(email);
         client.setPassword(passwordEncoder.encode(pass));
@@ -68,8 +78,40 @@ public class UserService {
         client.setAccountType(AccountType.CLIENT);  
         return userRepo.save(client);
     }
+    
+    public ClientEntity createClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String profilePhoto) {
+        ClientEntity client = new ClientEntity();
+        client.setEmail(email);
+        client.setPassword(pass);
+        client.setFname(Fname);
+        client.setLname(Lname);
+        client.setPhoneNumber(phoneNumber);
+        client.setAddress(address);
+        client.setCity(city);
+        client.setProvince(province);
+        client.setZip(zip);
+        client.setProfilePhoto(profilePhoto);
+        client.setAccountType(AccountType.CLIENT);  
+        int token = (int)(Math.random() * 900000) + 100000;
+        tempClientStorageService.saveUnverifiedUser(token, client);
+        tempClientStorageService.getUnverifiedUser(token);
+        ClientEntity savedClient = client;
+        verificationService.sendVerificationEmail(savedClient.getEmail(), savedClient.getFname(), token);
+        return savedClient;
+    }
+    public void verifyClient(String email) {
+        Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
 
-    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials) {
+        if (!optionalUser.isPresent() || !(optionalUser.get() instanceof ClientEntity)) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        ClientEntity user = (ClientEntity) optionalUser.get();
+        user.setVerified(true); 
+        userRepo.save(user);
+    }
+
+    public LawyerEntity saveLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials) {
         LawyerEntity lawyer = new LawyerEntity();
         lawyer.setEmail(email);
         lawyer.setPassword(passwordEncoder.encode(pass));
@@ -86,6 +128,40 @@ public class UserService {
         lawyer.setCredentials(credentials); 
         lawyer.setAccountType(AccountType.LAWYER);
         return userRepo.save(lawyer);
+    }
+    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials) {
+        LawyerEntity lawyer = new LawyerEntity();
+        lawyer.setEmail(email);
+        lawyer.setPassword(pass);
+        lawyer.setFname(Fname);
+        lawyer.setLname(Lname);
+        lawyer.setPhoneNumber(phoneNumber);
+        lawyer.setAddress(address);
+        lawyer.setCity(city);
+        lawyer.setProvince(province);
+        lawyer.setZip(zip);
+        lawyer.setBarNumber(barNumber);
+        lawyer.setSpecialization(specialization);
+        lawyer.setExperience(experience);
+        lawyer.setCredentials(credentials); 
+        lawyer.setAccountType(AccountType.LAWYER);
+        int token = (int)(Math.random() * 900000) + 100000;
+        tempLawyerStorageService.saveUnverifiedUser(token, lawyer);
+        tempLawyerStorageService.getUnverifiedUser(token);
+        LawyerEntity savedLawyer = lawyer;
+        verificationService.sendVerificationEmail(savedLawyer.getEmail(), savedLawyer.getFname(), token);
+        return savedLawyer;
+    }
+    public void verifyLawyer(String email) {
+        Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
+
+        if (!optionalUser.isPresent() || !(optionalUser.get() instanceof LawyerEntity)) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
+
+        LawyerEntity user = (LawyerEntity) optionalUser.get();
+        user.setVerified(true); 
+        userRepo.save(user);
     }
 
             public AdminEntity updateAdmin(int id, String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip) {
