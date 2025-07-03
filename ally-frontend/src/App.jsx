@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage'
 import SignUpPage from './pages/SignupPage'
 import ClientRegistrationForm from './components/ClientRegistrationForm'
 import LawyerRegistrationForm from './components/LawyerRegistrationForm'
+import VerifyClient from './components/VerifyClient'
 import VerifyLawyer from './components/VerifyLawyer'
 import Login from './components/Login'
 import Admin from './pages/Admin'
@@ -42,7 +43,8 @@ function AppContent() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/signup/client" element={<ClientRegistrationForm />} />
         <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
-        <Route path="/signup/lawyer/verify-lawyer" element={<VerifyLawyer />} />
+        <Route path="/signup/verifyClient" element={<VerifyClient/>} />
+        <Route path="/signup/verifyLawyer" element={<VerifyLawyer/>} />
         <Route path="/login" element={<Login />} />          
         <Route path="/lawyers" element={<LawyerDirectoryPage />} />
         <Route path="/appointments" element={<AppointmentsPage />} />

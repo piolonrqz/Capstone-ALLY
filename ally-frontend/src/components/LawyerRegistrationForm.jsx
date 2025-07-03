@@ -167,8 +167,7 @@ export default function LawyerRegistrationForm() {const [step, setStep] = useSta
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.log("Form submitted with:", body);
       alert("Registration successful!");
-      // navigate('/signup/lawyer/verify-lawyer', { state: { email: formData.email } });
-      navigate('/login');
+      navigate('/signup/verifyLawyer', { state: { email: formData.email } });
       } catch (error) {
         console.error('Error submitting form:', error);
       }
