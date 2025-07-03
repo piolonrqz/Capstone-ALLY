@@ -108,7 +108,8 @@ public class UserController {
                 lawyer.getBarNumber(),
                 lawyer.getSpecialization(),
                 lawyer.getExperience(),
-                lawyer.getCredentials()
+                lawyer.getCredentials(),
+                lawyer.getEducationInstitution() // add this line
         );
         return ResponseEntity.ok(updated);
     }
@@ -168,9 +169,9 @@ public class UserController {
     @RequestParam("barNumber") String barNumber,
     @RequestParam("specialization") List<String> specialization,
     @RequestParam("experience") String experience,
-    @RequestParam("credentials") MultipartFile credentialsFile
+    @RequestParam("credentials") MultipartFile credentialsFile,
+    @RequestParam(value = "educationInstitution", required = false) String educationInstitution
 ) throws java.io.IOException {
-
 
     String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/credentials";
     Files.createDirectories(Paths.get(uploadDir)); // Ensure directory exists
@@ -195,9 +196,9 @@ public class UserController {
         barNumber,
         specialization,
         experience,
-        relativePath 
+        relativePath,
+        educationInstitution
     );
-     
 
     return ResponseEntity.ok(lawyer);
 }
