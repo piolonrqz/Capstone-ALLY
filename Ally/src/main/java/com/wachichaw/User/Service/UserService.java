@@ -69,7 +69,7 @@ public class UserService {
         return userRepo.save(client);
     }
 
-    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials) {
+    public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials, String educationInstitution) {
         LawyerEntity lawyer = new LawyerEntity();
         lawyer.setEmail(email);
         lawyer.setPassword(passwordEncoder.encode(pass));
@@ -84,6 +84,7 @@ public class UserService {
         lawyer.setSpecialization(specialization);
         lawyer.setExperience(experience);
         lawyer.setCredentials(credentials); 
+        lawyer.setEducationInstitution(educationInstitution);
         lawyer.setAccountType(AccountType.LAWYER);
         return userRepo.save(lawyer);
     }
@@ -123,7 +124,7 @@ public class UserService {
             return userRepo.save(client);
         }
 
-        public LawyerEntity updateLawyer(int id,String email,String pass,String Fname,String Lname,Long phoneNumber,String address,String city,String province,String zip,String barNumber,List<String> specialization,String experience,String credentials)   
+        public LawyerEntity updateLawyer(int id,String email,String pass,String Fname,String Lname,Long phoneNumber,String address,String city,String province,String zip,String barNumber,List<String> specialization,String experience,String credentials, String educationInstitution)   
           {
             LawyerEntity lawyer = (LawyerEntity) userRepo.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Lawyer not found with id: " + id));
@@ -146,6 +147,8 @@ public class UserService {
             if (credentials != null && !credentials.trim().isEmpty()) {
                 lawyer.setCredentials(credentials);
             }
+            // Always set educationInstitution, even if empty (to allow clearing)
+            lawyer.setEducationInstitution(educationInstitution);
             return userRepo.save(lawyer);
         }
     
