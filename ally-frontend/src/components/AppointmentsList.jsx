@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AppointmentCard } from './AppointmentCard';
+import { AppointmentDetailsModal } from './AppointmentDetailsModal';
 import { Loader2, Calendar } from 'lucide-react';
 import { getAuthData } from '../utils/auth.jsx';
 import { scheduleService } from '../services/scheduleService.jsx';
@@ -8,6 +9,8 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchUserAppointments();
@@ -46,7 +49,6 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
       const transformedAppointments = data.map(appointment => {
         return {
           scheduleId: appointment.scheduleId,
-          appointmentType: appointment.legalCase ? 'Case Consultation' : 'Legal Consultation',
           bookingStartTime: appointment.bookingStartTime,
           bookingEndTime: appointment.bookingEndTime,
           lawyer: {
@@ -80,11 +82,16 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
       setLoading(false);
     }
   };
-  const handleEdit = (appointment) => {
-    // TODO: Implement edit functionality
-    console.log('Edit appointment:', appointment);
-    alert('Edit functionality will be implemented soon!');
+  const handleCardClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setIsModalOpen(true);
   };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
   const handleCancel = async (appointment) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) {
       return;
@@ -178,6 +185,13 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
       </div>
     );
   }
+  // Separate appointments by status
+  const pendingAppointments = appointments.filter(apt => apt.status?.toUpperCase() === 'PENDING');
+  const acceptedAppointments = appointments.filter(apt => apt.status?.toUpperCase() === 'ACCEPTED');
+  const otherAppointments = appointments.filter(apt =>
+    apt.status?.toUpperCase() !== 'PENDING' && apt.status?.toUpperCase() !== 'ACCEPTED'
+  );
+
   if (appointments.length === 0) {
     const authData = getAuthData();
     const isLawyer = authData?.accountType === 'LAWYER';
@@ -187,7 +201,7 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
         <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
         <h3 className="mb-2 text-lg font-medium text-gray-900">No Appointments Yet</h3>
         <p className="mb-6 text-gray-600">
-          {isLawyer 
+          {isLawyer
             ? "You don't have any upcoming appointments with clients."
             : "You haven't scheduled any appointments. Browse our lawyer directory to book a consultation."
           }
@@ -195,18 +209,92 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
       </div>
     );
   }
+
   return (
-    <div className="space-y-4">
-      {appointments.map((appointment) => (
-        <AppointmentCard
-          key={appointment.scheduleId}
-          appointment={appointment}
-          onEdit={handleEdit}
-          onCancel={handleCancel}
-          onAccept={handleAccept}
-          onDecline={handleDecline}
-        />
-      ))}
-    </div>
+    <>
+      <div className="space-y-6">
+        {/* Pending Appointments Section */}
+        {pendingAppointments.length > 0 && (
+          <div>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-orange-700">
+                Pending Appointments
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {pendingAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.scheduleId}
+                  appointment={appointment}
+                  onCardClick={handleCardClick}
+                  onCancel={handleCancel}
+                  onAccept={handleAccept}
+                  onDecline={handleDecline}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Accepted Appointments Section */}
+        {acceptedAppointments.length > 0 && (
+          <div>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-green-700">
+                Confirmed Appointments
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {acceptedAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.scheduleId}
+                  appointment={appointment}
+                  onCardClick={handleCardClick}
+                  onCancel={handleCancel}
+                  onAccept={handleAccept}
+                  onDecline={handleDecline}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Other Appointments Section (Cancelled, Declined, Completed) */}
+        {otherAppointments.length > 0 && (
+          <div>
+            <div className="flex items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">
+                Past Appointments
+              </h3>
+              <span className="ml-2 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
+                {otherAppointments.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {otherAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.scheduleId}
+                  appointment={appointment}
+                  onCardClick={handleCardClick}
+                  onCancel={handleCancel}
+                  onAccept={handleAccept}
+                  onDecline={handleDecline}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        appointment={selectedAppointment}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAccept={handleAccept}
+        onDecline={handleDecline}
+        onCancel={handleCancel}
+      />
+    </>
   );
 };

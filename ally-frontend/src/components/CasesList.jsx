@@ -1,8 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FileX, Briefcase } from 'lucide-react';
 import CaseCard from './CaseCard.jsx';
+import { CaseDetailsModal } from './CaseDetailsModal.jsx';
 
 const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => {
+  const [selectedCase, setSelectedCase] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCaseClick = (case_) => {
+    setSelectedCase(case_);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCase(null);
+  };
+
+  const handleModalStatusChange = (caseId, newStatus) => {
+    if (onStatusChange) {
+      onStatusChange(caseId, newStatus);
+    }
+    // Update the selected case status for immediate UI feedback
+    if (selectedCase && selectedCase.caseId === caseId) {
+      setSelectedCase({ ...selectedCase, status: newStatus });
+    }
+  };
+
+  const handleModalAppointmentBooked = (caseId) => {
+    if (onAppointmentBooked) {
+      onAppointmentBooked(caseId);
+    }
+  };
   if (cases.length === 0) {
     return (
       <div className="py-12 text-center">
@@ -82,9 +111,20 @@ const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => 
             userRole={userRole}
             onStatusChange={onStatusChange}
             onAppointmentBooked={onAppointmentBooked}
+            onCardClick={handleCaseClick}
           />
         ))}
       </div>
+
+      {/* Case Details Modal */}
+      <CaseDetailsModal
+        case_={selectedCase}
+        userRole={userRole}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onStatusChange={handleModalStatusChange}
+        onAppointmentBooked={handleModalAppointmentBooked}
+      />
     </div>
   );
 };
