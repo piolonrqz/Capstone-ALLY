@@ -76,7 +76,9 @@ export const adminService = {
   async rejectLawyer(id) {
     try {
       // Update lawyer verification status through admin endpoint
-      const response = await axios.put(`${API_URL}/admins/lawyers/reject/${id}`);
+      const response = await axios.put(`${API_URL}/admins/lawyers/verify/${id}`, {
+        status: 'rejected'
+      });
       return response.data;
     } catch (error) {
       console.error('Error rejecting lawyer:', error);
