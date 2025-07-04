@@ -174,6 +174,54 @@ export const userService = {
       console.error('Error updating verification status:', error);
       throw error;
     }
+  },
+
+  // Create a new client
+  async createClient(userData) {
+    try {
+      const response = await axios.post(`${API_URL}/users/Client`, userData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating client:', error);
+      throw new Error(error.response?.data?.message || 'Failed to create client');
+    }
+  },
+
+  // Create a new lawyer
+  async createLawyer(userData) {
+    try {
+      const response = await axios.post(`${API_URL}/users/Lawyer`, userData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating lawyer:', error);
+      throw new Error(error.response?.data?.message || 'Failed to create lawyer');
+    }
+  },
+
+  // Create a new admin
+  async createAdmin(userData) {
+    try {
+      const response = await axios.post(`${API_URL}/users/Admin`, userData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      throw new Error(error.response?.data?.message || 'Failed to create admin');
+    }
   }
 };
 

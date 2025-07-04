@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import StatsOverview from '../components/StatsOverview';
 import UserManagementTable from '../components/UserManagementTable';
+import AddUserModal from '../components/AddUserModal';
 import { userService } from '../services/userService';
 
 const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     const initializePage = async () => {
@@ -24,6 +26,13 @@ const UserManagement = () => {
 
     initializePage();
   }, []);
+
+  const handleAddUserSuccess = () => {
+    // Refresh the user table data
+    if (window.userTableRef?.current?.fetchUsers) {
+      window.userTableRef.current.fetchUsers();
+    }
+  };
 
   if (error) {
     return (
@@ -45,8 +54,14 @@ const UserManagement = () => {
       <StatsOverview />
       
       <div className="mt-8">
-        <UserManagementTable />
+        <UserManagementTable onAddUser={() => setIsAddModalOpen(true)} />
       </div>
+
+      <AddUserModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddUserSuccess}
+      />
 
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

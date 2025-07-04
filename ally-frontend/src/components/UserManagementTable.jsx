@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, ChevronDown, ChevronUp, MoreVertical, Trash2, UserCheck, UserX, Download, UserPlus, RefreshCw, Edit, Key, Ban, Mail, AlertTriangle } from 'lucide-react';
 import { userService } from '../services/userService';
 import { adminService } from '../services/adminService';
 
-const UserManagementTable = () => {
+const UserManagementTable = ({ onAddUser }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +17,10 @@ const UserManagementTable = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Create a ref for the fetchUsers function
+  const fetchUsersRef = useRef(null);
 
   // Fetch users data
   const fetchUsers = async () => {
@@ -41,8 +45,20 @@ const UserManagementTable = () => {
       setUsers([]); // Set empty array on error
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
+
+  // Store the fetchUsers function in the ref
+  fetchUsersRef.current = fetchUsers;
+
+  // Make the fetchUsers function available globally for the modal
+  useEffect(() => {
+    window.userTableRef = { current: { fetchUsers } };
+    return () => {
+      delete window.userTableRef;
+    };
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -101,6 +117,11 @@ const UserManagementTable = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchUsers();
+  };
+
   const getAvatarColor = (name) => {
     const colors = [
       'bg-blue-500',
@@ -112,6 +133,19 @@ const UserManagementTable = () => {
     ];
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
+  };
+
+  const getRoleColor = (role) => {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return 'bg-purple-100 text-purple-800';
+      case 'LAWYER':
+        return 'bg-blue-100 text-blue-800';
+      case 'CLIENT':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   const handleAction = async (action, userId) => {
@@ -149,10 +183,10 @@ const UserManagementTable = () => {
     .filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           user.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesRole = filters.role === 'all' || user.role === filters.role;
+      const matchesRole = filters.role === 'all' || user.role.toLowerCase() === filters.role.toLowerCase();
       const matchesStatus = filters.status === 'all' || user.status === filters.status;
       const matchesVerification = filters.verificationStatus === 'all' || 
-                                 user.verificationStatus === filters.verificationStatus;
+                                 (user.role.toLowerCase() === 'lawyer' ? user.verificationStatus === filters.verificationStatus : true);
       
       return matchesSearch && matchesRole && matchesStatus && matchesVerification;
     })
@@ -161,7 +195,10 @@ const UserManagementTable = () => {
       if (sort.field === 'name') {
         return direction * a.name.localeCompare(b.name);
       }
-      return direction * (new Date(a[sort.field]) - new Date(b[sort.field]));
+      if (sort.field === 'joinDate') {
+        return direction * (new Date(a.joinDate) - new Date(b.joinDate));
+      }
+      return 0;
     });
 
   if (loading) {
@@ -198,19 +235,23 @@ const UserManagementTable = () => {
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-semibold text-gray-800">Users</h2>
             <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-              {filteredUsers.length} total
+              {users.length} total
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+            <button
+              onClick={onAddUser}
+              className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            >
               <UserPlus className="w-4 h-4 mr-2" />
               Add User
             </button>
             <button 
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className={`flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 ${refreshing ? 'opacity-50' : ''}`}
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
           </div>
@@ -359,10 +400,7 @@ const UserManagementTable = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                    ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'lawyer' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'}`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getRoleColor(user.role)}`}>
                     {user.role}
                   </span>
                 </td>

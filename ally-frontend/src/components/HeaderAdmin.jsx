@@ -15,6 +15,11 @@ const HeaderAdmin = ({ onMenuClick }) => {
     navigate('/login');
   };
 
+  const handleSettingsClick = () => {
+    setShowProfile(false);
+    navigate('/settings');
+  };
+
   // Get user's initials for the avatar
   const getInitials = () => {
     if (!currentUser?.name) return 'A';
@@ -95,10 +100,10 @@ const HeaderAdmin = ({ onMenuClick }) => {
             {/* Profile Dropdown */}
             {showProfile && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
-                  View Profile
-                </button>
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
+                <button 
+                  onClick={handleSettingsClick}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                >
                   Account Settings
                 </button>
                 <div className="border-t border-gray-200 my-1"></div>
