@@ -24,6 +24,9 @@ export const getAuthData = () => {
 
     const payload = decodeJWT(token);
 
+    // Handle both profilePhoto and profile_photo for backward compatibility
+    const photoFromPayload = payload.profilePhoto || payload.profile_photo;
+
     return {
       token,
       userId: payload.sub,
@@ -31,7 +34,7 @@ export const getAuthData = () => {
       accountType: payload.accountType || role || 'unknown',
       department: department || null,
       isAuthenticated: true,
-      profilePhoto: payload.profilePhoto
+      profilePhoto: photoFromPayload || profilePhoto
     };
   } catch (error) {
     console.error('Error getting auth data:', error);
@@ -47,7 +50,7 @@ export const isAuthenticated = () => {
 
 export const isAdmin = () => {
   const authData = getAuthData();
-  return authData?.accountType === 'ADMIN' && authData?.department === 'ADMIN';
+  return authData?.accountType === 'ADMIN';
 };
 
 export const fetchUserDetails = async (userId) => {
