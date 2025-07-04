@@ -95,6 +95,10 @@ public class UserService {
         int token = (int)(Math.random() * 900000) + 100000;
         tempClientStorageService.saveUnverifiedUser(token, client);
         tempClientStorageService.getUnverifiedUser(token);
+        System.out.println("Lawyer retrieved: " + profilePhoto);
+        System.out.println("Lawyer email: " + client.getEmail());
+        System.out.println("Lawyer first name: " + Fname);
+        System.out.println("Lawyer password: " + token);
         ClientEntity savedClient = client;
         verificationService.sendVerificationEmail(savedClient.getEmail(), savedClient.getFname(), token);
         return savedClient;
@@ -122,6 +126,7 @@ public class UserService {
         lawyer.setCity(city);
         lawyer.setProvince(province);
         lawyer.setZip(zip);
+        lawyer.setCasesHandled(0);
         lawyer.setBarNumber(barNumber);
         lawyer.setSpecialization(specialization);
         lawyer.setExperience(experience);
