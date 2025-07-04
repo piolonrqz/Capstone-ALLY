@@ -28,20 +28,17 @@ const UserManagementTable = () => {
         id: user.userId,
         name: `${user.fname} ${user.lname}`,
         email: user.email,
-        role: user.accountType.toLowerCase(),
+        role: user.accountType?.toLowerCase() || 'client',
         joinDate: user.createdAt || new Date().toISOString(),
         status: user.status || 'active',
         verificationStatus: user.credentialsVerified ? 'verified' : 'pending',
-        avatar: `${user.fname[0]}${user.lname[0]}`
+        avatar: `${user.fname?.[0] || ''}${user.lname?.[0] || ''}`
       }));
       setUsers(formattedUsers);
     } catch (err) {
       console.error('Failed to fetch users:', err);
-      if (err.message === 'No users found') {
-        setUsers([]); // Set empty array instead of showing error
-      } else {
-        setError(err.message || 'Failed to load users. Please try again later.');
-      }
+      setError(err.message || 'Failed to load users. Please try again later.');
+      setUsers([]); // Set empty array on error
     } finally {
       setLoading(false);
     }

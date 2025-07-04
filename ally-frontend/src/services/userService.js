@@ -55,17 +55,29 @@ export const userService = {
   // Get all users with optional filters
   async getUsers(filters = {}) {
     try {
-      const response = await axios.get(`${API_URL}/users/getAll`, { 
+      const response = await axios.get(`${API_URL}/users/all`, { 
         params: filters,
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      return response.data;
+      
+      // Map the response data to match the expected format
+      return response.data.map(user => ({
+        userId: user.userId,
+        fname: user.Fname || user.fname,
+        lname: user.Lname || user.lname,
+        email: user.email,
+        accountType: user.accountType,
+        createdAt: user.createdAt,
+        isVerified: user.isVerified,
+        status: user.isVerified ? 'active' : 'inactive',
+        credentialsVerified: user.credentialsVerified
+      }));
     } catch (error) {
       console.error('Error fetching users:', error);
       if (error.response?.status === 404) {
-        throw new Error('No users found');
+        return []; // Return empty array instead of throwing error
       } else if (error.response?.status === 401) {
         throw new Error('Please log in to access this resource');
       } else if (!error.response) {
