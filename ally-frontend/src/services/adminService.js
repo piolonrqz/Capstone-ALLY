@@ -42,6 +42,32 @@ axios.interceptors.response.use(
 
 export const adminService = {
   // Lawyer Verification Operations
+  async getAllLawyers() {
+    try {
+      // Get both unverified and verified lawyers
+      const [unverified, verified] = await Promise.all([
+        axios.get(`${API_URL}/lawyers/unverified`),
+        axios.get(`${API_URL}/lawyers/verified`)
+      ]);
+
+      // Combine and mark their status
+      const unverifiedLawyers = unverified.data.map(lawyer => ({
+        ...lawyer,
+        status: 'pending'
+      }));
+
+      const verifiedLawyers = verified.data.map(lawyer => ({
+        ...lawyer,
+        status: lawyer.status || 'approved'
+      }));
+
+      return [...unverifiedLawyers, ...verifiedLawyers];
+    } catch (error) {
+      console.error('Error fetching all lawyers:', error);
+      throw error;
+    }
+  },
+
   async getUnverifiedLawyers() {
     try {
       const response = await axios.get(`${API_URL}/lawyers/unverified`);
@@ -65,7 +91,10 @@ export const adminService = {
   async verifyLawyer(id) {
     try {
       // Update lawyer verification status through admin endpoint
-      const response = await axios.put(`${API_URL}/admins/lawyers/verify/${id}`);
+      const response = await axios.put(`${API_URL}/users/verify/${id}`, {
+        status: 'approved',
+        credentialsVerified: true
+      });
       return response.data;
     } catch (error) {
       console.error('Error verifying lawyer:', error);
@@ -76,8 +105,9 @@ export const adminService = {
   async rejectLawyer(id) {
     try {
       // Update lawyer verification status through admin endpoint
-      const response = await axios.put(`${API_URL}/admins/lawyers/verify/${id}`, {
-        status: 'rejected'
+      const response = await axios.put(`${API_URL}/users/verify/${id}`, {
+        status: 'rejected',
+        credentialsVerified: false
       });
       return response.data;
     } catch (error) {
@@ -99,17 +129,13 @@ export const adminService = {
   // Statistics
   async getVerificationStats() {
     try {
-      // Get all lawyers
-      const [unverified, verified] = await Promise.all([
-        axios.get(`${API_URL}/lawyers/unverified`),
-        axios.get(`${API_URL}/lawyers/verified`)
-      ]);
-
+      const lawyers = await this.getAllLawyers();
+      
       // Calculate statistics
       return {
-        pending: unverified.data.length || 0,
-        verified: verified.data.length || 0,
-        rejected: 0 // We'll need to add this endpoint or filter from the response
+        pending: lawyers.filter(l => l.status === 'pending').length,
+        verified: lawyers.filter(l => l.status === 'approved').length,
+        rejected: lawyers.filter(l => l.status === 'rejected').length
       };
     } catch (error) {
       console.error('Error fetching verification stats:', error);

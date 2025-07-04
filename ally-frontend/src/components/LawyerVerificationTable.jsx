@@ -18,7 +18,7 @@ const LawyerVerificationTable = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await adminService.getUnverifiedLawyers();
+      const data = await adminService.getAllLawyers();
       const mapped = data.map(lawyer => ({
         id: lawyer.userId,
         firstName: lawyer.firstName || lawyer.Fname,
@@ -40,7 +40,7 @@ const LawyerVerificationTable = () => {
       }));
       setVerificationRequests(mapped);
     } catch (error) {
-      console.error('Failed to fetch unverified lawyers:', error);
+      console.error('Failed to fetch lawyers:', error);
       setError('Failed to load lawyer verification requests. Please try again later.');
       toast.error('Failed to load lawyer verification requests');
     } finally {
