@@ -34,7 +34,7 @@ const UserManagementTable = ({ onAddUser }) => {
         email: user.email,
         role: user.accountType?.toLowerCase() || 'client',
         joinDate: user.createdAt || new Date().toISOString(),
-        status: user.status || 'active',
+        status: user.isVerified ? 'active' : 'inactive',
         verificationStatus: user.credentialsVerified ? 'verified' : 'pending',
         avatar: `${user.fname?.[0] || ''}${user.lname?.[0] || ''}`
       }));

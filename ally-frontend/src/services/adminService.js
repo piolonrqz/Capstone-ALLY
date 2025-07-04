@@ -1,20 +1,46 @@
 import axios from 'axios';
-import { userService } from './userService';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_URL = 'http://localhost:8080';
+
+// Add request interceptor for authentication
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for error handling
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // Handle specific error cases
+      switch (error.response.status) {
+        case 401:
+          // Unauthorized - clear token and redirect to login
+          localStorage.clear();
+          window.location.href = '/login';
+          break;
+        case 403:
+          // Forbidden - user doesn't have necessary permissions
+          console.error('Access forbidden:', error.response.data);
+          break;
+        default:
+          console.error('API Error:', error.response.data);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const adminService = {
-  // Admin Dashboard Statistics
-  async getAdminStats() {
-    try {
-      const stats = await userService.getUserStats();
-      return stats;
-    } catch (error) {
-      console.error('Error fetching admin stats:', error);
-      throw error;
-    }
-  },
-
   // Lawyer Verification Operations
   async getUnverifiedLawyers() {
     try {
@@ -38,6 +64,7 @@ export const adminService = {
 
   async verifyLawyer(id) {
     try {
+      // Update lawyer verification status through admin endpoint
       const response = await axios.put(`${API_URL}/admins/lawyers/verify/${id}`);
       return response.data;
     } catch (error) {
@@ -46,58 +73,45 @@ export const adminService = {
     }
   },
 
-  // System Management
-  async updateSystemSettings(settings) {
+  async rejectLawyer(id) {
     try {
-      const response = await axios.put(`${API_URL}/admin/settings`, settings);
+      // Update lawyer verification status through admin endpoint
+      const response = await axios.put(`${API_URL}/admins/lawyers/reject/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error updating system settings:', error);
+      console.error('Error rejecting lawyer:', error);
       throw error;
     }
   },
 
-  async getSystemSettings() {
+  async getLawyerDetails(id) {
     try {
-      const response = await axios.get(`${API_URL}/admin/settings`);
+      const response = await axios.get(`${API_URL}/lawyers/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching system settings:', error);
+      console.error('Error fetching lawyer details:', error);
       throw error;
     }
   },
 
-  // Case Management
-  async getCaseStats() {
+  // Statistics
+  async getVerificationStats() {
     try {
-      const response = await axios.get(`${API_URL}/admin/cases/stats`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching case statistics:', error);
-      throw error;
-    }
-  },
+      // Get all lawyers
+      const [unverified, verified] = await Promise.all([
+        axios.get(`${API_URL}/lawyers/unverified`),
+        axios.get(`${API_URL}/lawyers/verified`)
+      ]);
 
-  // User Management (Admin-specific operations)
-  async updateUserRole(userId, newRole) {
-    try {
-      const response = await axios.put(`${API_URL}/admin/users/${userId}/role`, { role: newRole });
-      return response.data;
+      // Calculate statistics
+      return {
+        pending: unverified.data.length || 0,
+        verified: verified.data.length || 0,
+        rejected: 0 // We'll need to add this endpoint or filter from the response
+      };
     } catch (error) {
-      console.error('Error updating user role:', error);
-      throw error;
-    }
-  },
-
-  async getUserAuditLog(userId) {
-    try {
-      const response = await axios.get(`${API_URL}/admin/users/${userId}/audit-log`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching user audit log:', error);
+      console.error('Error fetching verification stats:', error);
       throw error;
     }
   }
-};
-
-export default adminService; 
+}; 

@@ -20,7 +20,7 @@ const HeaderAdmin = ({ onMenuClick }) => {
     navigate('/settings');
   };
 
-  // Get user's initials for the avatar
+  // Get user's initials for the avatar fallback
   const getInitials = () => {
     if (!currentUser?.name) return 'A';
     return currentUser.name.split(' ')
@@ -81,9 +81,23 @@ const HeaderAdmin = ({ onMenuClick }) => {
               onClick={() => setShowProfile(!showProfile)}
               className="flex items-center bg-gray-50 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
             >
-              {/* Profile Picture */}
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                {loading ? 'A' : getInitials()}
+              {/* Profile Picture or Initials */}
+              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                {loading ? (
+                  <div className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-semibold">
+                    A
+                  </div>
+                ) : currentUser?.profilePhoto ? (
+                  <img 
+                    src={currentUser.profilePhoto} 
+                    alt={currentUser.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-semibold">
+                    {getInitials()}
+                  </div>
+                )}
               </div>
               
               {/* Profile Info */}
