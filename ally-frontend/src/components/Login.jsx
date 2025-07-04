@@ -44,12 +44,8 @@ const Login = () => {
           if (adminResponse.ok) {
             const adminData = await adminResponse.json();
             localStorage.setItem('department', adminData.department);
-            
-            // Only redirect to admin if department is ADMIN
-            if (adminData.department === 'ADMIN') {
-              navigate('/admin', { replace: true });
-              return;
-            }
+            navigate('/admin', { replace: true });
+            return;
           }
         } catch (error) {
           console.error('Error fetching admin details:', error);

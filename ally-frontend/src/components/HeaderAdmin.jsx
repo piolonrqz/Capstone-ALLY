@@ -1,9 +1,28 @@
 import React, { useState } from 'react';
 import { Bell, Menu, ChevronDown } from 'lucide-react';
+import useCurrentUser from '../hooks/useCurrentUser';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../utils/auth';
 
 const HeaderAdmin = ({ onMenuClick }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const { currentUser, loading } = useCurrentUser();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Get user's initials for the avatar
+  const getInitials = () => {
+    if (!currentUser?.name) return 'A';
+    return currentUser.name.split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
+  };
 
   return (
     <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 bg-white border-b border-gray-200 z-10">
@@ -59,13 +78,15 @@ const HeaderAdmin = ({ onMenuClick }) => {
             >
               {/* Profile Picture */}
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                A
+                {loading ? 'A' : getInitials()}
               </div>
               
               {/* Profile Info */}
               <div className="ml-3 pr-2">
-                <h2 className="text-sm font-semibold text-gray-800">Piolo Enrequiz</h2>
-                <p className="text-xs text-gray-500">Admin</p>
+                <h2 className="text-sm font-semibold text-gray-800">
+                  {loading ? 'Loading...' : currentUser?.name || 'Admin'}
+                </h2>
+                <p className="text-xs text-gray-500">{loading ? '' : currentUser?.accountType?.toUpperCase() || 'ADMIN'}</p>
               </div>
 
               <ChevronDown className="h-4 w-4 ml-2 text-gray-400" />
@@ -81,7 +102,10 @@ const HeaderAdmin = ({ onMenuClick }) => {
                   Account Settings
                 </button>
                 <div className="border-t border-gray-200 my-1"></div>
-                <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50"
+                >
                   Sign Out
                 </button>
               </div>
