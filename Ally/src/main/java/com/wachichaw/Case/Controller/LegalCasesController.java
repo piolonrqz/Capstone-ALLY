@@ -21,6 +21,7 @@ import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.Case.Entity.LegalCaseResponseDTO;
 import com.wachichaw.Case.Service.LegalCaseService;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
+import com.wachichaw.Lawyer.Service.LawyerService;
 import com.wachichaw.User.Repo.UserRepo;
 
 @RestController
@@ -31,6 +32,8 @@ public class LegalCasesController {
     private UserRepo userRepo;
     @Autowired
     private final LegalCaseService LegalCaseService;
+    @Autowired
+    private LawyerService lawyerservice;
 
     public LegalCasesController(LegalCaseService legalCaseService) {
         this.LegalCaseService = legalCaseService;
@@ -133,6 +136,24 @@ public class LegalCasesController {
         }
     }
 
+    @PutMapping("/{caseId}/complete/{lawyerId}")
+    public ResponseEntity<LegalCasesEntity> completeCase(@PathVariable int caseId, @PathVariable int lawyerId) {
+        try {
+            ResponseEntity updatedCase = updateCaseStatus(caseId, CaseStatus.COMPLETED);
+            if (updatedCase.getStatusCode() == HttpStatus.OK) {
+                // Increment the cases handled for the lawyer
+                ResponseEntity<LawyerEntity> lawyerUpdateResponse = lawyerservice.updateCasesHandled(lawyerId);
+                if (lawyerUpdateResponse.getStatusCode() != HttpStatus.OK) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+                return updatedCase; // Return the updated case response
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     
 }
