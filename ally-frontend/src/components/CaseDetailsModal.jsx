@@ -45,6 +45,37 @@ export const CaseDetailsModal = ({
     }
   };
 
+  const handleCompleteCase = async () => {
+    if (case_.status !== 'ACCEPTED') {
+      console.warn('Cannot complete case that is not accepted');
+      return;
+    }
+
+    try {
+      // Call API to complete the case
+      const response = await fetch(`http://localhost:8080/Cases/${case_.caseId}/complete/${getAuthData()?.userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthData()?.token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to complete case');
+      }
+
+      // Notify parent component about status change
+      if (onStatusChange) {
+        onStatusChange(case_.caseId, 'COMPLETED');
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error('Error completing case:', error);
+    }
+  }
+
   const handleNavigateToDocuments = () => {
     navigate(`/documents/${case_.caseId}`);
     onClose();
@@ -291,6 +322,14 @@ export const CaseDetailsModal = ({
 
           {/* Footer with Actions */}
           <div className="flex justify-between items-center p-6 border-t border-gray-200 bg-gray-50">
+            {case_.status === 'ACCEPTED' && (
+              <button
+                onClick={handleCompleteCase}
+                className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Complete
+              </button>
+            )}
             <button
               onClick={onClose}
               className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
