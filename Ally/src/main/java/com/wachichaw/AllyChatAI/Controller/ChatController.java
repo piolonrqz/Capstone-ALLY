@@ -51,4 +51,10 @@ public class ChatController {
     public ResponseEntity<String> healthCheck() {
         return ResponseEntity.ok("ALLY 2.0 - Gemini service is running!");
     }
+
+    @GetMapping("/reset")
+    public ResponseEntity<String> resetChat() {
+        geminiChatService.resetHistory();
+        return ResponseEntity.ok("🔄 Chat history reset.");
+    }
 }
