@@ -77,6 +77,25 @@ const AllyConsultationChat = () => {
     }
   };
 
+  const handleNewChat = async () => {
+    try {
+      await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/api/chat/reset', {
+        method: 'GET',
+      });
+      setMessages([
+        {
+          id: `msg-${Date.now()}-1`,
+          text: "Hello! I'm ALLY, your AI legal assistant. I'm here to help answer your legal questions and provide general legal information. What would you like to know about today?",
+          sender: 'ai',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+      messageIdCounter.current = 2;
+    } catch (error) {
+      // Optionally show error to user
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto overflow-hidden bg-white shadow-lg rounded-xl">
       {/* Header */}
@@ -91,7 +110,7 @@ const AllyConsultationChat = () => {
               <p className="text-sm text-gray-500">AI Legal Assistant</p>
             </div>
           </div>
-          <button className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+          <button className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" onClick={handleNewChat}>
             <MessageCircle className="w-4 h-4" />
             <span className="text-sm">New Chat</span>
           </button>
