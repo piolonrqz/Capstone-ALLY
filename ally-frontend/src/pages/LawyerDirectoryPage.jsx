@@ -17,6 +17,17 @@ export const LawyerDirectoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const lawyersPerPage = 8;
+  const totalPages = Math.ceil(fetchedLawyers.length / lawyersPerPage);
+
+  // Get current page lawyers
+  const paginatedLawyers = fetchedLawyers.slice(
+    (currentPage - 1) * lawyersPerPage,
+    currentPage * lawyersPerPage
+  );
+
   useEffect(() => {
     const fetchVerifiedLawyers = async () => {
       try {
@@ -60,6 +71,11 @@ export const LawyerDirectoryPage = () => {
   const handleLawyerSelect = (lawyer) => {
     setSelectedLawyer(lawyer);
   };
+
+  // Reset to page 1 if filters/search change or lawyers list changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filters, fetchedLawyers.length]);
 
   return (
     <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
@@ -110,16 +126,44 @@ export const LawyerDirectoryPage = () => {
                 setSearchQuery={setSearchQuery}
                 filters={filters}
                 setFilters={setFilters}
-                lawyers={fetchedLawyers}
+                lawyers={paginatedLawyers}
                 onLawyerSelect={handleLawyerSelect}
               />
             ) : (
               <AIMatching 
-                lawyers={fetchedLawyers}
+                lawyers={paginatedLawyers}
                 onLawyerSelect={handleLawyerSelect}
               />
             )}
           </div>
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                className="px-3 py-1 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                className="px-3 py-1 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

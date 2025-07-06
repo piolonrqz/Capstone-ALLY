@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Shield, CheckCircle, Clock, Users, Award, Lock, Zap, Quote, Star } from 'lucide-react';
 import Footer from '../components/Footer';
@@ -7,8 +7,28 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("token");
   const isLawyer =  localStorage.getItem("role")  ;
+  const [showTokenExpired, setShowTokenExpired] = useState(false);
 
-
+  // JWT Expiry Check
+  useEffect(() => {
+    const checkToken = () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && Date.now() >= payload.exp * 1000) {
+          setShowTokenExpired(true);
+          localStorage.removeItem('token');
+        }
+      } catch (e) {
+        // Just log the error to the browser console
+        console.error("Internal Server Error", e);
+      }
+    };
+    checkToken();
+    const interval = setInterval(checkToken, 60 * 1000); // check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const companies = [
     { name: "LegalCorp", icon: "/legal_corp.png" },
@@ -59,7 +79,23 @@ const LandingPage = () => {
       quote: "ALLY has transformed the way I manage my practice. The case-matching system brings me clients that are actually relevant to my area of expertise, and the centralized document access saves hours each week. Plus, clients are better informed when they reach out, thanks to the AI consultation feature. It's a smarter, more efficient way to work—and I wouldn't go back."
     }
   ];  return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <>
+      {/* Token Expired Modal */}
+      {showTokenExpired && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-sm p-8 text-center bg-white rounded-lg shadow-lg">
+            <h2 className="mb-4 text-xl font-bold text-red-600">Session Expired</h2>
+            <p className="mb-6 text-gray-700">Your session has expired. Please log in again to continue.</p>
+            <button
+              className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              onClick={() => { setShowTokenExpired(false); navigate('/login'); }}
+            >
+              Log In
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="flex flex-col min-h-screen bg-white">
 
       {/* Hero Section */}
       <section className="bg-[#F7FBFF] px-8 py-20 min-h-[900px] flex items-center">
@@ -452,6 +488,7 @@ const LandingPage = () => {
       {/* Footer */}
       <Footer />
     </div>
+    </>
   );
 };
 
