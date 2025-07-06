@@ -33,6 +33,22 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
         }
     };
 
+    // Helper to robustly get education institution (camelCase or snake_case)
+    const getEducationInstitution = (lawyerObj) => {
+        return (
+            lawyerObj?.educationInstitution ||
+            lawyerObj?.education_institution ||
+            lawyerObj?.EducationInstitution ||
+            lawyerObj?.education ||
+            ''
+        );
+    };
+
+    // Helper to robustly get cases handled (camelCase and snake_case)
+    const getCasesHandled = (lawyerObj) => {
+        return lawyerObj?.casesHandled ?? lawyerObj?.cases_handled;
+    };
+
     if (!lawyer) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -71,24 +87,14 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
                                 <p className="flex items-center mt-2 text-gray-600">
                                     <MapPin className="w-4 h-4 mr-1" />
                                     {lawyer?.location || lawyer?.city || ''}
-                                    {lawyer?.rating && (
-                                        <>
-                                            <Star className="w-4 h-4 ml-4 mr-1 text-yellow-400 fill-yellow-400" />
-                                            {lawyer.rating}
-                                        </>
-                                    )}
                                 </p>
                             </div>
                         </div>
 
                         <div className="grid gap-6 mb-6 md:grid-cols-2">
                             <div>
-                                <h3 className="mb-2 font-semibold">About</h3>
-                                <p className="text-sm text-gray-700">{lawyer?.about || 'No description provided.'}</p>
-                            </div>
-                            <div>
-                                <h3 className="mb-2 font-semibold">Case Rate</h3>
-                                <p className="font-semibold text-blue-600">{lawyer?.fee || 'N/A'}</p>
+                                <h3 className="mb-2 font-semibold">Cases Handled</h3>
+                                <p className="font-semibold text-blue-600">{getCasesHandled(lawyer) !== undefined ? getCasesHandled(lawyer) : 'N/A'}</p>
                             </div>
                             <div>
                                 <h3 className="mb-2 font-semibold">Experience</h3>
@@ -100,7 +106,7 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
                             </div>
                             <div>
                                 <h3 className="mb-2 font-semibold">Education</h3>
-                                <p>{lawyer?.education || 'Not specified'}</p>
+                                <p>{getEducationInstitution(lawyer) || 'Not specified'}</p>
                             </div>
                         </div>
 
