@@ -130,7 +130,12 @@
 			<version>3.6.1</version>
 		</dependency>
 
-		<!-- ALLY AI - Finetuned Dependencies -->		
+		<!-- ALLY AI - Finetuned Dependencies -->	
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-aiplatform</artifactId>
+			<version>3.45.0</version>
+		</dependency>	
 		<dependency>
 			<groupId>com.google.auth</groupId>
 			<artifactId>google-auth-library-oauth2-http</artifactId>
