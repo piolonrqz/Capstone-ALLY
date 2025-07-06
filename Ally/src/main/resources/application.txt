@@ -35,11 +35,11 @@ scrt: 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
 
 server.error.include-stacktrace=never
 
-# TEST AI - Gemini Flash 2.0
-spring.ai.openai.chat.base-url=https://generativelanguage.googleapis.com
-spring.ai.openai.chat.completions-path=/v1beta/openai/chat/completions
-spring.ai.openai.api-key= 
-spring.ai.openai.chat.options.model=gemini-2.0-flash
+# # INITIAL TEST AI ONLY - Gemini Flash 2.0
+# spring.ai.openai.chat.base-url=https://generativelanguage.googleapis.com
+# spring.ai.openai.chat.completions-path=/v1beta/openai/chat/completions
+# spring.ai.openai.api-key= 
+# spring.ai.openai.chat.options.model=gemini-2.0-flash
 
 # K: AIzaSyBKAnxwUKbQdw87tccs-gLJx2vP03YHH9k
 
@@ -62,11 +62,6 @@ weka.temp.path=${java.io.tmpdir}/weka
 # fine tuned model ver 2.0
 google.project-id=gen-lang-client-0059670674
 google.model-id=5483076471230562304
-
-# Spring Cloud GCP (Optional - can be removed if not used)
-spring.cloud.gcp.credentials.location=classpath:service-account-key.json
-spring.cloud.gcp.project-id=839498679598
-spring.cloud.gcp.core.enabled=true
 
 # Logging for debugging
 logging.level.com.google.cloud=DEBUG
