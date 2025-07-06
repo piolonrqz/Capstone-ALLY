@@ -94,22 +94,20 @@ const LawyerVerificationStats = () => {
         </div>
       </div>
 
-      {stats.pendingVerifications > 0 && (
-        <div className="lg:col-span-4 bg-yellow-50 p-4 rounded-xl border border-yellow-100 flex items-center justify-between">
-          <div className="flex items-center">
-            <Clock className="w-5 h-5 text-yellow-600 mr-2" />
-            <span className="text-sm font-medium text-yellow-800">
-              {stats.pendingVerifications} lawyer verification{stats.pendingVerifications !== 1 ? 's' : ''} pending review
-            </span>
-          </div>
-          <button 
-            onClick={() => window.location.href = '/admin/verification'}
-            className="px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors"
-          >
-            Review
-          </button>
+      <div className="lg:col-span-4 bg-yellow-50 p-4 rounded-xl border border-yellow-100 flex items-center justify-between">
+        <div className="flex items-center">
+          <Clock className="w-5 h-5 text-yellow-600 mr-2" />
+          <span className="text-sm font-medium text-yellow-800">
+            {stats.pendingVerifications} lawyer verification{stats.pendingVerifications !== 1 ? 's' : ''} pending review
+          </span>
         </div>
-      )}
+        <button 
+          onClick={() => window.location.href = '/admin/verification'}
+          className="px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-lg hover:bg-yellow-200 transition-colors"
+        >
+          Review
+        </button>
+      </div>
     </div>
   );
 };
