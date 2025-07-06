@@ -29,3 +29,7 @@ replay_pid*
 
 ally.db
 Schedule-Backend-Optimization-Plan.md
+src/main/resources/static/credentials/1aa919fb-32c7-4cc9-bdd4-e4592ff0eb99_ally-firebasesdk.json
+src/main/resources/static/credentials/dbb7180b-2212-47ec-bbbf-7a8cb6c74694_ally-firebasesdk.json
+src/main/resources/static/credentials/f2bc693f-bc39-4738-80cb-4130eabc516a_service-account-key.json
+src/main/resources/static/credentials/7290d394-d5ed-423b-b262-5504b87b3ecd_ally-firebasesdk.json

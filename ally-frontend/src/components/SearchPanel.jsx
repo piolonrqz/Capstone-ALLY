@@ -22,6 +22,12 @@ export const SearchPanel = ({
   { label: "4-7 years", value: "4-7" },
   { label: "8+ years", value: "8+" }
 ];
+const casesHandledRanges = [
+  { label: "All Cases", value: "All Cases" },
+  { label: "1-10 cases", value: "1-10" },
+  { label: "11-50 cases", value: "11-50" },
+  { label: "51+ cases", value: "51+" }
+];
 
   // Initialize filtered lawyers and extract unique specializations, locations, and years of experience
   
@@ -59,24 +65,25 @@ useEffect(() => {
       return;
     }
 
-      const isDefault =
-    (!searchQuery || searchQuery.trim() === '') &&
-    (!filters.specialty || filters.specialty === 'All Specialties') &&
-    (!filters.location || filters.location === 'All Locations') &&
-    (!filters.experience || filters.experience === 'All Years') &&
-    (!filters.availability || filters.availability === 'Any Day');
+    const isDefault =
+      (!searchQuery || searchQuery.trim() === '') &&
+      (!filters.specialty || filters.specialty === 'All Specialties') &&
+      (!filters.location || filters.location === 'All Locations') &&
+      (!filters.experience || filters.experience === 'All Years') &&
+      (!filters.availability || filters.availability === 'Any Day') &&
+      (!filters.casesHandled || filters.casesHandled === 'All Cases');
 
-  let filtered = [...lawyers];
+    let filtered = [...lawyers];
 
-  if (isDefault) {
-    filtered.sort((a, b) => {
-      const aYears = Number(typeof a.experience === 'string' ? a.experience.replace(/\D/g, '') : a.experience);
-      const bYears = Number(typeof b.experience === 'string' ? b.experience.replace(/\D/g, '') : b.experience);
-      return bYears - aYears;
-    });
-    setFilteredLawyers(filtered);
-    return;
-  }
+    if (isDefault) {
+      filtered.sort((a, b) => {
+        const aYears = Number(typeof a.experience === 'string' ? a.experience.replace(/\D/g, '') : a.experience);
+        const bYears = Number(typeof b.experience === 'string' ? b.experience.replace(/\D/g, '') : b.experience);
+        return bYears - aYears;
+      });
+      setFilteredLawyers(filtered);
+      return;
+    }
 
 
     // Apply search query filter
@@ -120,6 +127,17 @@ useEffect(() => {
   });
 }
 
+    // Apply cases handled filter
+    if (filters.casesHandled && filters.casesHandled !== 'All Cases') {
+      filtered = filtered.filter(lawyer => {
+        const cases = Number(lawyer.casesHandled);
+        if (filters.casesHandled === '1-10') return cases >= 1 && cases <= 10;
+        if (filters.casesHandled === '11-50') return cases >= 11 && cases <= 50;
+        if (filters.casesHandled === '51+') return cases >= 51;
+        return true;
+      });
+    }
+
     setFilteredLawyers(filtered);
   };
 
@@ -136,6 +154,7 @@ useEffect(() => {
       location: 'All Locations',
       experience: 'All Years',
       availability: 'Any Day',
+      casesHandled: 'All Cases',
     });
   };
 
@@ -145,11 +164,11 @@ useEffect(() => {
       <p className="mb-8 text-gray-600">Search our network of verified legal professionals or let our AI match you with the perfect attorney</p>
       
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-sm">Error: {error}</p>
+        <div className="p-4 mb-4 border border-red-200 rounded-lg bg-red-50">
+          <p className="text-sm text-red-600">Error: {error}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="text-red-600 underline text-sm hover:text-red-800"
+            className="text-sm text-red-600 underline hover:text-red-800"
           >
             Retry
           </button>
@@ -226,6 +245,18 @@ useEffect(() => {
             <option>Weekends</option>
           </select>
         </div>
+        <div>
+          <label className="block mb-1 text-sm font-medium text-gray-700">Cases Handled</label>
+          <select
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            value={filters.casesHandled || 'All Cases'}
+            onChange={(e) => setFilters({ ...filters, casesHandled: e.target.value })}
+          >
+            {casesHandledRanges.map((range) => (
+              <option key={range.value} value={range.value}>{range.label}</option>
+            ))}
+          </select>
+        </div>
         <div className="flex space-x-2">
           <button 
             className="flex-1 px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
@@ -251,11 +282,11 @@ useEffect(() => {
       {/* Lawyers list */}
       <div className="space-y-4">
         {filteredLawyers.length === 0 ? (
-          <div className="text-center py-8">
+          <div className="py-8 text-center">
             <p className="text-gray-600">No lawyers found matching your criteria.</p>
             <button 
               onClick={resetFilters}
-              className="mt-2 text-blue-600 hover:text-blue-800 underline"
+              className="mt-2 text-blue-600 underline hover:text-blue-800"
             >
               Reset filters to see all lawyers
             </button>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Shield, CheckCircle, Clock, Users, Award, Lock, Zap, Quote, Star } from 'lucide-react';
 import Footer from '../components/Footer';
@@ -7,8 +7,28 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("token");
   const isLawyer =  localStorage.getItem("role")  ;
+  const [showTokenExpired, setShowTokenExpired] = useState(false);
 
-
+  // JWT Expiry Check
+  useEffect(() => {
+    const checkToken = () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && Date.now() >= payload.exp * 1000) {
+          setShowTokenExpired(true);
+          localStorage.removeItem('token');
+        }
+      } catch (e) {
+        // Just log the error to the browser console
+        console.error("Internal Server Error", e);
+      }
+    };
+    checkToken();
+    const interval = setInterval(checkToken, 60 * 1000); // check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const companies = [
     { name: "LegalCorp", icon: "/legal_corp.png" },
@@ -59,14 +79,30 @@ const LandingPage = () => {
       quote: "ALLY has transformed the way I manage my practice. The case-matching system brings me clients that are actually relevant to my area of expertise, and the centralized document access saves hours each week. Plus, clients are better informed when they reach out, thanks to the AI consultation feature. It's a smarter, more efficient way to work—and I wouldn't go back."
     }
   ];  return (
-    <div className="bg-white min-h-screen flex flex-col">
+    <>
+      {/* Token Expired Modal */}
+      {showTokenExpired && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-sm p-8 text-center bg-white rounded-lg shadow-lg">
+            <h2 className="mb-4 text-xl font-bold text-red-600">Session Expired</h2>
+            <p className="mb-6 text-gray-700">Your session has expired. Please log in again to continue.</p>
+            <button
+              className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              onClick={() => { setShowTokenExpired(false); navigate('/login'); }}
+            >
+              Log In
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="flex flex-col min-h-screen bg-white">
 
       {/* Hero Section */}
       <section className="bg-[#F7FBFF] px-8 py-20 min-h-[900px] flex items-center">
         <div className="max-w-[1440px] mx-auto w-full">
-          <div className="text-center max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
             {/* Main Heading */}
-            <h1 className="text-6xl font-bold text-black leading-tight mb-6">
+            <h1 className="mb-6 text-6xl font-bold leading-tight text-black">
               Find Legal Help,<br />
               Anonymously & Securely
             </h1>
@@ -76,42 +112,42 @@ const LandingPage = () => {
               Connect with verified legal professionals instantly. Get the help you<br />
               need without compromising your privacy or breaking your budget.
             </p>
-            
-            {/* Buttons */}
-            <div className="flex justify-center gap-6 mb-12">
-              {isLawyer !== "LAWYER" &&  (
-              <button
-                onClick={() => navigate('/lawyers')}
-                className="bg-[#1A6EFF] text-white px-8 py-5 rounded-lg text-2xl font-normal hover:bg-blue-700 transition-colors"
-              >
-                Get Legal Help Now
-              </button>
-              )}
-              {!isLoggedIn && (
+
+            {/* Consult with ALLY & Get Legal Help Now Buttons */}
+            <div className="flex items-center justify-between w-full max-w-2xl gap-6 mx-auto mb-12">
+              <div className="flex flex-col items-start gap-2">
                 <button
-                  onClick={() => navigate('/signup/lawyer')}
-                  className="bg-white text-[#363636] px-8 py-5 rounded-lg border border-[#ADADAD] text-2xl font-normal hover:bg-gray-50 transition-colors"
+                  onClick={() => navigate('/consult')}
+                  className="px-8 py-5 text-2xl font-normal text-white transition-colors rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
                 >
-                  Join as Lawyer
+                  Consult with ALLY
+                </button>
+              </div>
+              {isLawyer !== "LAWYER" &&  (
+                <button
+                  onClick={() => navigate('/lawyers')}
+                  className="bg-[#1A6EFF] text-white px-8 py-5 rounded-lg text-2xl font-normal hover:bg-blue-700 transition-colors"
+                >
+                  Get Legal Help Now
                 </button>
               )}
             </div>
               {/* Feature Badges */}
             <div className="flex justify-center gap-12">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                <div className="flex items-center justify-center w-8 h-8 bg-white rounded">
                   <Shield className="w-5 h-5 text-[#00C06F]" strokeWidth={2} />
                 </div>
                 <span className="text-[#363636] text-lg">100% Anonymous</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                <div className="flex items-center justify-center w-8 h-8 bg-white rounded">
                   <CheckCircle className="w-5 h-5 text-[#1A6EFF]" strokeWidth={2} />
                 </div>
                 <span className="text-[#363636] text-lg">Verified Lawyers</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
+                <div className="flex items-center justify-center w-8 h-8 bg-white rounded">
                   <Clock className="w-5 h-5 text-[#7578DA]" strokeWidth={2} />
                 </div>
                 <span className="text-[#363636] text-lg">24/7 Available</span>
@@ -123,7 +159,7 @@ const LandingPage = () => {
       <section className="py-20">
         <div className="max-w-[1200px] mx-auto px-8">
           {/* Section Header */}
-          <div className="text-center mb-16">
+          <div className="mb-16 text-center">
             <h2 className="text-6xl font-semibold text-[#07284A] mb-4">HOW IT WORKS</h2>
             <p className="text-2xl text-[#545454] font-normal">
               Getting legal help has never been easier. Follow these simple steps<br />
@@ -154,12 +190,12 @@ const LandingPage = () => {
                 Learn More
               </button>
             </div>              
-            <div className="flex-1 relative">
+            <div className="relative flex-1">
               <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
                 <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
                   {/* Top Icon */}
                   <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
-                    <div className="w-5 h-5 flex items-center justify-center">
+                    <div className="flex items-center justify-center w-5 h-5">
                       <Shield className="w-5 h-5 text-white" strokeWidth={2} />
                     </div>
                   </div>
@@ -168,7 +204,7 @@ const LandingPage = () => {
                   <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
                   
                   {/* Mock Content Lines */}
-                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                  <div className="absolute space-y-2 top-16 left-6 right-6">
                     <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
                     <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
                   </div>
@@ -195,18 +231,18 @@ const LandingPage = () => {
               </div>
               {/* Step Number */}
               <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-                <div className="bg-white w-11 h-11 rounded-full flex items-center justify-center">
+                <div className="flex items-center justify-center bg-white rounded-full w-11 h-11">
                   <span className="text-[#1A6EFF] font-normal text-base">01</span>
                 </div>
               </div>
             </div>
           </div>          
-          {/* Step 2 */}          <div className="flex items-center gap-20 mb-20">            <div className="flex-1 relative">
+          {/* Step 2 */}          <div className="flex items-center gap-20 mb-20">            <div className="relative flex-1">
               <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
                 <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
                   {/* Top Icon */}
                   <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
-                    <div className="w-5 h-5 flex items-center justify-center">
+                    <div className="flex items-center justify-center w-5 h-5">
                       <Users className="w-5 h-5 text-white" strokeWidth={2} />
                     </div>
                   </div>
@@ -215,7 +251,7 @@ const LandingPage = () => {
                   <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
                   
                   {/* Mock Content Lines */}
-                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                  <div className="absolute space-y-2 top-16 left-6 right-6">
                     <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
                     <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
                   </div>
@@ -242,7 +278,7 @@ const LandingPage = () => {
               </div>
               {/* Step Number */}
               <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-                <div className="bg-white w-11 h-11 rounded-full flex items-center justify-center">
+                <div className="flex items-center justify-center bg-white rounded-full w-11 h-11">
                   <span className="text-[#1A6EFF] font-normal text-base">02</span>
                 </div>
               </div>
@@ -286,12 +322,12 @@ const LandingPage = () => {
               <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
                 Learn More
               </button>
-            </div>            <div className="flex-1 relative">
+            </div>            <div className="relative flex-1">
               <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
                 <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
                   {/* Top Icon */}
                   <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
-                    <div className="w-5 h-5 flex items-center justify-center">
+                    <div className="flex items-center justify-center w-5 h-5">
                       <Clock className="w-5 h-5 text-white" strokeWidth={2} />
                     </div>
                   </div>
@@ -300,7 +336,7 @@ const LandingPage = () => {
                   <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
                   
                   {/* Mock Content Lines */}
-                  <div className="absolute top-16 left-6 right-6 space-y-2">
+                  <div className="absolute space-y-2 top-16 left-6 right-6">
                     <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
                     <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
                   </div>
@@ -327,7 +363,7 @@ const LandingPage = () => {
               </div>
               {/* Step Number */}
               <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-                <div className="bg-white w-11 h-11 rounded-full flex items-center justify-center">
+                <div className="flex items-center justify-center bg-white rounded-full w-11 h-11">
                   <span className="text-[#1A6EFF] font-normal text-base">03</span>
                 </div>
               </div>
@@ -354,7 +390,7 @@ const LandingPage = () => {
       </section>      {/* Statistics Section */}
       <section className="py-20 bg-white">
         <div className="max-w-[1200px] mx-auto px-32">
-          <div className="text-center mb-16">
+          <div className="mb-16 text-center">
             <h2 className="text-4xl font-semibold text-[#07284A] mb-6">
               Trusted by Legal Professionals & Clients
             </h2>
@@ -367,16 +403,16 @@ const LandingPage = () => {
             {stats.map((stat, index) => {
               const IconComponent = stat.icon;
               return (
-                <div key={index} className="text-center p-8">
-                  <div className="mb-4 flex justify-center">
+                <div key={index} className="p-8 text-center">
+                  <div className="flex justify-center mb-4">
                     <div className="relative w-[75px] h-[75px] rounded-full bg-[#1A6EFF] flex items-center justify-center">
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center">
+                      <div className="absolute flex items-center justify-center w-10 h-10 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
                         <IconComponent className="w-6 h-6 text-white" strokeWidth={2} />
                       </div>
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-black mb-2">{stat.number}</h3>
-                  <h4 className="text-xs font-medium text-black mb-2">{stat.title}</h4>
+                  <h3 className="mb-2 text-xl font-semibold text-black">{stat.number}</h3>
+                  <h4 className="mb-2 text-xs font-medium text-black">{stat.title}</h4>
                   <p className="text-xs text-black">{stat.description}</p>
                 </div>
               );
@@ -386,7 +422,7 @@ const LandingPage = () => {
           {/* Satisfaction Guarantee */}
           <div className="bg-[#EDFFF7] p-8 rounded-lg text-center">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="w-15 h-15 flex items-center justify-center">
+              <div className="flex items-center justify-center w-15 h-15">
                 <CheckCircle className="w-10 h-10 text-[#00C06F]" strokeWidth={2.5} />
               </div>
               <h3 className="text-4xl font-semibold text-[#003722]">
@@ -402,8 +438,8 @@ const LandingPage = () => {
       </section>      {/* Testimonials Section */}
       <section className="py-20 bg-[#2553A7]">
         <div className="max-w-[1200px] mx-auto px-32">
-          <div className="text-center mb-16">
-            <h2 className="text-6xl font-semibold text-white mb-8">What Our Clients Say</h2>
+          <div className="mb-16 text-center">
+            <h2 className="mb-8 text-6xl font-semibold text-white">What Our Clients Say</h2>
             <p className="text-xl text-[#B9DFFE]">
               Hear from real clients who have experienced the power of AI-enhanced legal services
             </p>
@@ -411,12 +447,12 @@ const LandingPage = () => {
           
           <div className="grid grid-cols-2 gap-0">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white p-0 shadow-2xl" style={{
+              <div key={index} className="p-0 bg-white shadow-2xl" style={{
                 borderRadius: '0px 200px 0px 200px'
               }}>
                 <div className="p-8 h-[227px] relative">
                   {/* Quote Icon */}
-                  <div className="absolute top-32 right-8 w-16 h-16">
+                  <div className="absolute w-16 h-16 top-32 right-8">
                     <Quote className="w-8 h-8 text-[#1A6EFF]" strokeWidth={2} />
                   </div>
                   
@@ -452,6 +488,7 @@ const LandingPage = () => {
       {/* Footer */}
       <Footer />
     </div>
+    </>
   );
 };
 

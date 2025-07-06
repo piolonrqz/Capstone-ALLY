@@ -35,11 +35,11 @@ scrt: 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
 
 server.error.include-stacktrace=never
 
-# TEST AI - Gemini Flash 2.0
-spring.ai.openai.chat.base-url=https://generativelanguage.googleapis.com
-spring.ai.openai.chat.completions-path=/v1beta/openai/chat/completions
-spring.ai.openai.api-key= 
-spring.ai.openai.chat.options.model=gemini-2.0-flash
+# # INITIAL TEST AI ONLY - Gemini Flash 2.0
+# spring.ai.openai.chat.base-url=https://generativelanguage.googleapis.com
+# spring.ai.openai.chat.completions-path=/v1beta/openai/chat/completions
+# spring.ai.openai.api-key= 
+# spring.ai.openai.chat.options.model=gemini-2.0-flash
 
 # K: AIzaSyBKAnxwUKbQdw87tccs-gLJx2vP03YHH9k
 
@@ -58,31 +58,16 @@ firebase.storage.weka.models.folder=weka/models
 # Temporary directory to store downloads/models locally
 weka.temp.path=${java.io.tmpdir}/weka
 
-# Vertex AI Configuration
-vertex.ai.project-id=gen-lang-client-0059670674
-vertex.ai.location=us-central1
-vertex.ai.model.endpoint=5483076471230562304
-
-# For fine-tuned models deployed to endpoints, use the base model name
-# Your fine-tuned model is based on Gemini, so use the base model
-vertex.ai.model.name=gemini-1.5-flash-002
-
-# The actual fine-tuned model will be accessed via the endpoint
-# vertex.ai.model.endpoint=5483076471230562304
-
-# Service Account Key for Google Cloud
-google.cloud.credentials.location=classpath:service-account-key.json
-
-# Spring Cloud GCP (Optional - can be removed if not used)
-spring.cloud.gcp.credentials.location=classpath:service-account-key.json
-spring.cloud.gcp.project-id=839498679598
-spring.cloud.gcp.core.enabled=true
+# ALLY 2.0 - Integration with Google Gemini AI Flash 2.0 - lite
+# fine tuned model ver 2.0
+google.project-id=gen-lang-client-0059670674
+google.model-id=5483076471230562304
 
 # Logging for debugging
 logging.level.com.google.cloud=DEBUG
 logging.level.com.wachichaw=DEBUG
 
-
+# Email Configuration
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
 spring.mail.username=allylegal.cit@gmail.com

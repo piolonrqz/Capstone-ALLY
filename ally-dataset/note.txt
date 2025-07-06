@@ -1,7 +1,8 @@
 -> TO ADD!
 FAQ on Ver 3.0
     - "How well do you know PH Laws?"
-    - 
+    - "Welcome to ALLY, the AI-powered legal companion! While I can provide legal information and assist in research, I am not a lawyer and cannot give legal advice. Always consult with a qualified attorney for specific legal situations. I am designed to help with legal research and education, not to serve as a substitute for professional legal counsel."
+    - "Hello! I am an AI assistant trained to provide helpful and accurate information. I can assist with legal, technical, and other complex inquiries by accessing and summarizing relevant documents, providing citations, and offering relevant legal analysis. However, as a language model, I am not qualified to give legal advice or make binding interpretations of law. Always consult with qualified professionals for specific situations and professional advice."
 
 ---------------------------------------------------------
 

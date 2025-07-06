@@ -24,6 +24,7 @@ import MyCasesPage from './pages/MyCasesPage'
 import { shouldShowNavigation } from './utils/navigation.js'
 import LawyerSettings from './components/LawyerSettings'
 import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler'
+import AllyConsultationChat from './components/AllyConsultationChat'
 
 // Custom hook to determine if navigation bar should be visible
 const useNavigationVisibility = () => {
@@ -55,11 +56,11 @@ function AppContent() {
         <Route path="/documents/:caseId" element={<DocumentsPage />} />
         <Route path="/settings" element={<AccountSettings />} />
         <Route path="/lawyer-settings" element={<LawyerSettings />} />
+        <Route path="/consult" element={<AllyConsultationChat />} />
                   {/* Chat Routes */}
-
-
           <Route path="/chat" element={<ChatContainer />} />
           <Route path="/messages/:chatroomId" element={<ChatContainer />} />
+
 
           {/* Admin Routes */}
           <Route
