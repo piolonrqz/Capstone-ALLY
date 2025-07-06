@@ -44,9 +44,11 @@ export const LawyerProfile = ({ lawyer, onClose }) => {
         );
     };
 
+    
+
     // Helper to robustly get cases handled (camelCase and snake_case)
     const getCasesHandled = (lawyerObj) => {
-        return lawyerObj?.casesHandled ?? lawyerObj?.cases_handled;
+        return lawyerObj?.casesHandled ?? lawyerObj?.casesHandled;
     };
 
     if (!lawyer) {
