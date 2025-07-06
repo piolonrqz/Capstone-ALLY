@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SearchPanel } from '../components/SearchPanel';
 import { LawyerProfile } from '../components/LawyerProfile';
 import { AIMatching } from '../components/AIMatching';
+import CasesList from '@/components/CasesList';
 
 export const LawyerDirectoryPage = () => {
   const [activeView, setActiveView] = useState('search');
@@ -37,22 +38,21 @@ export const LawyerDirectoryPage = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // Assuming the API returns an array of lawyer objects
-        // And we need to map them to the structure expected by LawyerCard and LawyerProfile
         const transformedData = data.map(lawyer => ({
-          id: lawyer.userId, // Assuming 'userId' from backend maps to 'id'
-          name: `${lawyer.Fname} ${lawyer.Lname}`, // Combine Fname and Lname
-          specialty: lawyer.specialization && lawyer.specialization.length > 0 ? lawyer.specialization.join(', ') : 'Not specified', // Join specializations or provide default
-          location: `${lawyer.city}, ${lawyer.province}`, // Combine city and province
-          rating: lawyer.rating || 0, // Provide default if not present
+          
+          id: lawyer.userId, 
+          name: `${lawyer.Fname} ${lawyer.Lname}`, 
+          specialty: lawyer.specialization && lawyer.specialization.length > 0 ? lawyer.specialization.join(', ') : 'Not specified', 
+          location: `${lawyer.city}, ${lawyer.province}`, 
+          rating: lawyer.rating || 0, 
           experience: lawyer.experience ? `${lawyer.experience} years` : 'N/A',
-          // caseType: 'N/A', // This field is not directly available from the backend snippet
-          fee: lawyer.consultationFee ? `₱${lawyer.consultationFee}/hour` : 'N/A', // Assuming consultationFee exists
-          image: `${lawyer.Fname ? lawyer.Fname[0] : ''}${lawyer.Lname ? lawyer.Lname[0] : ''}`.toUpperCase(), // Initials for image
-          about: lawyer.bio || 'No biography available.', // Assuming bio exists
-          education: lawyer.education || 'Not specified', // Assuming education exists
-          areas: lawyer.specialization || [], // Assuming specialization is an array
-          // Add other fields as necessary, mapping from backend lawyer entity
+          fee: lawyer.consultationFee ? `₱${lawyer.consultationFee}/hour` : 'N/A', 
+          image: `${lawyer.Fname ? lawyer.Fname[0] : ''}${lawyer.Lname ? lawyer.Lname[0] : ''}`.toUpperCase(), 
+          about: lawyer.bio || 'No biography available.', 
+          education: lawyer.educationInstitution|| 'Not specified', 
+          areas: lawyer.specialization || [], 
+          casesHandled: lawyer.casesHandled || 0,
+          
         }));
         setFetchedLawyers(transformedData);
         setError(null);
