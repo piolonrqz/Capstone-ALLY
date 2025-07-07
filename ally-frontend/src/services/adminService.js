@@ -41,6 +41,71 @@ axios.interceptors.response.use(
 );
 
 export const adminService = {
+  // User Management Operations
+  async getAllUsers() {
+    try {
+      // Get all users and lawyers
+      const [allUsers, verifiedLawyers, unverifiedLawyers] = await Promise.all([
+        axios.get(`${API_URL}/users/all`),
+        axios.get(`${API_URL}/lawyers/verified`),
+        axios.get(`${API_URL}/lawyers/unverified`)
+      ]);
+
+      // Create a map of lawyer details
+      const allLawyers = [...verifiedLawyers.data, ...unverifiedLawyers.data];
+      const lawyersMap = new Map(
+        allLawyers.map(lawyer => [lawyer.userId || lawyer.id, lawyer])
+      );
+
+      // Process all users
+      return allUsers.data.map(user => {
+        const isLawyer = user.accountType === 'LAWYER';
+        const lawyerDetails = isLawyer ? lawyersMap.get(user.id) : null;
+
+        // Extract first and last name from email if not provided
+        let firstName = user.Fname || user.firstName;
+        let lastName = user.Lname || user.lastName;
+        
+        if ((!firstName || !lastName) && user.email) {
+          // Try to extract name from email (e.g., john.doe@gmail.com -> John Doe)
+          const emailName = user.email.split('@')[0];
+          const nameParts = emailName.split(/[._-]/);
+          if (nameParts.length >= 2) {
+            firstName = firstName || nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+            lastName = lastName || nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
+          }
+        }
+
+        return {
+          ...user,
+          // Ensure consistent name fields
+          firstName: firstName || '',
+          lastName: lastName || '',
+          fullName: `${firstName || ''} ${lastName || ''}`.trim() || 'No name provided',
+          // Add lawyer-specific details if available
+          ...(isLawyer && lawyerDetails ? {
+            barNumber: lawyerDetails.barNumber,
+            experience: lawyerDetails.experience,
+            specialization: lawyerDetails.specialization || [],
+            credentials: lawyerDetails.credentials,
+            educationInstitution: lawyerDetails.educationInstitution,
+            casesHandled: lawyerDetails.casesHandled || 0,
+            status: lawyerDetails.status || 'pending',
+            verificationStatus: lawyerDetails.credentialsVerified ? 'verified' : 'pending'
+          } : {
+            // For non-lawyers
+            status: user.isVerified ? 'active' : 'inactive',
+            verificationStatus: user.isVerified ? 'verified' : 'pending'
+          }),
+          fullDetails: isLawyer && lawyerDetails ? true : false
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching all users:', error);
+      throw error;
+    }
+  },
+
   // Lawyer Verification Operations
   async getAllLawyers() {
     try {
@@ -53,12 +118,14 @@ export const adminService = {
       // Combine and mark their status
       const unverifiedLawyers = unverified.data.map(lawyer => ({
         ...lawyer,
-        status: 'pending'
+        status: 'pending',
+        verificationStatus: 'pending'
       }));
 
       const verifiedLawyers = verified.data.map(lawyer => ({
         ...lawyer,
-        status: lawyer.status || 'approved'
+        status: lawyer.status || 'approved',
+        verificationStatus: 'verified'
       }));
 
       return [...unverifiedLawyers, ...verifiedLawyers];
@@ -90,7 +157,6 @@ export const adminService = {
 
   async verifyLawyer(id) {
     try {
-      // Update lawyer verification status through admin endpoint
       const response = await axios.put(`${API_URL}/users/verify/${id}`, {
         status: 'approved',
         credentialsVerified: true
@@ -104,7 +170,6 @@ export const adminService = {
 
   async rejectLawyer(id) {
     try {
-      // Update lawyer verification status through admin endpoint
       const response = await axios.put(`${API_URL}/users/verify/${id}`, {
         status: 'rejected',
         credentialsVerified: false
@@ -139,6 +204,26 @@ export const adminService = {
       };
     } catch (error) {
       console.error('Error fetching verification stats:', error);
+      throw error;
+    }
+  },
+
+  // User Statistics
+  async getUserStats() {
+    try {
+      const users = await this.getAllUsers();
+      
+      return {
+        total: users.length,
+        lawyers: users.filter(u => u.accountType === 'LAWYER').length,
+        clients: users.filter(u => u.accountType === 'CLIENT').length,
+        admins: users.filter(u => u.accountType === 'ADMIN').length,
+        active: users.filter(u => u.status === 'active' || u.status === 'approved').length,
+        inactive: users.filter(u => u.status === 'inactive' || u.status === 'rejected').length,
+        pending: users.filter(u => u.status === 'pending').length
+      };
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
       throw error;
     }
   }
