@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LawyerSettings from './LawyerSettings';
 import ClientSettings from './ClientSettings';
+import AdminSettings from './AdminSettings';
 import { getAuthData, fetchUserDetails } from '../utils/auth';
 
 const AccountSettings = () => {
@@ -21,7 +22,7 @@ const AccountSettings = () => {
           return;
         }
         const data = await fetchUserDetails(auth.userId);
-        if (!data.accountType || (data.accountType.toLowerCase() !== 'lawyer' && data.accountType.toLowerCase() !== 'client')) {
+        if (!data.accountType) {
           setError('Unable to determine your account type.');
           setLoading(false);
           return;
@@ -52,12 +53,15 @@ const AccountSettings = () => {
     );
   }
 
-  if (userType === 'lawyer') {
-    return <LawyerSettings user={userData} />;
-  } else if (userType === 'client') {
-    return <ClientSettings user={userData} />;
-  } else {
-    return null;
+  switch (userType) {
+    case 'lawyer':
+      return <LawyerSettings user={userData} />;
+    case 'client':
+      return <ClientSettings user={userData} />;
+    case 'admin':
+      return <AdminSettings user={userData} />;
+    default:
+      return null;
   }
 };
 
