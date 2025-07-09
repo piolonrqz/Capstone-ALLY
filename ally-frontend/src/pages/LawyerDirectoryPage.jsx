@@ -11,7 +11,9 @@ export const LawyerDirectoryPage = () => {
   const [filters, setFilters] = useState({
     specialty: 'All Specialties',
     location: '',
+    experience: 'All Years',
     availability: 'Any Day',
+    casesHandled: 'All Cases',
     rating: 'Any Rating'
   });
   const [fetchedLawyers, setFetchedLawyers] = useState([]);
@@ -21,10 +23,62 @@ export const LawyerDirectoryPage = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const lawyersPerPage = 8;
-  const totalPages = Math.ceil(fetchedLawyers.length / lawyersPerPage);
 
-  // Get current page lawyers
-  const paginatedLawyers = fetchedLawyers.slice(
+  // Filtering logic moved here
+  const filteredLawyers = fetchedLawyers.filter(lawyer => {
+    // Search query
+    if (searchQuery && searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      if (
+        !(
+          lawyer.name?.toLowerCase().includes(query) ||
+          lawyer.specialty?.toLowerCase().includes(query) ||
+          lawyer.location?.toLowerCase().includes(query) ||
+          (lawyer.experience && lawyer.experience.toString().includes(query))
+        )
+      ) return false;
+    }
+    // Specialty
+    if (filters.specialty && filters.specialty !== 'All Specialties' && !lawyer.specialty?.includes(filters.specialty)) return false;
+    // Location
+    if (filters.location && filters.location !== 'All Locations' && filters.location !== '' && !lawyer.location?.includes(filters.location)) return false;
+    // Years of experience
+    if (filters.experience && filters.experience !== 'All Years') {
+      const years = Number(
+        typeof lawyer.experience === 'string'
+          ? lawyer.experience.replace(/\D/g, '')
+          : lawyer.experience
+      );
+      if (filters.experience === '1-3' && !(years >= 1 && years <= 3)) return false;
+      if (filters.experience === '4-7' && !(years >= 4 && years <= 7)) return false;
+      if (filters.experience === '8+' && !(years >= 8)) return false;
+    }
+    // Cases handled
+    if (filters.casesHandled && filters.casesHandled !== 'All Cases') {
+      const cases = Number(lawyer.casesHandled);
+      if (filters.casesHandled === '1-10' && !(cases >= 1 && cases <= 10)) return false;
+      if (filters.casesHandled === '11-50' && !(cases >= 11 && cases <= 50)) return false;
+      if (filters.casesHandled === '51+' && !(cases >= 51)) return false;
+    }
+    // Availability (if you have logic for this, add here)
+    return true;
+  });
+
+  // Sort by cases handled, then experience (descending)
+  filteredLawyers.sort((a, b) => {
+    const aCases = Number(a.casesHandled) || 0;
+    const bCases = Number(b.casesHandled) || 0;
+    if (bCases !== aCases) {
+      return bCases - aCases;
+    }
+    const aYears = Number(typeof a.experience === 'string' ? a.experience.replace(/\D/g, '') : a.experience) || 0;
+    const bYears = Number(typeof b.experience === 'string' ? b.experience.replace(/\D/g, '') : b.experience) || 0;
+    return bYears - aYears;
+  });
+
+  // Paginate the filtered lawyers
+  const totalPages = Math.ceil(filteredLawyers.length / lawyersPerPage);
+  const paginatedLawyers = filteredLawyers.slice(
     (currentPage - 1) * lawyersPerPage,
     currentPage * lawyersPerPage
   );
@@ -39,32 +93,28 @@ export const LawyerDirectoryPage = () => {
         }
         const data = await response.json();
         const transformedData = data.map(lawyer => ({
-          
-          id: lawyer.userId, 
-          name: `${lawyer.Fname} ${lawyer.Lname}`, 
-          specialty: lawyer.specialization && lawyer.specialization.length > 0 ? lawyer.specialization.join(', ') : 'Not specified', 
-          location: `${lawyer.city}, ${lawyer.province}`, 
-          rating: lawyer.rating || 0, 
+          id: lawyer.userId,
+          name: `${lawyer.Fname} ${lawyer.Lname}`,
+          specialty: lawyer.specialization && lawyer.specialization.length > 0 ? lawyer.specialization.join(', ') : 'Not specified',
+          location: `${lawyer.city}, ${lawyer.province}`,
+          rating: lawyer.rating || 0,
           experience: lawyer.experience ? `${lawyer.experience} years` : 'N/A',
-          fee: lawyer.consultationFee ? `₱${lawyer.consultationFee}/hour` : 'N/A', 
-          image: `${lawyer.Fname ? lawyer.Fname[0] : ''}${lawyer.Lname ? lawyer.Lname[0] : ''}`.toUpperCase(), 
-          about: lawyer.bio || 'No biography available.', 
-          education: lawyer.educationInstitution|| 'Not specified', 
-          areas: lawyer.specialization || [], 
+          fee: lawyer.consultationFee ? `₱${lawyer.consultationFee}/hour` : 'N/A',
+          image: `${lawyer.Fname ? lawyer.Fname[0] : ''}${lawyer.Lname ? lawyer.Lname[0] : ''}`.toUpperCase(),
+          about: lawyer.bio || 'No biography available.',
+          education: lawyer.educationInstitution|| 'Not specified',
+          areas: lawyer.specialization || [],
           casesHandled: lawyer.casesHandled || 0,
-          
         }));
         setFetchedLawyers(transformedData);
         setError(null);
       } catch (err) {
-        console.error("Failed to fetch verified lawyers:", err);
         setError(err.message);
-        setFetchedLawyers([]); // Set to empty array on error to avoid issues with map
+        setFetchedLawyers([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchVerifiedLawyers();
   }, []);
 
@@ -90,7 +140,7 @@ export const LawyerDirectoryPage = () => {
         <div className="p-4 bg-white shadow-sm sm:p-6 md:p-8 rounded-xl">
           <h1 className="mb-2 text-xl font-bold text-gray-900 sm:mb-3 sm:text-2xl">Find the Right Lawyer for Your Case</h1>
           <p className="mb-6 text-sm text-gray-600 sm:mb-8 sm:text-base">Search our network of verified legal professionals and submit your case to get started with legal assistance</p>
-            {/* Responsive button group */}
+          {/* Responsive button group */}
           <div className="flex flex-col gap-2 mb-6 sm:flex-row sm:gap-0 sm:mb-8">
             <button 
               className={`py-2 px-4 text-sm sm:text-base font-medium transition-colors ${
@@ -98,7 +148,6 @@ export const LawyerDirectoryPage = () => {
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               } ${
-                // Responsive border radius
                 'rounded-lg sm:rounded-none sm:rounded-l-lg'
               }`}
               onClick={() => setActiveView('search')}
@@ -111,7 +160,6 @@ export const LawyerDirectoryPage = () => {
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               } ${
-                // Responsive border radius
                 'rounded-lg sm:rounded-none sm:rounded-r-lg'
               }`}
               onClick={() => setActiveView('ai-matching')}
@@ -119,7 +167,7 @@ export const LawyerDirectoryPage = () => {
               AI Matching
             </button>
           </div>
-            <div className="transition-opacity duration-200 ease-in-out">
+          <div className="transition-opacity duration-200 ease-in-out">
             {activeView === 'search' ? (
               <SearchPanel 
                 searchQuery={searchQuery}
@@ -128,6 +176,7 @@ export const LawyerDirectoryPage = () => {
                 setFilters={setFilters}
                 lawyers={paginatedLawyers}
                 onLawyerSelect={handleLawyerSelect}
+                totalLawyers={filteredLawyers.length}
               />
             ) : (
               <AIMatching 

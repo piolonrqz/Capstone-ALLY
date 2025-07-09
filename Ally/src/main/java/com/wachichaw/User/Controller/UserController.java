@@ -203,15 +203,24 @@ profilePhotoUrl = String.format(
 );
     }
 
-    String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/credentials";
-    Files.createDirectories(Paths.get(uploadDir)); // Ensure directory exists
 
-    String uniqueFileName = UUID.randomUUID() + "_" + credentialsFile.getOriginalFilename();
-    Path filePath = Paths.get(uploadDir, uniqueFileName);
-    Files.copy(credentialsFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    String credentialsFileURL = null;
 
-    // Save the relative path to DB
-    String relativePath = "/static/credentials/" + uniqueFileName;
+    if (credentialsFile != null && !credentialsFile.isEmpty()) {
+        String fileName = UUID.randomUUID() + "_" + credentialsFile.getOriginalFilename();
+
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.create("credentials/" + fileName,
+                                  credentialsFile.getBytes(),
+                                  credentialsFile.getContentType());
+
+        String encodedFileName = URLEncoder.encode(blob.getName(), StandardCharsets.UTF_8);
+credentialsFileURL = String.format(
+    "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
+    bucket.getName(),
+    encodedFileName
+);
+    }
 
     LawyerEntity lawyer = userService.createLawyer(
         email,
@@ -226,7 +235,7 @@ profilePhotoUrl = String.format(
         barNumber,
         specialization,
         experience,
-        relativePath,
+        credentialsFileURL,
         educationInstitution,
         profilePhotoUrl
     );
