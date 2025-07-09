@@ -19,4 +19,6 @@ public interface LawyerRepo extends JpaRepository<LawyerEntity, Integer>{
     @Query("SELECT l FROM LawyerEntity l WHERE :specialization MEMBER OF l.specialization")
     List<LawyerEntity> findBySpecialization(@Param("specialization") String specialization);
     
+    long countByCredentialsVerifiedTrue();
+    long countByCredentialsVerifiedFalse();
 }

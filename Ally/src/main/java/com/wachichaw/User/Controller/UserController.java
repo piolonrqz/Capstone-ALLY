@@ -30,6 +30,7 @@ import com.wachichaw.User.Entity.LoginRequest;
 import com.wachichaw.User.Entity.UserEntity;
 import com.wachichaw.User.Repo.UserRepo;
 import com.wachichaw.User.Service.UserService;
+import com.wachichaw.Lawyer.Repo.LawyerRepo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.MediaType;
@@ -52,6 +53,9 @@ public class UserController {
     private UserRepo userRepo;
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private LawyerRepo lawyerRepo;
 
     @PutMapping("/adminUpdate/{id}")
     public ResponseEntity<AdminEntity> updateAdmin(
@@ -392,6 +396,41 @@ profilePhotoUrl = String.format(
                 .collect(Collectors.toList());
         
         return ResponseEntity.ok(lawyers);
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getUserStatistics() {
+        Map<String, Object> statistics = new HashMap<>();
+        
+        // Get total users count
+        long totalUsers = userRepo.count();
+        
+        // Get verified/unverified users instead of active/inactive
+        List<UserEntity> allUsers = userRepo.findAll();
+        long activeUsers = allUsers.stream().filter(UserEntity::isVerified).count();
+        long inactiveUsers = totalUsers - activeUsers;
+        
+        // Get verified lawyers count
+        long verifiedLawyers = lawyerRepo.countByCredentialsVerifiedTrue();
+        
+        // Get pending verifications
+        long pendingVerifications = lawyerRepo.countByCredentialsVerifiedFalse();
+        
+        // Calculate percentage changes (you might want to store previous values in a database)
+        Map<String, String> percentageChanges = new HashMap<>();
+        percentageChanges.put("totalUsers", "+0%");  // Replace with actual calculation
+        percentageChanges.put("activeUsers", "+0%");
+        percentageChanges.put("inactiveUsers", "+0%");
+        percentageChanges.put("verifiedLawyers", "+0%");
+        
+        statistics.put("totalUsers", totalUsers);
+        statistics.put("activeUsers", activeUsers);
+        statistics.put("inactiveUsers", inactiveUsers);
+        statistics.put("verifiedLawyers", verifiedLawyers);
+        statistics.put("pendingVerifications", pendingVerifications);
+        statistics.put("percentageChanges", percentageChanges);
+        
+        return ResponseEntity.ok(statistics);
     }
 
 }
