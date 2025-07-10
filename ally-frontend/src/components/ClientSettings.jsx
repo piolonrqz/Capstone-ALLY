@@ -340,10 +340,13 @@ const ClientSettings = ({ user }) => {
                 >
                   {selectedProfileFile ? 'Change Selected Photo' : 'Select Profile Photo'}
                 </button>
-                {selectedProfileFile && (
-                  <p className="text-sm text-green-600 mt-1">
-                    ✓ Photo selected: {selectedProfileFile.name}
+                <p className="text-sm text-gray-500 mt-1">
+                    File limit: 5MB
                   </p>
+                  {selectedProfileFile && (
+                    <p className="text-sm text-green-600 mt-1">
+                      ✓ Photo selected: {selectedProfileFile.name}
+                    </p>
                 )}
               </div>
             </div>
