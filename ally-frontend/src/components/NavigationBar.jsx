@@ -28,15 +28,17 @@ const NavigationBar = () => {
         try {
           const details = await fetchUserDetails(authData.userId);
           setUserDetails(details);
+          
+          // Add this: Store profile photo URL in localStorage if it exists
+          if (details.profilePhotoUrl) {
+            localStorage.setItem('profilePhoto', details.profilePhotoUrl);
+          }
         } catch (error) {
           console.error('Failed to fetch user details:', error);
           setUserDetails(null);
         } finally {
           setIsLoadingUser(false);
         }
-      } else if (!isLoggedIn) {
-        setUserDetails(null);
-        setIsLoadingUser(false);
       }
     };
 

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from '../firebase/config';
 
 const EditProfile = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +12,10 @@ const EditProfile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const profilePhoto = localStorage.get('profilePhoto')
+  const [imgSrc, setImgSrc] = useState('/api/placeholder/100/100'); // Fixed: Added missing state
+  
+  // Fixed: Corrected localStorage method
+  const profilePhoto = localStorage.getItem('profilePhoto');
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
   // Load current user details from localStorage
@@ -58,22 +59,29 @@ const EditProfile = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (e.g., 5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
       setFormData(prev => ({
         ...prev,
         file,
       }));
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setImgSrc(reader.result);
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const uploadImageToFirebase = async (file) => {
-    const storageRef = ref(storage, `profile_pictures/${currentUser.id}_${Date.now()}_${file.name}`);
-    await uploadBytes(storageRef, file);
-    return await getDownloadURL(storageRef);
   };
 
   const validateForm = () => {
@@ -113,13 +121,47 @@ const EditProfile = () => {
         throw new Error('Invalid user ID');
       }
 
-      let profilePhoto = currentUser.prof_pic || '';
+      let profilePhotoUrl = currentUser.prof_pic || '';
+      
+      // Upload profile picture if a new one is selected
       if (formData.file) {
-        // Upload to Firebase Storage
-        profilePhotoUrl = await uploadImageToFirebase(formData.file);
-        setImgSrc(profilePhoto); // Update preview immediately
+        console.log('Uploading profile picture...');
+        console.log('File:', formData.file);
+        console.log('User ID:', currentUser.id);
+        
+        const backendFormData = new FormData();
+        backendFormData.append("file", formData.file);
+        backendFormData.append("userId", currentUser.id.toString()); // Ensure it's a string
+
+        console.log('FormData contents:');
+        for (let [key, value] of backendFormData.entries()) {
+          console.log(key, value);
+        }
+
+        const uploadResponse = await fetch("http://localhost:8080/api/upload-profile-picture", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwtToken')}`
+            // Don't set Content-Type header for multipart/form-data - let browser set it with boundary
+          },
+          body: backendFormData
+        });
+
+        console.log('Upload response status:', uploadResponse.status);
+        console.log('Upload response headers:', uploadResponse.headers);
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          console.error('Upload error response:', errorText);
+          throw new Error(`Failed to upload profile picture: ${errorText}`);
+        }
+
+        profilePhotoUrl = await uploadResponse.text(); // Firebase URL returned
+        console.log('Received profile photo URL:', profilePhotoUrl);
+        setImgSrc(profilePhotoUrl); // Update preview
       }
 
+      // Update user profile
       const formDataPayload = new FormData();
       formDataPayload.append('userId', currentUser.id);
       formDataPayload.append('name', formData.name);
@@ -148,7 +190,7 @@ const EditProfile = () => {
 
       const updatedUser = await response.json();
 
-      // 1. Update localStorage with the new user data including the profile picture
+      // Update localStorage with the new user data including the profile picture
       localStorage.setItem('currentUser', JSON.stringify({
         ...currentUser,
         name: updatedUser.name,

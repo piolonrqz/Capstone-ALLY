@@ -93,7 +93,7 @@ public class UserController {
                 client.getCity(),
                 client.getProvince(),
                 client.getZip(),
-                client.getProfilePhoto()
+                client.getProfilePhotoUrl()
         );
         return ResponseEntity.ok(updated);
     }
