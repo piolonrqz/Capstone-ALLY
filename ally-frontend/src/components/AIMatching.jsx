@@ -9,29 +9,43 @@ export const AIMatching = ({ lawyers, onLawyerSelect }) => (
       </div>
 
       <div>
-        <label className="block mb-2 font-medium text-gray-700">Describe your legal issue</label>
+        <label className="block mb-2 font-medium text-gray-700">Title</label>
+        <input 
+          type="text"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Brief title for your case..."
+        />
+      </div>
+
+      <div>
+        <label className="block mb-2 font-medium text-gray-700">Description</label>
         <textarea 
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           rows="4"
-          placeholder="Briefly describe your legal situation and what you need help with..."
+          placeholder="Describe your legal situation and what you need help with..."
         ></textarea>
       </div>
 
       <div className="grid gap-4 mt-6 md:grid-cols-2">
         <div>
-          <label className="block mb-2 font-medium text-gray-700">Case urgency</label>
+          <label className="block mb-2 font-medium text-gray-700">Case Type</label>
           <select className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            <option>Medium (This Week)</option>
-            <option>Low (This Month)</option>
-            <option>High (Urgent)</option>
+            <option>Family Law</option>
+            <option>Criminal Law</option>
+            <option>Civil Law</option>
+            <option>Corporate Law</option>
+            <option>Labor Law</option>
+            <option>Real Estate Law</option>
+            <option>Personal Injury</option>
+            <option>Immigration Law</option>
           </select>
         </div>
         <div>
-          <label className="block mb-2 font-medium text-gray-700">Budget range</label>
+          <label className="block mb-2 font-medium text-gray-700">Urgency</label>
           <select className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            <option>₱5,000 to ₱10,000</option>
-            <option>Under ₱5,000</option>
-            <option>₱10,000+</option>
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
           </select>
         </div>
       </div>
