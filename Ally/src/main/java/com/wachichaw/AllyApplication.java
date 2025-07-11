@@ -9,3 +9,4 @@ public class AllyApplication {
 		SpringApplication.run(AllyApplication.class, args);
 	}
 }
+ 
