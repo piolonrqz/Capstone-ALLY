@@ -50,11 +50,11 @@ const ViewUserModal = ({ user, onClose }) => {
   if (!user) return null;
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md p-6">
-        <div className="flex justify-between items-center mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">User Details</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full">
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -112,11 +112,11 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md p-6">
-        <div className="flex justify-between items-center mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Edit User</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full">
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -127,7 +127,7 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -136,7 +136,7 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -144,7 +144,7 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
             <select
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="client">Client</option>
               <option value="lawyer">Lawyer</option>
@@ -156,13 +156,13 @@ const EditUserModal = ({ user, onClose, onUpdate }) => {
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
           </div>
-          <div className="flex justify-end space-x-3 mt-6">
+          <div className="flex justify-end mt-6 space-x-3">
             <button
               type="button"
               onClick={onClose}
@@ -187,15 +187,15 @@ const DeleteConfirmationModal = ({ user, onClose, onConfirm }) => {
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-md p-6 bg-white rounded-lg">
         <div className="flex items-center justify-center mb-4">
-          <div className="bg-red-100 rounded-full p-3">
+          <div className="p-3 bg-red-100 rounded-full">
             <AlertTriangle className="w-6 h-6 text-red-600" />
           </div>
         </div>
-        <h2 className="text-xl font-semibold text-center mb-2">Delete User</h2>
-        <p className="text-gray-500 text-center mb-6">
+        <h2 className="mb-2 text-xl font-semibold text-center">Delete User</h2>
+        <p className="mb-6 text-center text-gray-500">
           Are you sure you want to delete {user.name}? This action cannot be undone.
         </p>
         <div className="flex justify-center space-x-3">
@@ -278,8 +278,6 @@ const UserManagementTable = ({ onAddUser }) => {
         casesHandled: user.casesHandled,
         // Image
         image: user.profilePhoto || user.image,
-        // Additional status fields
-        verificationStatus: user.verificationStatus,
         accountStatus: user.status,
         // Full details flag
         fullDetails: user.fullDetails
@@ -480,37 +478,37 @@ const UserManagementTable = ({ onAddUser }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-8 flex flex-col items-center justify-center bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="flex flex-col items-center justify-center p-8 bg-white border border-gray-200 shadow-sm rounded-xl">
         <div className="mb-6 text-center">
-          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to Load Users</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <div className="flex gap-4 justify-center">
+          <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+          <h3 className="mb-2 text-lg font-medium text-gray-900">Unable to Load Users</h3>
+          <p className="mb-4 text-gray-600">{error}</p>
+          <div className="flex justify-center gap-4">
             <button
               onClick={fetchUsers}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Try Again
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Reload Page
             </button>
           </div>
         </div>
-        <div className="w-full max-w-2xl bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
-          <p className="font-medium mb-2">Troubleshooting Tips:</p>
-          <ul className="list-disc list-inside space-y-1">
+        <div className="w-full max-w-2xl p-4 text-sm text-gray-600 rounded-lg bg-gray-50">
+          <p className="mb-2 font-medium">Troubleshooting Tips:</p>
+          <ul className="space-y-1 list-disc list-inside">
             <li>Check your internet connection</li>
             <li>Verify that the backend server is running</li>
             <li>Make sure you're logged in with valid credentials</li>
@@ -523,10 +521,10 @@ const UserManagementTable = ({ onAddUser }) => {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-white border border-gray-200 shadow-sm rounded-xl">
         {/* Header Section */}
         <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold text-gray-800">Users</h2>
               <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
@@ -536,7 +534,7 @@ const UserManagementTable = ({ onAddUser }) => {
             <div className="flex items-center gap-3">
               <button
                 onClick={onAddUser}
-                className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Add User
@@ -553,10 +551,10 @@ const UserManagementTable = ({ onAddUser }) => {
           </div>
 
           {/* Search and Filters */}
-          <div className="mt-6 flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col gap-4 mt-6 lg:flex-row">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
                 <input
                   type="text"
                   placeholder="Search by name or email..."
@@ -565,7 +563,7 @@ const UserManagementTable = ({ onAddUser }) => {
                   className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 {searchTerm !== debouncedSearchTerm && (
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
+                  <span className="absolute text-xs text-gray-400 transform -translate-y-1/2 right-3 top-1/2">
                     Searching...
                   </span>
                 )}
@@ -602,7 +600,7 @@ const UserManagementTable = ({ onAddUser }) => {
                 <option value="unverified">Unverified</option>
               </select>
               {JSON.stringify(filters) !== JSON.stringify(debouncedFilters) && (
-                <span className="text-xs text-gray-400 self-center">
+                <span className="self-center text-xs text-gray-400">
                   Updating...
                 </span>
               )}
@@ -611,21 +609,21 @@ const UserManagementTable = ({ onAddUser }) => {
 
           {/* Bulk Actions */}
           {selectedUsers.length > 0 && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-between">
-              <span className="text-sm text-blue-700 font-medium">
+            <div className="flex items-center justify-between p-3 mt-4 border border-blue-100 rounded-lg bg-blue-50">
+              <span className="text-sm font-medium text-blue-700">
                 {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} selected
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleBulkAction('activate')}
-                  className="flex items-center px-3 py-2 text-sm font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100"
+                  className="flex items-center px-3 py-2 text-sm font-medium text-green-700 rounded-lg bg-green-50 hover:bg-green-100"
                 >
                   <UserCheck className="w-4 h-4 mr-1" />
                   Activate
                 </button>
                 <button
                   onClick={() => handleBulkAction('deactivate')}
-                  className="flex items-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100"
+                  className="flex items-center px-3 py-2 text-sm font-medium text-red-700 rounded-lg bg-red-50 hover:bg-red-100"
                 >
                   <UserX className="w-4 h-4 mr-1" />
                   Deactivate
@@ -652,11 +650,11 @@ const UserManagementTable = ({ onAddUser }) => {
                     type="checkbox"
                     checked={selectedUsers.length === users.length}
                     onChange={handleSelectAll}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className="px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">
@@ -666,11 +664,11 @@ const UserManagementTable = ({ onAddUser }) => {
                     )}
                   </div>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="hidden md:table-cell px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bar Number</th>
-                <th className="hidden lg:table-cell px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                <th className="px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Role</th>
+                <th className="hidden px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase md:table-cell">Bar Number</th>
+                <th className="hidden px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase lg:table-cell">Location</th>
                 <th
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className="px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
                   onClick={() => handleSort('joinDate')}
                 >
                   <div className="flex items-center">
@@ -680,8 +678,8 @@ const UserManagementTable = ({ onAddUser }) => {
                     )}
                   </div>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -692,14 +690,14 @@ const UserManagementTable = ({ onAddUser }) => {
                       type="checkbox"
                       checked={selectedUsers.includes(user.id)}
                       onChange={() => handleSelectUser(user.id)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className={`flex-shrink-0 h-10 w-10 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center`}>
                         {user.image ? (
-                          <img src={user.image} alt="Profile" className="h-10 w-10 rounded-full object-cover" />
+                          <img src={user.image} alt="Profile" className="object-cover w-10 h-10 rounded-full" />
                         ) : (
                           <span className="text-sm font-medium text-white">
                             {user.firstName?.[0]}{user.lastName?.[0]}
@@ -719,7 +717,7 @@ const UserManagementTable = ({ onAddUser }) => {
                       {formatRole(user.role)}
                     </span>
                     {user.role === 'lawyer' && user.specialization && (
-                      <div className="mt-1 flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 mt-1">
                         {user.specialization.slice(0, 2).map((area, index) => (
                           <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
                             {formatSpecialization(area)}
@@ -733,17 +731,17 @@ const UserManagementTable = ({ onAddUser }) => {
                       </div>
                     )}
                   </td>
-                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                  <td className="hidden px-6 py-4 md:table-cell whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {user.role === 'lawyer' ? (user.barNumber || 'Not Provided') : '-'}
                     </div>
                   </td>
-                  <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
+                  <td className="hidden px-6 py-4 lg:table-cell whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {formatLocation(user.city, user.province) || 'No Location'}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                     {new Date(user.joinDate).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
@@ -768,7 +766,7 @@ const UserManagementTable = ({ onAddUser }) => {
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <button 
                         onClick={() => handleAction('view', user.id)}
@@ -801,11 +799,11 @@ const UserManagementTable = ({ onAddUser }) => {
 
         {/* Empty State */}
         {filteredUsers.length === 0 && (
-          <div className="text-center py-12">
+          <div className="py-12 text-center">
             <div className="flex flex-col items-center">
-              <UserX className="w-12 h-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-1">No users found</h3>
-              <p className="text-gray-500 text-sm">Try adjusting your search or filter criteria</p>
+              <UserX className="w-12 h-12 mb-4 text-gray-400" />
+              <h3 className="mb-1 text-lg font-medium text-gray-900">No users found</h3>
+              <p className="text-sm text-gray-500">Try adjusting your search or filter criteria</p>
             </div>
           </div>
         )}
