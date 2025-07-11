@@ -279,7 +279,7 @@ const UserManagementTable = ({ onAddUser }) => {
         // Image
         image: user.profilePhoto || user.image,
         // Additional status fields
-        verificationStatus: user.verificationStatus,
+        verificationStatus: user.verificationStatus || (user.credentialsVerified ? 'verified' : 'pending'),
         accountStatus: user.status,
         // Full details flag
         fullDetails: user.fullDetails
