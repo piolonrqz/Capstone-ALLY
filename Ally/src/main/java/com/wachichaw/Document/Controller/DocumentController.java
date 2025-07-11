@@ -112,9 +112,9 @@ public class DocumentController {
     /**
      * Enhanced upload with case validation and security
      */
-    @PostMapping("/upload/{clientId}")
+    @PostMapping("/upload/{userId}")
     public ResponseEntity<?> uploadDocument(
-            @PathVariable int clientId,
+            @PathVariable int userId,
             @RequestParam("file") MultipartFile file,
             @RequestParam("caseId") int caseId,
             @RequestParam("documentName") String documentName,
@@ -122,24 +122,16 @@ public class DocumentController {
             @RequestParam("status") String status,
             HttpServletRequest request) {
         try {
-            // Extract user info from JWT token
-            String[] userInfo = extractUserFromRequest(request);
-            int userId = Integer.parseInt(userInfo[0]);
-            String userRole = userInfo[1];
+          
 
-            // Validate user is CLIENT and matches the clientId
-            if (!userRole.equals("CLIENT") || userId != clientId) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Access denied: Only clients can upload documents to their own cases");
-            }
+            
 
-            // Get the legal case
             LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
 
             // Upload document with enhanced validation
             DocumentEntity document = documentService.uploadDocumentToCase(
-                legalCase, clientId, file, documentName, documentType, status);
+                legalCase, userId, file, documentName, documentType, status);
 
             DocumentDTO documentDTO = new DocumentDTO(document);
             return ResponseEntity.ok(documentDTO);

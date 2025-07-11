@@ -115,20 +115,33 @@ export default function ClientRegistrationForm() {
           }
           console.log("Submitting form with:", body);
           
-        await fetch("http://localhost:8080/users/Client", {
-          method: "POST",
-          body: body
-        })
-        console.log("Form submitted with:", body);
-      alert("Registration successful! Please verify the email.");
-      navigate('/signup/verifyClient' , { state: { email: formData.email } });
+        const response = await fetch("http://localhost:8080/users/Client", {
+        method: "POST",
+        body: body
+      });
+
+      if (response.ok) {
+        alert("Registration successful! Please verify the email.");
+        navigate('/signup/verifyClient', { state: { email: formData.email } });
+      } else {
+        // Try to get error message from backend
+        const errorData = await response.json().catch(() => ({}));
+        if (
+          response.status === 409 ||
+          (errorData && errorData.message && errorData.message.toLowerCase().includes("email"))
+        ) {
+          alert("Email already exists.");
+          navigate('/signup');
+        } else {
+          alert(errorData.message || "Registration failed. Please try again.");
+        }
       }
-      catch (error) {
-        console.error("Error submitting form:", error);
-        alert('Registration failed. Please try again.');
-      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert('Registration failed. Please try again.');
     }
-  };
+  }
+};
   return (    
     <div className="flex items-center justify-center w-full min-h-screen overflow-hidden bg-white font-['Poppins'] relative">
       <Logo />
