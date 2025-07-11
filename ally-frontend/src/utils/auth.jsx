@@ -1,16 +1,13 @@
 import { jwtDecode } from "jwt-decode";
 
 export const decodeJWT = (token) => {
-
-  
- try {
+  try {
     return jwtDecode(token); // ✅ use jwtDecode (not jwt_decode)
   } catch (error) {
     console.error('Error decoding JWT:', error);
     throw error;
   }
 };
-
 
 export const getAuthData = () => {
   try {
@@ -41,7 +38,6 @@ export const getAuthData = () => {
     return null;
   }
 };
-
 
 export const isAuthenticated = () => {
   const authData = getAuthData();
@@ -84,6 +80,12 @@ export const fetchUserDetails = async (userId) => {
 
     const userData = await response.json();
 
+    // FIX: Store profile photo URL in localStorage if it exists
+    if (userData.profilePhotoUrl) {
+      localStorage.setItem('profilePhoto', userData.profilePhotoUrl);
+      console.log('Profile photo URL stored in localStorage:', userData.profilePhotoUrl);
+    }
+
     // If user is admin, fetch department information
     let department = null;
     if (userData.accountType === 'ADMIN') {
@@ -115,6 +117,8 @@ export const fetchUserDetails = async (userId) => {
       city: userData.city || '',
       province: userData.province || '',
       zip: userData.zip || '',
+      // 🔥 FIX: Include profile photo URL in returned user details
+      profilePhotoUrl: userData.profilePhotoUrl || null,
     };
   } catch (error) {
     console.error(`Error fetching user details for ${userId}:`, error);
@@ -122,10 +126,10 @@ export const fetchUserDetails = async (userId) => {
   }
 };
 
-
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
   localStorage.removeItem('department');
+  localStorage.removeItem('profilePhoto');
   window.location.href = '/login';
 };

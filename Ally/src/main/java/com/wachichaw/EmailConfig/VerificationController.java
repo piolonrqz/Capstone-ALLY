@@ -59,7 +59,7 @@ public class VerificationController {
         client.getCity(),
         client.getProvince(),
         client.getZip(),
-        client.getProfilePhoto()
+        client.getProfilePhotoUrl()
         );
         userService.verifyClient(client.getEmail()); 
         tempClientStorageService.removeUnverifiedUser(token);
@@ -88,7 +88,7 @@ public class VerificationController {
         lawyer.getExperience(),
         lawyer.getCredentials(),
         lawyer.getEducationInstitution(),
-        lawyer.getProfilePhoto()
+        lawyer.getProfilePhotoUrl()
 
         );
         userService.verifyLawyer(lawyer.getEmail()); 
