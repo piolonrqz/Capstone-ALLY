@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Loader2, FileText, X } from 'lucide-react';
+import { Eye, Loader2, FileText, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { adminService } from '../services/adminService';
 
@@ -21,6 +21,8 @@ const LawyerVerificationTable = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [processingIds, setProcessingIds] = useState(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const fetchLawyers = async () => {
     try {
@@ -146,6 +148,21 @@ const LawyerVerificationTable = () => {
     return request.status.toLowerCase() === filter.toLowerCase();
   });
 
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredRequests.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+
+  // Reset to first page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -222,7 +239,7 @@ const LawyerVerificationTable = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredRequests.map((request) => (
+                {currentItems.map((request) => (
                   <tr key={request.id} className="hover:bg-gray-50">
                     <td className="px-2 py-3 sm:px-4">
                       <div>
@@ -302,7 +319,7 @@ const LawyerVerificationTable = () => {
                     </td>
                   </tr>
                 ))}
-                {filteredRequests.length === 0 && (
+                {currentItems.length === 0 && (
                   <tr>
                     <td colSpan={5} className="py-4 text-center text-gray-500">
                       No Requests Found
@@ -312,6 +329,56 @@ const LawyerVerificationTable = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {filteredRequests.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 sm:px-6">
+              <div className="flex items-center text-sm text-gray-700">
+                <span>
+                  Showing {indexOfFirstItem + 1} to{' '}
+                  {Math.min(indexOfLastItem, filteredRequests.length)} of{' '}
+                  {filteredRequests.length} results
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded ${
+                    currentPage === 1
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={`px-3 py-1 rounded ${
+                      currentPage === index + 1
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded ${
+                    currentPage === totalPages
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Logo from './Logo';
+import { Shield } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -63,15 +64,45 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50 font-['Poppins'] relative p-4">
-      {/* Logo in upper left corner */}
-      <div className="absolute flex items-center gap-2 top-4 left-4 md:left-8">
-        <img src="/small_logo.png" alt="ALLY Logo" className="w-8 h-8 sm:w-12 sm:h-12" />
-        <h1 className="text-2xl font-bold text-blue-600 sm:text-4xl">ALLY</h1>
-      </div>
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <div className="max-w-[1440px] mx-auto px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div onClick={() => navigate('/')} className="cursor-pointer">
+              <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+            </div>
+            
+            {/* Navigation Links */}
+            <div className="flex items-center">
+              <div className="flex items-center gap-8">
+                <Link 
+                  to="#" 
+                  className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                >
+                  About
+                </Link>
+                <Link 
+                  to="#" 
+                  className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                >
+                  Legal Resources
+                </Link>
+                <Link 
+                  to="#" 
+                  className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                >
+                  FAQ
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
       
-      <div className="w-full max-w-md p-4 mt-16 bg-white border rounded-lg shadow-lg sm:max-w-lg md:max-w-2xl sm:p-6 md:p-8 sm:mt-0">
-        <h2 className="mb-1 text-2xl sm:text-3xl md:text-4xl font-semibold text-center font-['Poppins']">Log in To ALLY</h2>
-        <p className="mb-4 sm:mb-6 text-sm sm:text-base text-center text-gray-600 font-['Poppins']">Enter your credentials to access your account</p>
+      <div className="w-full max-w-md p-6 mt-16 bg-white border rounded-lg shadow-lg sm:max-w-lg md:max-w-2xl sm:p-8 md:p-10 sm:mt-0">
+        <h2 className="mb-2 text-2xl sm:text-3xl md:text-4xl font-semibold text-center font-['Poppins']">Log in To ALLY</h2>
+        <p className="mb-6 sm:mb-8 text-sm sm:text-base text-center text-gray-600 font-['Poppins']">Enter your credentials to access your account</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -82,14 +113,14 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your.email@example.com"
-              className="block w-full px-3 py-2 mt-1 text-sm border border-gray-300 rounded-md shadow-sm sm:px-4 sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="block w-full px-4 py-2 mt-1 text-sm border border-gray-300 rounded-md shadow-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-              <a href="#" className="text-xs text-blue-500 sm:text-sm hover:underline">Forgot password?</a>
+              <a href="#" className="text-sm text-blue-500 hover:text-blue-700 hover:underline">Forgot password?</a>
             </div>
             <input
               id="password"
@@ -97,7 +128,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="********"
-              className="block w-full px-3 py-2 mt-1 text-sm border border-gray-300 rounded-md shadow-sm sm:px-4 sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="block w-full px-4 py-2 mt-1 text-sm border border-gray-300 rounded-md shadow-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             />
           </div>
 
@@ -105,9 +136,9 @@ const Login = () => {
             <input
               id="remember"
               type="checkbox"
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="remember" className="block ml-2 text-xs text-gray-900 sm:text-sm">
+            <label htmlFor="remember" className="block ml-2 text-sm text-gray-600">
               Remember me
             </label>
           </div>
@@ -120,41 +151,34 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-600 sm:text-sm">
-            Don't have an account? 
-          </p>
-          <div className="mt-2 space-y-2 sm:space-y-0 sm:space-x-4">
+        <div className="mt-6 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <p className="text-sm text-gray-600">
+              Don't have an account?
+            </p>
             <button
-              onClick={() => navigate('/signup/client')}
-              className="block w-full text-sm text-blue-500 sm:inline sm:w-auto hover:underline"
+              onClick={() => navigate('/signup')}
+              className="text-sm text-blue-500 font-medium hover:text-blue-700 hover:underline"
             >
-              Register as Client
-            </button>
-            <span className="hidden text-gray-500 sm:inline">or</span>
-            <button
-              onClick={() => navigate('/signup/lawyer')}
-              className="block w-full text-sm text-blue-500 sm:inline sm:w-auto hover:underline"
-            >
-              Register as Lawyer
+              Sign up
             </button>
           </div>
         </div>
 
-        <div className="flex items-center my-4 sm:my-6">
+        <div className="flex items-center my-6">
           <hr className="flex-grow border-t border-gray-300" />
-          <span className="mx-3 text-xs text-gray-500 sm:text-sm">OR CONTINUE WITH</span>
+          <span className="px-4 text-sm text-gray-500">OR CONTINUE WITH</span>
           <hr className="flex-grow border-t border-gray-300" />
         </div>
 
-        <div className="flex space-x-4">
-          <button className="block w-full py-2 text-sm transition border border-gray-300 rounded-md sm:text-base hover:bg-gray-50"
+        <button 
+          className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 transition bg-white border border-gray-300 rounded-md sm:text-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           onClick={() => {
-          window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-          }}>
-            Google
-          </button>
-        </div>
+            window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+          }}
+        >
+          Google
+        </button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Shield, CheckCircle, Clock, Users, Award, Lock, Zap, Quote, Star } from 'lucide-react';
+import { Shield, CheckCircle, Clock, Users, Award, Lock, Zap, Quote, Star, Bot, Search, MessageSquare, Phone } from 'lucide-react';
 import Footer from '../components/Footer';
 
 const LandingPage = () => {
@@ -21,12 +21,11 @@ const LandingPage = () => {
           localStorage.removeItem('token');
         }
       } catch (e) {
-        // Just log the error to the browser console
         console.error("Internal Server Error", e);
       }
     };
     checkToken();
-    const interval = setInterval(checkToken, 60 * 1000); // check every minute
+    const interval = setInterval(checkToken, 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -95,44 +94,121 @@ const LandingPage = () => {
           </div>
         </div>
       )}
+      
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <div className="max-w-[1440px] mx-auto px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div onClick={() => navigate('/')} className="cursor-pointer">
+              <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+            </div>
+            
+            {/* Navigation Links */}
+            <div className="flex items-center">
+              {isLoggedIn ? (
+                <div className="flex items-center gap-8">
+                  <Link
+                    to="/my-cases"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    My Cases
+                  </Link>
+                  <Link
+                    to="/appointments"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Appointment
+                  </Link>
+                  <Link
+                    to="/documents"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Documents
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <div className="flex items-center gap-8">
+                    <Link 
+                      to="#" 
+                      className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                    >
+                      About
+                    </Link>
+                    <Link 
+                      to="#" 
+                      className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                    >
+                      Legal Resources
+                    </Link>
+                    <Link 
+                      to="#" 
+                      className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                    >
+                      FAQ
+                    </Link>
+                  </div>
+                  <div className="flex items-center gap-4 ml-8 border-l pl-8">
+                    <button
+                      onClick={() => navigate('/login')}
+                      className="px-4 py-2 text-sm font-medium text-[#1A6EFF] hover:text-blue-700 transition-colors"
+                    >
+                      Sign in
+                    </button>
+                    <button
+                      onClick={() => navigate('/signup')}
+                      className="px-4 py-2 text-sm font-medium text-white bg-[#1A6EFF] rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <div className="flex flex-col min-h-screen bg-white">
 
       {/* Hero Section */}
-      <section className="bg-[#F7FBFF] px-8 py-20 min-h-[900px] flex items-center">
+      <section className="bg-[#F7FBFF] px-8 pt-32 pb-40 min-h-[900px] flex items-center">
         <div className="max-w-[1440px] mx-auto w-full">
           <div className="max-w-4xl mx-auto text-center">
             {/* Main Heading */}
-            <h1 className="mb-6 text-6xl font-bold leading-tight text-black">
-              Find Legal Help,<br />
-              Anonymously & Securely
+            <h1 className="mb-6 text-6xl font-bold leading-tight">
+              <span className="text-[#11265A]">Find Legal Help,</span><br />
+              <span className="text-[#1A6EFF]">Anonymously & Securely</span>
             </h1>
             
             {/* Subheading */}
-            <p className="text-3xl text-[#7C7C7C] mb-12 leading-relaxed">
-              Connect with verified legal professionals instantly. Get the help you<br />
-              need without compromising your privacy or breaking your budget.
+            <p className="text-2xl text-[#7C7C7C] mb-12 leading-relaxed">
+              Connect with verified legal professionals instantly.<br />
+              Get expert guidance without compromising your privacy.
             </p>
 
-            {/* Consult with ALLY & Get Legal Help Now Buttons */}
-            <div className="flex items-center justify-between w-full max-w-2xl gap-6 mx-auto mb-12">
-              <div className="flex flex-col items-start gap-2">
-                <button
-                  onClick={() => navigate('/consult')}
-                  className="px-8 py-5 text-2xl font-normal text-white transition-colors rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
-                >
-                  Consult with ALLY
-                </button>
-              </div>
-              {isLawyer !== "LAWYER" &&  (
+            {/* Buttons Section */}
+            <div className="flex items-center justify-center w-full max-w-2xl gap-6 mx-auto mb-12">
+              <button
+                onClick={() => navigate('/consult')}
+                className="flex items-center justify-center gap-3 px-6 py-4 text-lg font-medium text-white whitespace-nowrap transition-colors rounded-xl bg-[#1A6EFF] hover:bg-blue-700 min-w-[280px]"
+              >
+                <Bot className="w-6 h-6" />
+                Try AI Consultation - Free
+              </button>
+              {isLawyer !== "LAWYER" && (
                 <button
                   onClick={() => navigate('/lawyers')}
-                  className="bg-[#1A6EFF] text-white px-8 py-5 rounded-lg text-2xl font-normal hover:bg-blue-700 transition-colors"
+                  className="flex items-center justify-center gap-3 px-6 py-4 text-lg font-medium text-[#11265A] whitespace-nowrap transition-colors bg-white border border-gray-200 rounded-xl hover:bg-gray-50 min-w-[220px]"
                 >
-                  Get Legal Help Now
+                  <Users className="w-6 h-6" />
+                  Find Expert Lawyers
                 </button>
               )}
             </div>
-              {/* Feature Badges */}
+
+            {/* Feature Badges */}
             <div className="flex justify-center gap-12">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-8 h-8 bg-white rounded">
@@ -156,12 +232,12 @@ const LandingPage = () => {
           </div>
         </div>
       </section>{/* How It Works Section */}
-      <section className="py-20">
+      <section className="pt-32 pb-20">
         <div className="max-w-[1200px] mx-auto px-8">
           {/* Section Header */}
           <div className="mb-16 text-center">
-            <h2 className="text-6xl font-semibold text-[#07284A] mb-4">HOW IT WORKS</h2>
-            <p className="text-2xl text-[#545454] font-normal">
+            <h2 className="text-5xl font-semibold text-[#11265A] mb-4">HOW IT WORKS</h2>
+            <p className="text-xl text-[#545454] font-normal">
               Getting legal help has never been easier. Follow these simple steps<br />
               to connect with expert Lawyers.
             </p>
@@ -171,207 +247,211 @@ const LandingPage = () => {
           <div className="flex items-center gap-20 mb-20">
             <div className="flex-1">
               <div className="mb-6">
-                <span className="text-2xl text-[#1A6EFF] font-normal">/ 01</span>
+                <span className="text-3xl text-[#1A6EFF] font-medium">/ 01</span>
               </div>
               <div className="mb-6">
-                <div className="bg-[#1A6EFF] text-white p-3 rounded-lg inline-block">
-                  <span className="text-3xl font-semibold">the ease of submitting</span>
-                </div>
-                <p className="text-3xl text-[#545454] mt-3">
-                  queries can provide a different experience
-                </p>
+                <h3 className="text-[#545454] text-3xl">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#1A6EFF] text-white px-3 py-1 rounded-lg">
+                      the ease of submitting
+                    </span>
+                    <span>queries</span>
+                  </div>
+                  <span className="block mt-2">can provide a different</span>
+                  <span className="block mt-2">experience</span>
+                </h3>
               </div>
-              <p className="text-lg text-[#7B7B7B] mb-8 leading-relaxed">
+              <p className="text-base text-[#7B7B7B] mb-8 leading-relaxed">
                 Describe your legal issue anonymously in just a few minutes.<br />
                 our platform makes it easy for you to find the right legal help<br />
                 quickly and securely.
               </p>
-              <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
+              <button className="border border-[#BBBBBB] text-[#292929] px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
                 Learn More
               </button>
-            </div>              
+            </div>
+            
             <div className="relative flex-1">
               <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
                 <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
                   {/* Top Icon */}
                   <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
-                    <div className="flex items-center justify-center w-5 h-5">
-                      <Shield className="w-5 h-5 text-white" strokeWidth={2} />
-                    </div>
+                    <MessageSquare className="w-5 h-5 text-white" strokeWidth={2} />
                   </div>
                   
                   {/* Top Right Logo */}
-                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  <div className="absolute top-6 right-6 flex items-center gap-2">
+                    <img src="/ally_logo.svg" alt="ALLY" className="w-[70px]" />
+                  </div>
                   
                   {/* Mock Content Lines */}
-                  <div className="absolute space-y-2 top-16 left-6 right-6">
+                  <div className="absolute space-y-2 top-24 left-6 right-6">
                     <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
                     <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
                   </div>
                   
                   {/* Blue Button */}
-                  <div className="absolute top-32 left-6 right-6">
-                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                  <div className="absolute bottom-20 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-2 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
                       Legal Question Form
                     </div>
                   </div>
                   
                   {/* Get Started Button */}
-                  <div className="absolute top-48 left-6 right-6">
-                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-2 rounded text-sm font-medium text-center">
                       Get Started
                     </div>
                   </div>
-                  
-                  {/* Bottom Text */}
-                  <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
-                    Anonymous & Secure
-                  </p>
                 </div>
               </div>
               {/* Step Number */}
-              <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-                <div className="flex items-center justify-center bg-white rounded-full w-11 h-11">
-                  <span className="text-[#1A6EFF] font-normal text-base">01</span>
-                </div>
+              <div className="absolute -bottom-6 right-8 bg-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-2 border-[#1A6EFF] text-[#1A6EFF] text-2xl font-semibold">
+                01
               </div>
             </div>
-          </div>          
-          {/* Step 2 */}          <div className="flex items-center gap-20 mb-20">            <div className="relative flex-1">
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex items-center gap-20 mb-20">
+            <div className="relative flex-1">
               <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
                 <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
                   {/* Top Icon */}
                   <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
-                    <div className="flex items-center justify-center w-5 h-5">
-                      <Users className="w-5 h-5 text-white" strokeWidth={2} />
-                    </div>
+                    <Users className="w-5 h-5 text-white" strokeWidth={2} />
                   </div>
                   
                   {/* Top Right Logo */}
-                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  <div className="absolute top-6 right-6 flex items-center gap-2">
+                    <img src="/ally_logo.svg" alt="ALLY" className="w-[70px]" />
+                  </div>
                   
                   {/* Mock Content Lines */}
-                  <div className="absolute space-y-2 top-16 left-6 right-6">
+                  <div className="absolute space-y-2 top-24 left-6 right-6">
                     <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
                     <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
                   </div>
                   
                   {/* Blue Button */}
-                  <div className="absolute top-32 left-6 right-6">
-                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                  <div className="absolute bottom-20 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-2 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
                       Expert Matching
                     </div>
                   </div>
                   
                   {/* Get Started Button */}
-                  <div className="absolute top-48 left-6 right-6">
-                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-2 rounded text-sm font-medium text-center">
                       Get Started
                     </div>
                   </div>
-                  
-                  {/* Bottom Text */}
-                  <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
-                    AI-Powered Selection
-                  </p>
                 </div>
               </div>
               {/* Step Number */}
-              <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-                <div className="flex items-center justify-center bg-white rounded-full w-11 h-11">
-                  <span className="text-[#1A6EFF] font-normal text-base">02</span>
-                </div>
+              <div className="absolute -bottom-6 right-8 bg-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-2 border-[#1A6EFF] text-[#1A6EFF] text-2xl font-semibold">
+                02
               </div>
             </div>
+
             <div className="flex-1">
               <div className="mb-6">
-                <span className="text-2xl text-[#1A6EFF] font-normal">/ 02</span>
+                <span className="text-3xl text-[#1A6EFF] font-medium">/ 02</span>
               </div>
               <div className="mb-6">
-                <div className="bg-[#1A6EFF] text-white p-3 rounded-lg inline-block">
-                  <span className="text-3xl font-semibold">the ease of matching</span>
-                </div>
-                <p className="text-3xl text-[#545454] mt-3">
-                  with experts can provide a different experience
-                </p>
+                <h3 className="text-[#545454] text-3xl">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#1A6EFF] text-white px-3 py-1 rounded-lg">
+                      the ease of matching
+                    </span>
+                    <span>with</span>
+                  </div>
+                  <span className="block mt-2">experts can provide a different</span>
+                  <span className="block mt-2">experience</span>
+                </h3>
               </div>
-              <p className="text-lg text-[#7B7B7B] mb-8 leading-relaxed">
-                Our AI connects you with the right legal expert for your case. We categorize queries properly so that users can easily find the perfect match.
+              <p className="text-base text-[#7B7B7B] mb-8 leading-relaxed">
+                Our AI connects you with the right legal expert for your case.<br />
+                We categorize queries properly so that users can easily find<br />
+                the perfect match.
               </p>
-              <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
+              <button className="border border-[#BBBBBB] text-[#292929] px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
                 Learn More
               </button>
             </div>
-          </div>          {/* Step 3 */}
+          </div>
+
+          {/* Step 3 */}
           <div className="flex items-center gap-20">
             <div className="flex-1">
               <div className="mb-6">
-                <span className="text-2xl text-[#1A6EFF] font-normal">/ 03</span>
+                <span className="text-3xl text-[#1A6EFF] font-medium">/ 03</span>
               </div>
               <div className="mb-6">
-                <div className="bg-[#1A6EFF] text-white p-3 rounded-lg inline-block">
-                  <span className="text-3xl font-semibold">connecting with lawyers</span>
-                </div>
-                <p className="text-3xl text-[#545454] mt-3">
-                  can now be done by looking at the actual availability
-                </p>
+                <h3 className="text-[#545454] text-3xl">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#1A6EFF] text-white px-3 py-1 rounded-lg">
+                      connecting with lawyers
+                    </span>
+                    <span>can</span>
+                  </div>
+                  <span className="block mt-2">now be done by looking at the</span>
+                  <span className="block mt-2">actual availability</span>
+                </h3>
               </div>
-              <p className="text-lg text-[#7B7B7B] mb-8 leading-relaxed">
-                Start chatting or schedule a call with your matched lawyer. Connect directly and get the legal guidance you need when you need it.
+              <p className="text-base text-[#7B7B7B] mb-8 leading-relaxed">
+                Start chatting or schedule a call with your matched lawyer.<br />
+                Connect directly and get the legal guidance you need when<br />
+                you need it.
               </p>
-              <button className="border border-[#BBBBBB] text-[#292929] px-8 py-3 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors">
+              <button className="border border-[#BBBBBB] text-[#292929] px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
                 Learn More
               </button>
-            </div>            <div className="relative flex-1">
+            </div>
+
+            <div className="relative flex-1">
               <div className="bg-[#B9DEFF] rounded-[18px] shadow-lg h-[296px] relative p-4">
                 <div className="bg-white shadow-lg rounded-[18px] h-full relative overflow-hidden">
                   {/* Top Icon */}
                   <div className="absolute top-6 left-6 bg-[#1A6EFF] p-2 rounded-lg">
-                    <div className="flex items-center justify-center w-5 h-5">
-                      <Clock className="w-5 h-5 text-white" strokeWidth={2} />
-                    </div>
+                    <Phone className="w-5 h-5 text-white" strokeWidth={2} />
                   </div>
                   
                   {/* Top Right Logo */}
-                  <img src="/ally_logo.svg" alt="ALLY" className="absolute top-6 right-6 w-12 h-4 text-[#1A6EFF]" />
+                  <div className="absolute top-6 right-6 flex items-center gap-2">
+                    <img src="/ally_logo.svg" alt="ALLY" className="w-[70px]" />
+                  </div>
                   
                   {/* Mock Content Lines */}
-                  <div className="absolute space-y-2 top-16 left-6 right-6">
+                  <div className="absolute space-y-2 top-24 left-6 right-6">
                     <div className="bg-[#BBBBBB] h-2 rounded w-3/4"></div>
                     <div className="bg-[#BBBBBB] h-2 rounded w-1/2"></div>
                   </div>
                   
                   {/* Blue Button */}
-                  <div className="absolute top-32 left-6 right-6">
-                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-3 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
+                  <div className="absolute bottom-20 left-6 right-6">
+                    <div className="bg-[#E8EEFC] text-[#1A6EFF] px-3 py-2 rounded text-sm font-medium text-center mb-3 border border-[#1A6EFF]">
                       Secure Chat
                     </div>
                   </div>
                   
                   {/* Get Started Button */}
-                  <div className="absolute top-48 left-6 right-6">
-                    <div className="bg-[#1A6EFF] text-white px-6 py-3 rounded text-sm font-medium text-center">
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <div className="bg-[#1A6EFF] text-white px-6 py-2 rounded text-sm font-medium text-center">
                       Get Started
                     </div>
                   </div>
-                  
-                  {/* Bottom Text */}
-                  <p className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-[#545454]">
-                    Direct Communication
-                  </p>
                 </div>
               </div>
               {/* Step Number */}
-              <div className="absolute -bottom-6 right-8 bg-[#B9DEFF] w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
-                <div className="flex items-center justify-center bg-white rounded-full w-11 h-11">
-                  <span className="text-[#1A6EFF] font-normal text-base">03</span>
-                </div>
+              <div className="absolute -bottom-6 right-8 bg-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-2 border-[#1A6EFF] text-[#1A6EFF] text-2xl font-semibold">
+                03
               </div>
             </div>
           </div>
         </div>
       </section>      {/* Mobile App Section */}
-      <section className="py-20">
+      <section className="pt-4 pb-20">
         <div className="max-w-[1200px] mx-auto px-8">
           <div className="bg-[#F7FBFF] border border-[#BBBBBB] rounded-xl p-8 text-center shadow-lg shadow-[rgba(26,110,255,0.25)]">
             <h3 className="text-3xl text-[#07284A] font-normal mb-8">
@@ -422,14 +502,14 @@ const LandingPage = () => {
           {/* Satisfaction Guarantee */}
           <div className="bg-[#EDFFF7] p-8 rounded-lg text-center">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="flex items-center justify-center w-15 h-15">
-                <CheckCircle className="w-10 h-10 text-[#00C06F]" strokeWidth={2.5} />
+              <div className="flex items-center justify-center w-12 h-12">
+                <CheckCircle className="w-8 h-8 text-[#00C06F]" strokeWidth={2.5} />
               </div>
-              <h3 className="text-4xl font-semibold text-[#003722]">
+              <h3 className="text-2xl font-semibold text-[#003722]">
                 100% Satisfaction Guarantee
               </h3>
             </div>
-            <p className="text-xl text-[#545454] leading-relaxed">
+            <p className="text-base text-[#545454] leading-relaxed">
               We stand behind our service. If you're not completely satisfied with your legal consultation,<br />
               we'll work to make it right or provide a full refund.
             </p>
@@ -437,46 +517,48 @@ const LandingPage = () => {
         </div>
       </section>      {/* Testimonials Section */}
       <section className="py-20 bg-[#2553A7]">
-        <div className="max-w-[1200px] mx-auto px-32">
+        <div className="max-w-[1200px] mx-auto px-8">
           <div className="mb-16 text-center">
-            <h2 className="mb-8 text-6xl font-semibold text-white">What Our Clients Say</h2>
-            <p className="text-xl text-[#B9DFFE]">
+            <h2 className="mb-4 text-5xl font-semibold text-white">What Our Clients Say</h2>
+            <p className="text-lg text-[#B9DFFE]">
               Hear from real clients who have experienced the power of AI-enhanced legal services
             </p>
           </div>
           
-          <div className="grid grid-cols-2 gap-0">
+          <div className="grid grid-cols-2 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="p-0 bg-white shadow-2xl" style={{
-                borderRadius: '0px 200px 0px 200px'
+              <div key={index} className="bg-white rounded-[48px] p-8 relative shadow-lg" style={{
+                borderTopRightRadius: '48px',
+                borderBottomLeftRadius: '48px',
+                borderTopLeftRadius: index === 0 ? '48px' : '0px',
+                borderBottomRightRadius: index === 0 ? '0px' : '48px',
               }}>
-                <div className="p-8 h-[227px] relative">
-                  {/* Quote Icon */}
-                  <div className="absolute w-16 h-16 top-32 right-8">
-                    <Quote className="w-8 h-8 text-[#1A6EFF]" strokeWidth={2} />
-                  </div>
-                  
+                <div className="flex gap-6 items-start">
                   {/* Profile Image */}
-                  <div 
-                    className="absolute top-0 left-0 w-[183px] h-[183px] bg-cover bg-center"
-                    style={{
-                      backgroundImage: `url(${testimonial.image})`,
-                      borderRadius: '0px 100px 0px 100px'
-                    }}
-                  ></div>
-                  
-                  {/* Name and Role */}
-                  <div className="absolute top-8 left-48 flex items-center gap-1.5 px-4 py-4">
-                    <span className="text-xl font-semibold text-black">{testimonial.name}</span>
-                    <span className="text-base text-[#545454]">/</span>
-                    <span className="text-xs text-[#545454]">{testimonial.role}</span>
-                  </div>
-                  
-                  {/* Testimonial Text */}
-                  <div className="absolute top-20 left-48 right-16 bottom-8">
-                    <p className="text-xs text-[#545454] leading-relaxed overflow-hidden">
-                      "{testimonial.quote}"
+                  <img 
+                    src={testimonial.image}
+                    alt={testimonial.name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    {/* Name and Role */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <h4 className="text-lg font-semibold text-[#11265A]">{testimonial.name}</h4>
+                      <span className="text-[#545454]">/</span>
+                      <span className="text-sm text-[#545454]">{testimonial.role}</span>
+                    </div>
+
+                    {/* Testimonial Text */}
+                    <p className="text-[#545454] text-sm leading-relaxed pr-8">
+                      {testimonial.quote}
                     </p>
+                  </div>
+
+                  {/* Quote Mark */}
+                  <div className="absolute top-4 right-6">
+                    <Quote className="w-16 h-16 text-[#1A6EFF] opacity-50" strokeWidth={1.5} />
                   </div>
                 </div>
               </div>
