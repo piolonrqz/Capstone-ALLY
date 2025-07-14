@@ -171,21 +171,33 @@ export default function LawyerRegistrationForm() {
         });
         body.append("credentials", formData.credentials);
         console.log("Submitting form with:", body);
-        await fetch("http://localhost:8080/users/Lawyer", {
-          method: "POST",
-          body: body
-        });
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log("Form submitted with:", body);
-      alert("Registration successful!, Please verify the email");
-      navigate('/signup/verifyLawyer', { state: { email: formData.email } });
+        const response = await fetch("http://localhost:8080/users/Lawyer", {
+        method: "POST",
+        body: body
+      });
 
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        alert("Error submitting form. Please try again.");
+      if (response.ok) {
+        alert("Registration successful! Please verify the email.");
+        navigate('/signup/verifyClient', { state: { email: formData.email } });
+      } else {
+        // Try to get error message from backend
+        const errorData = await response.json().catch(() => ({}));
+        if (
+          response.status === 409 ||
+          (errorData && errorData.message && errorData.message.toLowerCase().includes("email"))
+        ) {
+          alert("Email already exists.");
+          navigate('/signup');
+        } else {
+          alert(errorData.message || "Registration failed. Please try again.");
+        }
       }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert('Registration failed. Please try again.');
     }
-  };
+  }
+};
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-6 bg-white">

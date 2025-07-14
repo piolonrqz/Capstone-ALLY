@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import com.wachichaw.Admin.Entity.AdminEntity;
 import com.wachichaw.Client.Entity.ClientEntity;
@@ -80,6 +82,11 @@ public class UserService {
     }
     
     public ClientEntity createClient(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String profilePhoto) {
+       Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
+        if (optionalUser.isPresent()) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "User with email " + email + " already exists.");
+    }
+        else{
         ClientEntity client = new ClientEntity();
         client.setEmail(email);
         client.setPassword(pass);
@@ -102,6 +109,7 @@ public class UserService {
         ClientEntity savedClient = client;
         verificationService.sendVerificationEmail(savedClient.getEmail(), savedClient.getFname(), token);
         return savedClient;
+        }
     }
     public void verifyClient(String email) {
         Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
@@ -138,6 +146,11 @@ public class UserService {
     }
 
     public LawyerEntity createLawyer(String email, String pass, String Fname, String Lname, Long phoneNumber, String address, String city, String province, String zip, String barNumber, List<String> specialization , String experience, String credentials,String educationInstitution, String profilePhoto) {
+        Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
+        if (optionalUser.isPresent()) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "User with email " + email + " already exists.");
+    }
+        else{
         LawyerEntity lawyer = new LawyerEntity();
         lawyer.setEmail(email);
         lawyer.setPassword(pass);
@@ -165,6 +178,7 @@ public class UserService {
         LawyerEntity savedLawyer = lawyer;
         verificationService.sendVerificationEmail(savedLawyer.getEmail(), savedLawyer.getFname(), token);
         return savedLawyer;
+        }
     }
     public void verifyLawyer(String email) {
         Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
