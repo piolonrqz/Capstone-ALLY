@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Logo from './Logo';
-import { Shield } from 'lucide-react';
+import { Shield, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -60,6 +61,10 @@ const Login = () => {
       console.error('Login failed:', error);
       alert('Login failed. Please check your credentials.');
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -122,14 +127,27 @@ const Login = () => {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
               <a href="#" className="text-sm text-blue-500 hover:text-blue-700 hover:underline">Forgot password?</a>
             </div>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="********"
-              className="block w-full px-4 py-2 mt-1 text-sm border border-gray-300 rounded-md shadow-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="********"
+                className="block w-full px-3 py-2 mt-1 text-sm border border-gray-300 rounded-md shadow-sm sm:px-4 sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? (
+                  <Eye className="w-5 h-5" />
+                ) : (
+                  <EyeOff className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center">

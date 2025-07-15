@@ -55,12 +55,6 @@ public class FirebaseStorageService {
             fileName = "profile_pictures/unknown/" + cleanUserId + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
         }
         
-        // Debug logging
-        System.out.println("Uploading file with path: " + fileName);
-        System.out.println("User ID: " + userId);
-        System.out.println("Clean User ID: " + cleanUserId);
-        System.out.println("Account Type: " + accountType);
-        
         Bucket bucket = StorageClient.getInstance().bucket();
         
         // Create BlobInfo with public read access

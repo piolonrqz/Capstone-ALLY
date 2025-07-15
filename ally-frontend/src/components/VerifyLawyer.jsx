@@ -36,7 +36,15 @@ const VerifyLawyer = () => {
   };
 
   const handleResendCode = () => {
+   e.preventDefault();
+    setIsLoading(true);
+    setTimeout(async () => {
+      setIsLoading(false);
+      await fetch("http://localhost:8080/resendCodeLawyer?email=" + email, {
+        method: "POST"
+      });
     alert('Verification code resent!');
+    }, 1500);
   };
 
   return (
