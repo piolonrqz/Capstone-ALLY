@@ -3,7 +3,7 @@ import { SearchPanel } from '../components/SearchPanel';
 import { LawyerProfile } from '../components/LawyerProfile';
 import { AIMatching } from '../components/AIMatching';
 import CasesList from '@/components/CasesList';
-import LawyerDirectoryNav from '../components/LawyerDirectoryNav';
+import NavigationBar from '../components/NavigationBar';
 
 export const LawyerDirectoryPage = () => {
   const [activeView, setActiveView] = useState('search');
@@ -130,7 +130,7 @@ export const LawyerDirectoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <LawyerDirectoryNav />
+      <NavigationBar />
       {selectedLawyer && (
         <LawyerProfile 
           lawyer={selectedLawyer}
