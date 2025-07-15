@@ -1,6 +1,8 @@
 package com.wachichaw.Document.Service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import com.wachichaw.Case.Entity.CaseStatus;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.Case.Repo.LegalCaseRepo;
@@ -99,17 +104,23 @@ public class DocumentService {
             throw new RuntimeException("File size exceeds maximum limit of 20MB");
         }
 
-        // Create case-specific directory
-        String caseDir = UPLOAD_DIR + "/case_" + legalCase.getCaseId();
-        Files.createDirectories(Paths.get(caseDir));
+       String DocumentFileURL = null;
 
-        // Generate unique filename
-        String uniqueFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path filePath = Paths.get(caseDir, uniqueFileName);
-        
-        // Save file
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        String relativePath = "/static/docs/case_" + legalCase.getCaseId() + "/" + uniqueFileName;
+    if (file != null && !file.isEmpty()) {
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.create("documents/" + fileName,
+                                  file.getBytes(),
+                                  file.getContentType());
+
+        String encodedFileName = URLEncoder.encode(blob.getName(), StandardCharsets.UTF_8);
+DocumentFileURL = String.format(
+    "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
+    bucket.getName(),
+    encodedFileName
+);
+    }
 
         // Get client entity
         ClientEntity client = clientRepo.findById(clientId)
@@ -122,7 +133,7 @@ public class DocumentService {
         document.setDocumentName(documentName);
         document.setDocumentType(documentType);
         document.setUploadedAt(LocalDateTime.now());
-        document.setFilePath(relativePath);
+        document.setFilePath(DocumentFileURL);
         document.setStatus(status);
 
         return documentRepo.save(document);
