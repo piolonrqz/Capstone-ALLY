@@ -15,11 +15,13 @@ const LawyerVerificationTable = () => {
   const [processingIds, setProcessingIds] = useState(new Set());
 
   const fetchLawyers = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await adminService.getAllLawyers();
-      const mapped = data.map(lawyer => ({
+  try {
+    setIsLoading(true);
+    setError(null);
+    const data = await adminService.getAllLawyers();
+    const mapped = data.map(lawyer => {
+      const hasCredentials = lawyer.credentials && lawyer.credentials.trim() !== '';
+      return {
         id: lawyer.userId,
         firstName: lawyer.firstName || lawyer.Fname,
         lastName: lawyer.lastName || lawyer.Lname,
@@ -28,25 +30,26 @@ const LawyerVerificationTable = () => {
         barNumber: lawyer.barNumber,
         practiceAreas: lawyer.specialization || [],
         submittedDate: lawyer.createdAt || '',
-        status: lawyer.status || 'pending',
+        status: !hasCredentials ? 'rejected' : (lawyer.status || 'pending'),
         phoneNumber: lawyer.phoneNumber,
         address: lawyer.address,
         city: lawyer.city,
         province: lawyer.province,
         zipCode: lawyer.zipCode,
-        yearsOfExperience: lawyer.yearsOfExperience,
+        experience: lawyer.experience,
         credentials: lawyer.credentials,
         profilePhoto: lawyer.profilePhoto
-      }));
-      setVerificationRequests(mapped);
-    } catch (error) {
-      console.error('Failed to fetch lawyers:', error);
-      setError('Failed to load lawyer verification requests. Please try again later.');
-      toast.error('Failed to load lawyer verification requests');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      };
+    });
+    setVerificationRequests(mapped);
+  } catch (error) {
+    console.error('Failed to fetch lawyers:', error);
+    setError('Failed to load lawyer verification requests. Please try again later.');
+    toast.error('Failed to load lawyer verification requests');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchLawyers();

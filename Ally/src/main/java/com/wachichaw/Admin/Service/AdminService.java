@@ -45,5 +45,12 @@ public class AdminService {
         lawyer.setCredentialsVerified(true);
         return lawyerRepo.save(lawyer);
     }
+
+    public LawyerEntity rejectLawyer(int id) {
+        LawyerEntity lawyer = lawyerRepo.findById(id)
+        .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + id));
+        lawyer.setCredentials(null);
+        return lawyerRepo.save(lawyer);
+    }
      
 }

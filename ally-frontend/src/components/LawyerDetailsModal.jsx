@@ -139,7 +139,7 @@ const LawyerDetailsModal = ({ lawyer, isOpen, onClose, onApprove, onReject }) =>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Years of Experience</label>
-                          <div className="mt-1">{lawyer.yearsOfExperience} years</div>
+                          <div className="mt-1">{lawyer.experience} years</div>
                         </div>
                       </div>
                     </div>

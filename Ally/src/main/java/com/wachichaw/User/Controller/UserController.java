@@ -102,7 +102,8 @@ public class UserController {
     public ResponseEntity<LawyerEntity> updateLawyer(
             @PathVariable int id,
             @RequestBody LawyerEntity lawyer
-    ) {
+    ) 
+    {
         LawyerEntity updated = userService.updateLawyer(
                 id,
                 lawyer.getEmail(),
@@ -118,7 +119,7 @@ public class UserController {
                 lawyer.getSpecialization(),
                 lawyer.getExperience(),
                 lawyer.getCredentials(),
-                lawyer.getEducationInstitution() // add this line
+                lawyer.getEducationInstitution() 
         );
         return ResponseEntity.ok(updated);
     }

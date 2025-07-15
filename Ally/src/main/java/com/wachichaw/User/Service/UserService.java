@@ -254,7 +254,8 @@ public class UserService {
             if (credentials != null && !credentials.trim().isEmpty()) {
                 lawyer.setCredentials(credentials);
             }
-            // Always set educationInstitution, even if empty (to allow clearing)
+            
+            
             lawyer.setEducationInstitution(educationInstitution);
             return userRepo.save(lawyer);
         }
