@@ -4,7 +4,7 @@
 /**
  * Routes where the navigation bar should be hidden
  */
-export const hiddenNavRoutes = ['/admin', '/settings', '/login', '/signup', '/'];
+export const hiddenNavRoutes = ['/admin', '/settings', '/login', '/signup'];
 
 /**
  * Determines if the navigation bar should be visible for a given pathname
