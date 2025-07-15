@@ -79,7 +79,7 @@ public class UserService {
         client.setCity(city);
         client.setProvince(province);
         client.setZip(zip);
-        client.setProfilePhoto(profilePhoto);
+        client.setProfilePhotoUrl(profilePhoto);
         client.setAccountType(AccountType.CLIENT);  
         return userRepo.save(client);
     }
@@ -100,7 +100,7 @@ public class UserService {
         client.setCity(city);
         client.setProvince(province);
         client.setZip(zip);
-        client.setProfilePhoto(profilePhoto);
+        client.setProfilePhotoUrl(profilePhoto);
         client.setAccountType(AccountType.CLIENT);  
         int token = (int)(Math.random() * 900000) + 100000;
         tempClientStorageService.saveUnverifiedUser(token, client);
@@ -144,7 +144,7 @@ public class UserService {
         lawyer.setExperience(experience);
         lawyer.setCredentials(credentials); 
         lawyer.setEducationInstitution(educationInstitution);
-        lawyer.setProfilePhoto(profilePhoto);
+        lawyer.setProfilePhotoUrl(profilePhoto);
         lawyer.setAccountType(AccountType.LAWYER);
         return userRepo.save(lawyer);
     }
@@ -170,7 +170,7 @@ public class UserService {
         lawyer.setExperience(experience);
         lawyer.setCredentials(credentials); 
         lawyer.setEducationInstitution(educationInstitution);
-        lawyer.setProfilePhoto(profilePhoto);
+        lawyer.setProfilePhotoUrl(profilePhoto);
         lawyer.setAccountType(AccountType.LAWYER);
         int token = (int)(Math.random() * 900000) + 100000;
         tempLawyerStorageService.saveUnverifiedUser(token, lawyer);
@@ -227,7 +227,7 @@ public class UserService {
             client.setCity(city);
             client.setProvince(province);
             client.setZip(zip);
-            client.setProfilePhoto(profilePhoto);
+            client.setProfilePhotoUrl(profilePhoto);
             return userRepo.save(client);
         }
 

@@ -56,8 +56,8 @@ public abstract class UserEntity {
     @Column(name = "zip", nullable = true)
     private String zip;
     
-    @Column(name = "profile_photo", nullable = true)
-    private String profilePhoto;
+    @Column(name = "profile_photo_url")
+    private String profilePhotoUrl;
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -188,11 +188,12 @@ public abstract class UserEntity {
         this.zip = zip;
     }
     
-    public String getProfilePhoto() {
-        return profilePhoto;
+    public String getProfilePhotoUrl() {
+        return profilePhotoUrl;
     }
-    public void setProfilePhoto(String profilePhoto) {
-        this.profilePhoto = profilePhoto;
+    
+    public void setProfilePhotoUrl(String profilePhotoUrl) {
+        this.profilePhotoUrl = profilePhotoUrl;
     }
     
 }

@@ -26,7 +26,7 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
         claims.put("accountType", user.getAccountType());
-        claims.put("profilePhoto", user.getProfilePhoto());
+        claims.put("profilePhoto", user.getProfilePhotoUrl());
 
         return createToken(claims, String.valueOf(user.getUserId()));
     }

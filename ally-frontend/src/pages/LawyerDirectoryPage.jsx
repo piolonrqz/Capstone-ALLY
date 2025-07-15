@@ -3,6 +3,7 @@ import { SearchPanel } from '../components/SearchPanel';
 import { LawyerProfile } from '../components/LawyerProfile';
 import { AIMatching } from '../components/AIMatching';
 import CasesList from '@/components/CasesList';
+import NavigationBar from '../components/NavigationBar';
 
 export const LawyerDirectoryPage = () => {
   const [activeView, setActiveView] = useState('search');
@@ -128,7 +129,8 @@ export const LawyerDirectoryPage = () => {
   }, [searchQuery, filters, fetchedLawyers.length]);
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      <NavigationBar />
       {selectedLawyer && (
         <LawyerProfile 
           lawyer={selectedLawyer}
@@ -136,7 +138,7 @@ export const LawyerDirectoryPage = () => {
         />
       )}
 
-      <div className="container max-w-5xl px-4 mx-auto">        
+      <div className="container max-w-5xl px-4 mx-auto pt-24">        
         <div className="p-4 bg-white shadow-sm sm:p-6 md:p-8 rounded-xl">
           <h1 className="mb-2 text-xl font-bold text-gray-900 sm:mb-3 sm:text-2xl">Find the Right Lawyer for Your Case</h1>
           <p className="mb-6 text-sm text-gray-600 sm:mb-8 sm:text-base">Search our network of verified legal professionals and submit your case to get started with legal assistance</p>

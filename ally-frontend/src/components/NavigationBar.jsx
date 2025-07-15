@@ -28,15 +28,17 @@ const NavigationBar = () => {
         try {
           const details = await fetchUserDetails(authData.userId);
           setUserDetails(details);
+          
+          // Add this: Store profile photo URL in localStorage if it exists
+          if (details.profilePhotoUrl) {
+            localStorage.setItem('profilePhoto', details.profilePhotoUrl);
+          }
         } catch (error) {
           console.error('Failed to fetch user details:', error);
           setUserDetails(null);
         } finally {
           setIsLoadingUser(false);
         }
-      } else if (!isLoggedIn) {
-        setUserDetails(null);
-        setIsLoadingUser(false);
       }
     };
 
@@ -130,142 +132,146 @@ const NavigationBar = () => {
   };
 
   return (
-    <nav className="fixed top-0 bg-[#F7FBFF] w-full h-[104px] px-8 flex justify-between items-center z-50" style={{boxShadow: '0px 0px 4px 0px rgba(0, 0, 0, 0.25)'}}>
-      {/* Logo */}
-      <Link to="/" className="flex items-center justify-center h-10">
-        <img src="/ally_logo.svg" alt="ALLY Logo" className="w-[114px] h-10" />
-      </Link>      
-      
-      {/* Navigation Links */}
-      <div className="flex items-center gap-8">
-        {isLoggedIn ? (
-          <>
-          <Link
-              to="/my-cases"
-              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-            >
-              My Cases
-            </Link>
-            <Link
-              to="/appointments"
-              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-            >
-              Appointment
-            </Link>
-            <Link
-              to="/documents"
-              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-            >
-              Documents
-            </Link>
-          </>
-        ) : (
-          <>
-            <Link 
-              to="#" 
-              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-            >
-              About
-            </Link>
-            <Link 
-              to="#" 
-              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-            >
-              Legal Resources
-            </Link>
-            <Link 
-              to="#" 
-              className="text-[#11265A] text-2xl font-medium hover:text-blue-600 transition-colors"
-            >
-              FAQ
-            </Link>
-          </>
-        )}
-      </div>        
-      
-      {/* Right Side Buttons */}
-      <div className="flex items-center gap-4">
-        {isLoggedIn ? (
-          <>
-            {/* Message and Notification Icons */}
-            <div className="relative" ref={notificationRef}>
-              <button
-                onClick={toggleNotifications}
-                className="relative flex items-center justify-center w-11 h-11 bg-white/80 backdrop-blur-sm rounded-full border border-[#E8F2FF] hover:border-[#2B62C4]/30 hover:bg-white hover:shadow-lg transition-all duration-300 ease-in-out group"
-              >
-                <Bell className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors duration-200" strokeWidth={1.8} />
-              </button>
-              <NotificationDropdown
-                isOpen={isNotificationOpen}
-                onClose={() => setIsNotificationOpen(false)}
-                currentUser={userDetails}
-              />
-            </div>
-            
-            {/* User Type Badge */}
-            <UserTypeBadge />
-            
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={toggleDropdown}
-                className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-[#E8F2FF] transition-all duration-200 ease-in-out hover:shadow-md"
-              >
-
-                {localStorage.getItem('profilePhoto') ? (
-                  <img
-                    src={localStorage.getItem('profilePhoto')}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover shadow-md border border-blue-200"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-base font-semibold shadow-lg">
-                    {getUserInitials()}
-                  </div>
-                )}
-
-                <ChevronDown className={`w-5 h-5 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-            
-              {/* Dropdown Menu */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-[#E8F2FF] py-2 z-50 backdrop-blur-sm">
-                  <div className="px-4 py-3 border-b border-[#E8F2FF]">
-                    <p className="text-sm text-[#11265A]/60">Signed in as</p>
-                    <p className="text-sm font-semibold text-[#11265A] truncate">
-                      {userDetails?.email || authData?.email || 'User'}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleProfileSettings}
-                    className="flex items-center gap-3 w-full px-4 py-3 text-left text-[#11265A] hover:bg-[#E8F2FF] transition-colors group"
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+      <div className="max-w-[1440px] mx-auto px-8 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <div onClick={() => navigate('/')} className="cursor-pointer">
+            <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+          </div>
+          
+          {/* Navigation Links */}
+          <div className="flex items-center">
+            {isLoggedIn ? (
+              <>
+                <div className="flex items-center gap-8">
+                  <Link
+                    to="/my-cases"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
                   >
-                    <Settings className="w-5 h-5 text-[#2B62C4] group-hover:text-[#1A6EFF] transition-colors" />
-                    <span className="font-medium">Profile Settings</span>
+                    My Cases
+                  </Link>
+                  <Link
+                    to="/appointments"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Appointment
+                  </Link>
+                  <Link
+                    to="/documents"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Documents
+                  </Link>
+                </div>
+
+                {/* Right Side Icons and Profile */}
+                <div className="flex items-center gap-4 ml-8 border-l pl-8">
+                  {/* Message and Notification Icons */}
+                  <div className="relative" ref={notificationRef}>
+                    <button
+                      onClick={toggleNotifications}
+                      className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-50 transition-all duration-200"
+                    >
+                      <Bell className="w-5 h-5 text-[#2B62C4]" strokeWidth={1.8} />
+                    </button>
+                    <NotificationDropdown
+                      isOpen={isNotificationOpen}
+                      onClose={() => setIsNotificationOpen(false)}
+                      currentUser={userDetails}
+                    />
+                  </div>
+                  
+                  {/* User Type Badge */}
+                  <UserTypeBadge />
+                  
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={toggleDropdown}
+                      className="flex items-center gap-2 hover:bg-gray-50 rounded-full p-2 transition-all duration-200"
+                    >
+                      {localStorage.getItem('profilePhoto') ? (
+                        <img
+                          src={localStorage.getItem('profilePhoto')}
+                          alt="Profile"
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold">
+                          {getUserInitials()}
+                        </div>
+                      )}
+                      <ChevronDown className={`w-4 h-4 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  
+                    {/* Dropdown Menu */}
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                        <div className="px-4 py-2 border-b border-gray-200">
+                          <p className="text-sm text-gray-600">Signed in as</p>
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {userDetails?.email || authData?.email || 'User'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleProfileSettings}
+                          className="flex items-center gap-3 w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
+                        >
+                          <Settings className="w-5 h-5 text-gray-500" />
+                          <span>Profile Settings</span>
+                        </button>
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center w-full gap-3 px-4 py-2 text-left text-red-600 hover:bg-red-50"
+                        >
+                          <LogOut className="w-5 h-5 text-red-500" />
+                          <span>Logout</span>
+                        </button>              
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-8">
+                  <Link 
+                    to="#" 
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    About
+                  </Link>
+                  <Link 
+                    to="#" 
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Legal Resources
+                  </Link>
+                  <Link 
+                    to="#" 
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    FAQ
+                  </Link>
+                </div>
+                <div className="flex items-center gap-4 ml-8 border-l pl-8">
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-4 py-2 text-sm font-medium text-[#1A6EFF] hover:text-blue-700 transition-colors"
+                  >
+                    Sign in
                   </button>
                   <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full gap-3 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-50 group"
+                    onClick={() => navigate('/signup')}
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#1A6EFF] rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    <LogOut className="w-5 h-5 text-red-500 transition-colors group-hover:text-red-600" />
-                    <span className="font-medium">Logout</span>
-                  </button>              
+                    Get Started
+                  </button>
                 </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <button
-            onClick={handleAuthAction}
-            className="flex items-center gap-3 px-4 py-1.5 border border-[#2B62C4] rounded-lg hover:bg-blue-50 transition-colors"
-          >
-            <div className="flex items-center justify-center w-6 h-6">
-              <User className="w-5 h-5 text-[#11265A]" strokeWidth={1.5} />
-            </div>
-            <span className="text-[#11265A] text-xl font-semibold">
-              Login / Register
-            </span>
-          </button>
-        )}
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </nav>
   );
