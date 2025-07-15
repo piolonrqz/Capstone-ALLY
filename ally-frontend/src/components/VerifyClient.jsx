@@ -36,8 +36,16 @@ const VerifyClient = () => {
     }, 1500);
   };
 
-  const handleResendCode = () => {
+  const handleResendCode = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setTimeout(async () => {
+      setIsLoading(false);
+      await fetch("http://localhost:8080/resendCodeClient?email=" + email, {
+        method: "POST"
+      });
     alert('Verification code resent!');
+    }, 1500);
   };
 
   return (
