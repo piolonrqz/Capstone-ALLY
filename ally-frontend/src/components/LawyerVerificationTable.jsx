@@ -25,11 +25,13 @@ const LawyerVerificationTable = () => {
   const [itemsPerPage] = useState(10);
 
   const fetchLawyers = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await adminService.getAllLawyers();
-      const mapped = data.map(lawyer => ({
+  try {
+    setIsLoading(true);
+    setError(null);
+    const data = await adminService.getAllLawyers();
+    const mapped = data.map(lawyer => {
+      const hasCredentials = lawyer.credentials && lawyer.credentials.trim() !== '';
+      return {
         id: lawyer.userId,
         firstName: capitalizeText(lawyer.firstName || lawyer.Fname),
         lastName: capitalizeText(lawyer.lastName || lawyer.Lname),
@@ -38,13 +40,13 @@ const LawyerVerificationTable = () => {
         barNumber: lawyer.barNumber,
         practiceAreas: (lawyer.specialization || []).map(area => capitalizeText(area)),
         submittedDate: lawyer.createdAt || '',
-        status: lawyer.status || 'pending',
+        status: !hasCredentials ? 'rejected' : (lawyer.status || 'pending'),
         phoneNumber: lawyer.phoneNumber,
         address: capitalizeText(lawyer.address),
         city: capitalizeText(lawyer.city),
         province: capitalizeText(lawyer.province),
         zipCode: lawyer.zipCode,
-        yearsOfExperience: lawyer.yearsOfExperience,
+        experience: lawyer.experience,
         credentials: lawyer.credentials,
         profilePhoto: lawyer.profilePhoto,
         // Additional fields for profile
@@ -56,8 +58,9 @@ const LawyerVerificationTable = () => {
         academicHonors: lawyer.academicHonors,
         yearAdmitted: lawyer.yearAdmitted,
         jurisdiction: lawyer.jurisdiction || 'Philippines'
-      }));
-      setVerificationRequests(mapped);
+      };
+    });
+    setVerificationRequests(mapped);
     } catch (error) {
       console.error('Failed to fetch lawyers:', error);
       setError('Failed to load lawyer verification requests. Please try again later.');

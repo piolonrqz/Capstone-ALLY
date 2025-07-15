@@ -97,12 +97,53 @@ public class UserController {
         );
         return ResponseEntity.ok(updated);
     }
+    @PutMapping("/lawyerUpdate/credentials/{id}")
+    public ResponseEntity<LawyerEntity> updateLawyerCredentials(
+            @PathVariable int id,
+            @RequestParam("credentials") MultipartFile credentialsFile
+    ) throws java.io.IOException {
+        String credentialsFileURL = null;
+
+        if (credentialsFile != null && !credentialsFile.isEmpty()) {
+            String fileName = UUID.randomUUID() + "_" + credentialsFile.getOriginalFilename();
+
+            Bucket bucket = StorageClient.getInstance().bucket();
+            Blob blob = bucket.create("credentials/" + fileName,
+                                      credentialsFile.getBytes(),
+                                      credentialsFile.getContentType());
+
+            String encodedFileName = URLEncoder.encode(blob.getName(), StandardCharsets.UTF_8);
+            credentialsFileURL = String.format(
+                "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
+                bucket.getName(),
+                encodedFileName
+            );
+        }
+
+        LawyerEntity updated = userService.updateLawyerCredentials(id, credentialsFileURL);
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/{id}/checkcredentials")
+    public ResponseEntity<Map<String, Object>> checkUserCredentials(@PathVariable int id) {
+        Optional<LawyerEntity> lawyerOpt = lawyerRepo.findById(id);
+        if (lawyerOpt.isPresent()) {
+            LawyerEntity lawyer = lawyerOpt.get();
+            Map<String, Object> response = new HashMap<>();
+            response.put("credentialsVerified", lawyer.getCredentialsVerified());
+            response.put("credentials", lawyer.getCredentials());
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Lawyer not found"));
+        }
+    }
 
     @PutMapping("/lawyerUpdate/{id}")
     public ResponseEntity<LawyerEntity> updateLawyer(
             @PathVariable int id,
             @RequestBody LawyerEntity lawyer
-    ) {
+    ) 
+    {
         LawyerEntity updated = userService.updateLawyer(
                 id,
                 lawyer.getEmail(),
@@ -118,7 +159,7 @@ public class UserController {
                 lawyer.getSpecialization(),
                 lawyer.getExperience(),
                 lawyer.getCredentials(),
-                lawyer.getEducationInstitution() // add this line
+                lawyer.getEducationInstitution() 
         );
         return ResponseEntity.ok(updated);
     }

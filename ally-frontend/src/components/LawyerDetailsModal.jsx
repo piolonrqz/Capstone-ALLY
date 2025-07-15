@@ -105,41 +105,69 @@ const LawyerDetailsModal = ({ lawyer, isOpen, onClose, onApprove, onReject }) =>
                     <p className="mt-1 text-gray-900">{lawyer.zipCode || 'Not Provided'}</p>
                   </div>
                 </div>
-              </div>
-            </div>
+              ) : (
+                <div>
+                  {/* Professional Information */}
+                  <div className="border border-gray-200 rounded-lg">
+                    <div className="p-6">
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                        <div className="col-span-2">
+                          <label className="block text-sm font-medium text-gray-500">Specialization / Expertise</label>
+                          <div className="mt-1">
+                            {lawyer.practiceAreas?.map((area, index) => (
+                              <span
+                                key={index}
+                                className="inline-block px-3 py-1 mr-2 mb-2 text-sm rounded-full bg-blue-100 text-blue-800"
+                              >
+                                {area}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500">Bar License Number</label>
+                          <div className="mt-1">{lawyer.barNumber}</div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-500">Years of Experience</label>
+                          <div className="mt-1">{lawyer.experience} years</div>
+                        </div>
+                      </div>
+                    </div>
 
-            {/* Professional Information */}
-            <div>
-              <div className="flex items-center mb-4">
-                <Briefcase className="w-5 h-5 text-blue-600 mr-2" />
-                <h4 className="text-lg font-semibold text-gray-900">Professional Overview</h4>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-500 mb-2">Areas of Practice</label>
-                  <div className="flex flex-wrap gap-2">
-                    {lawyer.practiceAreas?.length > 0 ? (
-                      lawyer.practiceAreas.map((area, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                        >
-                          {capitalizeText(area)}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-500">No areas specified</span>
-                    )}
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Years of Experience</label>
-                    <p className="mt-1 text-gray-900">{lawyer.yearsOfExperience || 'Not Specified'} Years</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Cases Handled</label>
-                    <p className="mt-1 text-gray-900">{lawyer.casesHandled || '0'}</p>
+                    {/* Documentation Section - No space between sections */}
+                    <div className="border-t border-gray-200">
+                      <div className="p-6">
+                        <h3 className="mb-4 text-lg font-semibold">Documentation</h3>
+                        {lawyer.credentials ? (
+                          <div className="space-y-4">
+                            <div className="p-4 border border-gray-200 rounded-lg">
+                              <div className="flex items-center gap-4">
+                                <FileText className="w-6 h-6 text-blue-500" />
+                                <div className="flex-1">
+                                  <h4 className="font-medium">Credentials & Certifications</h4>
+                                  <p className="text-sm text-gray-500">
+                                    {typeof lawyer.credentials === 'string' 
+                                      ? lawyer.credentials 
+                                      : lawyer.credentials.name}
+                                  </p>
+                                </div>
+                                <button 
+                                  className="px-3 py-1 text-sm text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50"
+                                  onClick={() => {
+                                    // Handle document view/download
+                                  }}
+                                >
+                                  View Document
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-center text-gray-500">No documents uploaded</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

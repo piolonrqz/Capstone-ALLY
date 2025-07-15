@@ -4,6 +4,7 @@ import { User, Shield, Users, FileOutput, Trash2 } from 'lucide-react';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 import NavigationBar from './NavigationBar';
+import { Button } from 'react-day-picker';
 
 // Accept user prop from AccountSettings
 const LawyerSettings = ({ user }) => {
@@ -83,6 +84,7 @@ const LawyerSettings = ({ user }) => {
           barNumber: data.barNumber || '',
           specialization: Array.isArray(data.specialization) ? data.specialization : (typeof data.specialization === 'string' ? data.specialization.split(',').map(s => s.trim()).filter(Boolean) : []),
           educationInstitution: data.educationInstitution || '',
+          credentials : data.credentials || '',
         }));
         setAddress(prev => ({
           ...prev,
@@ -226,6 +228,7 @@ const LawyerSettings = ({ user }) => {
       specialization: finalPracticeAreas, // use 'specialization' for backend
       educationInstitution: personalInfo.educationInstitution,
       prof_pic: currentProfilePhoto,
+      credentials: personalInfo.credentials, 
     };
     try {
       const response = await fetch(`http://localhost:8080/users/lawyerUpdate/${user.id}`, {
@@ -248,6 +251,34 @@ const LawyerSettings = ({ user }) => {
     }
   };
 
+  const handleCredentialsUpdate = async () => {
+  const credentials = document.getElementById('credentials-input').files[0];
+  if (!credentials) {
+    alert('Please select a file.');
+    return;
+  }
+  const formData = new FormData();
+  formData.append('credentials', credentials);
+
+  try {
+    const response = await fetch(`http://localhost:8080/users/lawyerUpdate/credentials/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: formData,
+    });
+    if (response.ok) {
+      alert('Credentials updated successfully!');
+    } else {
+      const errorData = await response.text();
+      alert(`Failed to update credentials: ${errorData}`);
+    }
+  } catch (error) {
+    console.error('Error updating credentials:', error);
+    alert('Failed to update credentials. Please try again.');
+  }
+};
   // Handler for profile photo change
   const handleProfilePhotoChange = async (e) => {
     const file = e.target.files[0];
@@ -522,6 +553,46 @@ const LawyerSettings = ({ user }) => {
               onChange={(e) => setAddress({ ...address, cityState: e.target.value })}
             />
           </div>
+        </Section>
+        <Section title="Credentials">
+        <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Credentials & Certifications</label>
+                <div className="p-6 text-center border border-gray-300 border-dashed rounded">
+                  <div className="flex justify-center mb-4">
+                    <svg className="w-12 h-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                    </svg>
+                  </div>
+                  <p className="mb-2 text-gray-600">Drag and drop files here or</p>
+                  <label className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600">
+                    Browse Files
+                    <input
+                    id='credentials-input'
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => {
+                        setPersonalInfo({
+                          ...personalInfo,
+                          credentials: e.target.files[0]
+                        });
+                      }}
+                    />
+                  </label>
+                  {personalInfo.credentials && (
+                    <p className="mt-2 text-xs text-gray-700">
+                      Selected file: {personalInfo.credentials.name}
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs text-gray-500">PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB each)</p>
+                </div>
+                <button
+                className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
+                onClick={handleCredentialsUpdate}
+                type="button"
+              >
+                Update Credentials
+              </button>
+              </div>
         </Section>
 
         <div className="mt-6">
