@@ -30,6 +30,7 @@ const Login = () => {
       localStorage.setItem('token', data.token); 
       localStorage.setItem('role', data.accountType);
       localStorage.setItem('profilePhoto', data.profilePhoto);
+      localStorage.setItem('userId', data.id);
       console.log('Login successful:', data);
 
       

@@ -4,6 +4,7 @@ import { User, Shield, Users, FileOutput, Trash2 } from 'lucide-react';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 import NavigationBar from './NavigationBar';
+import { Button } from 'react-day-picker';
 
 // Accept user prop from AccountSettings
 const LawyerSettings = ({ user }) => {
@@ -250,6 +251,34 @@ const LawyerSettings = ({ user }) => {
     }
   };
 
+  const handleCredentialsUpdate = async () => {
+  const credentials = document.getElementById('credentials-input').files[0];
+  if (!credentials) {
+    alert('Please select a file.');
+    return;
+  }
+  const formData = new FormData();
+  formData.append('credentials', credentials);
+
+  try {
+    const response = await fetch(`http://localhost:8080/users/lawyerUpdate/credentials/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: formData,
+    });
+    if (response.ok) {
+      alert('Credentials updated successfully!');
+    } else {
+      const errorData = await response.text();
+      alert(`Failed to update credentials: ${errorData}`);
+    }
+  } catch (error) {
+    console.error('Error updating credentials:', error);
+    alert('Failed to update credentials. Please try again.');
+  }
+};
   // Handler for profile photo change
   const handleProfilePhotoChange = async (e) => {
     const file = e.target.files[0];
@@ -538,6 +567,7 @@ const LawyerSettings = ({ user }) => {
                   <label className="px-4 py-2 text-white bg-blue-500 rounded cursor-pointer hover:bg-blue-600">
                     Browse Files
                     <input
+                    id='credentials-input'
                       type="file"
                       className="hidden"
                       onChange={(e) => {
@@ -555,6 +585,13 @@ const LawyerSettings = ({ user }) => {
                   )}
                   <p className="mt-2 text-xs text-gray-500">PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB each)</p>
                 </div>
+                <button
+                className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700"
+                onClick={handleCredentialsUpdate}
+                type="button"
+              >
+                Update Credentials
+              </button>
               </div>
         </Section>
 

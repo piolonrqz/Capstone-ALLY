@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, data } from "react-router-dom";
 import { Shield, CheckCircle, Clock, Users, Award, Lock, Zap, Quote, Star, Bot, Search, MessageSquare, Phone } from 'lucide-react';
 import Footer from '../components/Footer';
 import NavigationBar from '../components/NavigationBar';
@@ -9,6 +9,37 @@ const LandingPage = () => {
   const isLoggedIn = !!localStorage.getItem("token");
   const isLawyer =  localStorage.getItem("role")  ;
   const [showTokenExpired, setShowTokenExpired] = useState(false);
+  const [credentialsStatus, setCredentialsStatus] = useState(null);
+
+  const checkUserCredentials = async () => {
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
+  if (!token || !userId) return null;
+
+  try {
+    const response = await fetch(`http://localhost:8080/users/${userId}/checkcredentials`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch credentials');
+    }
+    const data = await response.json();
+    setCredentialsStatus(data);
+    return data;
+  } catch (error) {
+    console.error('Error checking credentials:', error);
+    setCredentialsStatus(null);
+    return null;
+  }
+};
+
+useEffect(() => {
+  if (isLawyer === "LAWYER") {
+    checkUserCredentials();
+  }
+}, [isLawyer]);
 
   // JWT Expiry Check
   useEffect(() => {
@@ -99,6 +130,17 @@ const LandingPage = () => {
       {/* Navigation Bar */}
       <NavigationBar />
 
+      {isLawyer === "LAWYER" && credentialsStatus && credentialsStatus.credentialsVerified === false && (
+  credentialsStatus.credentials ? (
+    <div className="w-full bg-yellow-100 border-b border-yellow-300 text-yellow-900 py-3 px-4 text-center font-medium">
+      Your credentials have been submitted and are pending verification by the admin.
+    </div>
+  ) : (
+    <div className="w-full bg-red-100 border-b border-red-400 text-red-800 py-3 px-4 text-center font-medium">
+      Your credentials were rejected. Please upload valid credentials to proceed.
+    </div>
+  )
+)}
       <div className="flex flex-col min-h-screen bg-white">
 
       {/* Hero Section */}

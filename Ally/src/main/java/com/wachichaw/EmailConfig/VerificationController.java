@@ -61,7 +61,7 @@ public class VerificationController {
         client.getCity(),
         client.getProvince(),
         client.getZip(),
-        client.getProfilePhoto()
+        client.getProfilePhotoUrl()
         );
         tempClientStorageService.removeUnverifiedUser(token);
         return ResponseEntity.ok("Code Resent Successfully");
@@ -85,7 +85,7 @@ public class VerificationController {
         lawyer.getExperience(),
         lawyer.getCredentials(),
         lawyer.getEducationInstitution(),
-        lawyer.getProfilePhoto()
+        lawyer.getProfilePhotoUrl()
         );
         tempClientStorageService.removeUnverifiedUser(token);
         return ResponseEntity.ok("Code Resent Successfully");
