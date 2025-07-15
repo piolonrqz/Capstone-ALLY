@@ -13,11 +13,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.wachichaw.Admin.Entity.AdminEntity;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Client.Entity.TempClient;
 import com.wachichaw.Config.JwtUtil;
+import com.wachichaw.EmailConfig.VerificationController;
 import com.wachichaw.EmailConfig.VerificationService;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Lawyer.Entity.TempLawyer;
@@ -42,6 +44,7 @@ public class UserService {
     private TempLawyer tempLawyerStorageService;
     @Autowired
     private VerificationService verificationService;
+    
      
 
     public UserService(UserRepo userRepo,PasswordEncoder passwordEncoder) {
@@ -111,6 +114,7 @@ public class UserService {
         return savedClient;
         }
     }
+    
     public void verifyClient(String email) {
         Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
         if (!optionalUser.isPresent() || !(optionalUser.get() instanceof ClientEntity)) {

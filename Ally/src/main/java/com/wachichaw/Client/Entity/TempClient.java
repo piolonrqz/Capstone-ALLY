@@ -20,6 +20,14 @@ public class TempClient{
         System.out.println("Retrieved user: " + (user != null ? user.getEmail() : "null"));
         return user;
     }
+    public Integer getTokenByEmail(String email) {
+    for (Map.Entry<Integer, ClientEntity> entry : unverifiedUsers.entrySet()) {
+        if (entry.getValue().getEmail().equalsIgnoreCase(email)) {
+            return entry.getKey();
+        }
+    }
+    return null;
+}
   
 
     public void removeUnverifiedUser(int token) {
