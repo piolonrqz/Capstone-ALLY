@@ -181,7 +181,7 @@ export default function LawyerRegistrationForm() {
 
       if (response.ok) {
         alert("Registration successful! Please verify the email.");
-        navigate('/signup/verifyClient', { state: { email: formData.email } });
+        navigate('/signup/verifyLawyer', { state: { email: formData.email } });
       } else {
         // Try to get error message from backend
         const errorData = await response.json().catch(() => ({}));

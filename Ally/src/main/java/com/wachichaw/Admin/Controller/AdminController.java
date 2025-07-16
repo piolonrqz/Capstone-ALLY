@@ -49,5 +49,11 @@ public class AdminController {
     adminService.verifyLawyer(id); // toggles or sets is_verified = true
     return ResponseEntity.ok("Lawyer verified.");
 }
-      
+
+    @PutMapping("/lawyers/reject/{id}")
+    public ResponseEntity<?> rejectLawyer(@PathVariable int id) {
+        adminService.rejectLawyer(id); // sets credentials to null
+        return ResponseEntity.ok("Lawyer rejected.");
+    }
+          
 }
