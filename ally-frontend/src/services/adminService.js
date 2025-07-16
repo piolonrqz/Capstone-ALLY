@@ -157,7 +157,7 @@ export const adminService = {
 
   async verifyLawyer(id) {
     try {
-      const response = await axios.put(`${API_URL}/users/verify/${id}`, {
+      const response = await axios.put(`${API_URL}/admins/lawyers/verify/${id}`, {
         status: 'approved',
         credentialsVerified: true
       });
@@ -170,7 +170,7 @@ export const adminService = {
 
   async rejectLawyer(id) {
     try {
-      const response = await axios.put(`${API_URL}/users/verify/${id}`, {
+      const response = await axios.put(`${API_URL}/admins/lawyers/reject/${id}`, {
         status: 'rejected',
         credentialsVerified: false
       });

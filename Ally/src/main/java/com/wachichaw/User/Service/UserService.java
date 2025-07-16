@@ -13,11 +13,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.wachichaw.Admin.Entity.AdminEntity;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Client.Entity.TempClient;
 import com.wachichaw.Config.JwtUtil;
+import com.wachichaw.EmailConfig.VerificationController;
 import com.wachichaw.EmailConfig.VerificationService;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Lawyer.Entity.TempLawyer;
@@ -42,6 +44,7 @@ public class UserService {
     private TempLawyer tempLawyerStorageService;
     @Autowired
     private VerificationService verificationService;
+    
      
 
     public UserService(UserRepo userRepo,PasswordEncoder passwordEncoder) {
@@ -111,6 +114,7 @@ public class UserService {
         return savedClient;
         }
     }
+    
     public void verifyClient(String email) {
         Optional<UserEntity> optionalUser = userRepo.findByEmail(email);
         if (!optionalUser.isPresent() || !(optionalUser.get() instanceof ClientEntity)) {
@@ -227,6 +231,17 @@ public class UserService {
             return userRepo.save(client);
         }
 
+        public LawyerEntity updateLawyerCredentials(int id, String credentials) {
+            LawyerEntity lawyer = (LawyerEntity) userRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Lawyer not found with id: " + id));
+            if (credentials != null && !credentials.trim().isEmpty()) {
+                lawyer.setCredentials(credentials);
+            } else {
+                throw new IllegalArgumentException("Credentials cannot be null or empty");
+            }
+            return userRepo.save(lawyer);
+        }
+
         public LawyerEntity updateLawyer(int id,String email,String pass,String Fname,String Lname,Long phoneNumber,String address,String city,String province,String zip,String barNumber,List<String> specialization,String experience,String credentials, String educationInstitution)   
           {
             LawyerEntity lawyer = (LawyerEntity) userRepo.findById(id)
@@ -250,7 +265,8 @@ public class UserService {
             if (credentials != null && !credentials.trim().isEmpty()) {
                 lawyer.setCredentials(credentials);
             }
-            // Always set educationInstitution, even if empty (to allow clearing)
+            
+            
             lawyer.setEducationInstitution(educationInstitution);
             return userRepo.save(lawyer);
         }

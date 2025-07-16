@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 
+import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 
 @Service
@@ -21,6 +22,14 @@ public class TempLawyer{
         return user;
     }
   
+    public Integer getTokenByEmail(String email) {
+    for (Map.Entry<Integer, LawyerEntity> entry : unverifiedUsers.entrySet()) {
+        if (entry.getValue().getEmail().equalsIgnoreCase(email)) {
+            return entry.getKey();
+        }
+    }
+    return null;
+}
 
     public void removeUnverifiedUser(int token) {
         unverifiedUsers.remove(token);
