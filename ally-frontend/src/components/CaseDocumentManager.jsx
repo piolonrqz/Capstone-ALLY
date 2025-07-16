@@ -81,8 +81,8 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
 
   // Process files for inline list
   const handleFiles = async (files) => {
-    if (userRole !== 'CLIENT') {
-      toast.error('Only clients can upload documents');
+    if (userRole !== 'CLIENT' && userRole !== 'LAWYER') {
+      toast.error('Only clients or lawyers can upload documents');
       return;
     }
 
@@ -267,10 +267,7 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
 
   // Delete document
   const handleDeleteDocument = async (documentId, documentName) => {
-    if (userRole !== 'CLIENT') {
-      toast.error('Only clients can delete documents');
-      return;
-    }
+
 
     if (!window.confirm(`Are you sure you want to delete "${documentName}"?`)) {
       return;
@@ -295,10 +292,10 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
   const handleDownloadDocument = async (documentId, documentName) => {
     try {
       await documentService.downloadDocument(documentId, documentName);
-      toast.success('Download started');
+      toast.success('Download started successfully');
     } catch (error) {
       console.error('Error downloading document:', error);
-      toast.error('Failed to download document: ' + error.message);
+      toast.error(error.message || 'An unexpected error occurred while downloading the document');
     }
   };
 
@@ -393,8 +390,8 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
   return (
     <div className="bg-white rounded-lg shadow-sm">
       <div className="p-6">
-        {/* Upload Section - Only for Clients */}
-        {userRole === 'CLIENT' && (
+        {/* Upload Section - Only for Clients and Lawyer */}
+        {(userRole === 'CLIENT' || userRole === 'LAWYER') && (
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-4">Upload Documents</h3>
             <div 
@@ -524,7 +521,7 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
                         <button
                           onClick={() => previewSelectedFile(file)}
                           disabled={uploading}
-                          className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
                           title="Preview File"
                         >
                           <Eye className="w-4 h-4" />
@@ -607,8 +604,10 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
                         {doc.documentName}
                       </h4>
                       <p className="text-sm text-gray-500">
-                        {doc.documentType.toUpperCase()} • Uploaded {documentService.formatDate(doc.uploadedAt)}
-                        {doc.uploaderName && ` by ${doc.uploaderName}`}
+                        documentTypeUploaded {documentService.formatDate(doc.uploadedAt)}
+                        {doc.uploaderName && doc.uploaderRole && (
+                          <> • Uploaded by {doc.uploaderName} ({doc.uploaderRole === 'CLIENT' ? 'Client' : doc.uploaderRole === 'LAWYER' ? 'Lawyer' : doc.uploaderRole})</>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -619,7 +618,7 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
                         e.stopPropagation();
                         handlePreviewDocument(doc);
                       }}
-                      className="p-2 text-green-600 hover:bg-green-100 rounded-full transition-colors"
+                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-full transition-colors"
                       title="Preview"
                       disabled={!doc.documentId}
                     >
@@ -638,7 +637,7 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
                       <Download className="w-4 h-4" />
                     </button>
                     
-                    {userRole === 'CLIENT' && (
+                    {(
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -668,9 +667,10 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{selectedDocument.documentName}</h3>
                 <p className="text-sm text-gray-500">
-                  {selectedDocument.documentType.toUpperCase()} •
-                  Uploaded {documentService.formatDate(selectedDocument.uploadedAt)}
-                  {selectedDocument.uploaderName && ` by ${selectedDocument.uploaderName}`}
+                 Uploaded {documentService.formatDate(selectedDocument.uploadedAt)}
+                  {selectedDocument.uploaderName && selectedDocument.uploaderRole && (
+                    <> • Uploaded by {selectedDocument.uploaderName} ({selectedDocument.uploaderRole === 'CLIENT' ? 'Client' : selectedDocument.uploaderRole === 'LAWYER' ? 'Lawyer' : selectedDocument.uploaderRole})</>
+                  )}
                 </p>
               </div>
               <button
