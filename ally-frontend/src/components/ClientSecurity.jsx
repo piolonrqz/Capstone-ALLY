@@ -120,7 +120,7 @@ const ClientSecurity = ({ user }) => {
     }
   };
 
-  // Handle password change
+
   const handlePasswordChange = async () => {
     if (!passwordChange.currentPassword || !passwordChange.newPassword || !passwordChange.confirmPassword) {
       alert('Please fill in all password fields.');
@@ -145,20 +145,21 @@ const ClientSecurity = ({ user }) => {
     setPasswordChange(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch('http://localhost:8080/auth/change-password', {
+      const response = await fetch('http://localhost:8080/users/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          userId: user.id,
           currentPassword: passwordChange.currentPassword,
           newPassword: passwordChange.newPassword
         })
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setPasswordChange({
           currentPassword: '',
           newPassword: '',
@@ -170,8 +171,7 @@ const ClientSecurity = ({ user }) => {
         });
         alert('Password changed successfully!');
       } else {
-        const errorData = await response.json();
-        alert(`Password change failed: ${errorData.message || 'Current password is incorrect'}`);
+        alert(`Password change failed: ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Password change error:', error);
@@ -397,7 +397,6 @@ const ClientSecurity = ({ user }) => {
                 <ul className="text-sm text-blue-700 space-y-1">
                   <li>• Use a strong, unique password for your account</li>
                   <li>• Don't share your login credentials with anyone</li>
-                  <li>• Log out when using shared or public computers</li>
                   <li>• Regularly update your password</li>
                   <li>• Keep your email address up to date for security notifications</li>
                 </ul>

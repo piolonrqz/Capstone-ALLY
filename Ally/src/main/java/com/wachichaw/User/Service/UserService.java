@@ -266,6 +266,38 @@ public class UserService {
         }
     }
 
+    public boolean changePassword(int userId, String currentPassword, String newPassword) {
+        try {
+            // Find user by ID
+            Optional<UserEntity> optionalUser = userRepo.findById(userId);
+            if (!optionalUser.isPresent()) {
+                throw new UsernameNotFoundException("User not found with id: " + userId);
+            }
+            
+            UserEntity user = optionalUser.get();
+            
+            // Verify current password
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                return false; // Current password is incorrect
+            }
+            
+            // Check if new password is different from current password
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+                throw new IllegalArgumentException("New password must be different from current password");
+            }
+            
+            // Update password
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepo.save(user);
+            
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("Error changing password for user " + userId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to change password: " + e.getMessage());
+        }
+    }
+
     public List<UserEntity> getAllUser() {
         return userRepo.findAll();
     }
@@ -275,11 +307,11 @@ public class UserService {
     }
 
      
-public String deleteUser(int id) {
-    String msg = " ";
-    userRepo.deleteById(id);
-    msg = "User successfully deleted!";
-    return msg;
-}
+    public String deleteUser(int id) {
+        String msg = " ";
+        userRepo.deleteById(id);
+        msg = "User successfully deleted!";
+        return msg;
+    }
     
 }
