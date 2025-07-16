@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 
 import com.wachichaw.Case.Entity.LegalCasesEntity;
-import com.wachichaw.Client.Entity.ClientEntity;
+import com.wachichaw.User.Entity.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,7 +29,7 @@ public class DocumentEntity {
 
     @ManyToOne
     @JoinColumn(name = "uploaded_by")
-    private ClientEntity uploadedBy;
+    private UserEntity uploadedBy;
 
     @Column(name = "document_name")
     private String documentName;
@@ -46,7 +46,7 @@ public class DocumentEntity {
     @Column(name = "status")
     private String status;
 
-    public DocumentEntity(int document_id, LegalCasesEntity legalcaseEntity, ClientEntity uploadedBy, String documentName, String filePath, String documentType, LocalDateTime uploadedAt, String status) {
+    public DocumentEntity(int document_id, LegalCasesEntity legalcaseEntity, UserEntity uploadedBy, String documentName, String filePath, String documentType, LocalDateTime uploadedAt, String status) {
         this.document_id = document_id;
         this.legalcaseEntity = legalcaseEntity;
         this.uploadedBy = uploadedBy;
@@ -75,11 +75,11 @@ public class DocumentEntity {
         this.legalcaseEntity = legalcaseEntity;
     }
 
-    public ClientEntity getUploadedBy() {
+    public UserEntity getUploadedBy() {
         return uploadedBy;
     }
 
-    public void setUploadedBy(ClientEntity uploadedBy) {
+    public void setUploadedBy(UserEntity uploadedBy) {
         this.uploadedBy = uploadedBy;
     }
 

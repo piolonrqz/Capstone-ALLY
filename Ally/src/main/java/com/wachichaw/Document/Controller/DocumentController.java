@@ -1,6 +1,7 @@
 package com.wachichaw.Document.Controller;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,8 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.Case.Repo.LegalCaseRepo;
 import com.wachichaw.Config.JwtUtil;
@@ -122,9 +125,22 @@ public class DocumentController {
             @RequestParam("status") String status,
             HttpServletRequest request) {
         try {
-          
+            // Extract user info from JWT token to verify authorization
+            String[] userInfo = extractUserFromRequest(request);
+            int tokenUserId = Integer.parseInt(userInfo[0]);
+            String userRole = userInfo[1];
 
-            
+            // Ensure the user can only upload for themselves
+            if (tokenUserId != userId) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Access denied: Cannot upload documents for another user");
+            }
+
+            // Ensure only clients and lawyers can upload documents
+            if (!"CLIENT".equals(userRole) && !"LAWYER".equals(userRole)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Access denied: Only clients and lawyers can upload documents");
+            }
 
             LegalCasesEntity legalCase = legalCaseRepo.findById(caseId)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
@@ -186,22 +202,60 @@ public class DocumentController {
             // Retrieve document with access validation
             DocumentEntity document = documentService.retrieveDocument(documentId, userId, userRole);
 
-            // Prepare file for download
-            String fullPath = System.getProperty("user.dir") + "/src/main/resources" + document.getFilePath();
-            Path filePath = Paths.get(fullPath);
-
-            if (!Files.exists(filePath)) {
+            // Prepare file for download from Firebase Storage
+            String fileUrl = document.getFilePath();
+            if (fileUrl == null || fileUrl.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("File not found on server");
+                    .body("File URL not found");
             }
 
-            Resource resource = new UrlResource(filePath.toUri());
+            try {
+                // Extract file name from URL for Firebase Storage access
+                String blobName;
+                if (fileUrl.contains("/o/")) {
+                    // Extract blob name from Firebase Storage URL
+                    blobName = fileUrl.substring(fileUrl.indexOf("/o/") + 3, fileUrl.indexOf("?alt=media"));
+                    blobName = java.net.URLDecoder.decode(blobName, StandardCharsets.UTF_8.toString());
+                } else {
+                    // Fallback: assume the URL contains the path directly
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Invalid file URL format");
+                }
 
-            return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION, 
-                    "attachment; filename=\"" + document.getDocumentName() + "\"")
-                .body(resource);
+                // Get the file from Firebase Storage using Admin SDK
+                Bucket bucket = StorageClient.getInstance().bucket();
+                Blob blob = bucket.get(blobName);
+                
+                if (blob == null || !blob.exists()) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("File not found in storage");
+                }
+
+                // Get file content as byte array
+                byte[] fileContent = blob.getContent();
+                
+                // Determine content type
+                String contentType = blob.getContentType();
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+
+                // Create InputStreamResource from byte array
+                InputStreamResource resource = new InputStreamResource(
+                    new java.io.ByteArrayInputStream(fileContent));
+
+                return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + document.getDocumentName() + "\"")
+                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileContent.length))
+                    .body(resource);
+                    
+            } catch (Exception e) {
+                // Handle cases where the file cannot be accessed from Firebase Storage
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to download file: " + e.getMessage());
+            }
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -271,9 +325,9 @@ public class DocumentController {
      * Legacy upload endpoint - maintained for backward compatibility
      * Updated to use new request mapping structure
      */
-    @PostMapping("/legacy/upload/{clientId}")
+    @PostMapping("/legacy/upload/{userId}")
     public ResponseEntity<DocumentEntity> legacyUploadDocument(
-            @PathVariable int clientId,
+            @PathVariable int userId,
             @RequestParam("file") MultipartFile file,
             @RequestParam("caseId") int caseId,
             @RequestParam("documentName") String documentName,
@@ -289,11 +343,11 @@ public class DocumentController {
             String uniqueFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             Path filePath = Paths.get(uploadDir, uniqueFileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            String relativePath = "/static/docs/" + uniqueFileName; 
+            String relativePath = "/static/docs/" + uniqueFileName;
 
             DocumentEntity document = documentService.uploadDocument(
                 legalCase,
-                clientId,
+                userId,
                 documentName,
                 relativePath,
                 documentType,
@@ -328,3 +382,4 @@ public class DocumentController {
         return new String[]{userId, accountType};
     }
 }
+

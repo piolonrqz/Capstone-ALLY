@@ -76,7 +76,7 @@ export const documentService = {
   },
 
   // Upload document to a specific case
-  uploadDocument: async (clientId, caseId, file, documentMetadata = {}) => {
+  uploadDocument: async (userId, caseId, file, documentMetadata = {}) => {
     try {
       const authData = getAuthData();
       if (!authData) {
@@ -103,7 +103,7 @@ export const documentService = {
       formData.append('documentType', documentMetadata.documentType || fileExtension);
       formData.append('status', documentMetadata.status || 'uploaded');
 
-      const response = await fetch(`${API_BASE_URL}/upload/${clientId}`, {
+      const response = await fetch(`${API_BASE_URL}/upload/${userId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authData.token}`,
@@ -188,17 +188,14 @@ export const documentService = {
         throw new Error('Failed to download document');
       }
 
-      // Create blob and download
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = documentName || 'document';
-      document.body.appendChild(link);
-      link.click();
-      
-      // Clean up
-      document.body.removeChild(link);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = documentName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
       window.URL.revokeObjectURL(url);
       
       return true;
