@@ -1,4 +1,4 @@
-package com.wachichaw.EmailConfig;
+package com.wachichaw.EmailConfig.Controller;
 
 import java.nio.file.AccessDeniedException;
 
@@ -25,7 +25,7 @@ import com.wachichaw.User.Service.UserService;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
-import com.wachichaw.EmailConfig.VerificationService;
+import com.wachichaw.EmailConfig.Service.VerificationService;
 import com.wachichaw.Lawyer.Controller.LawyerController;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Lawyer.Entity.TempLawyer;
