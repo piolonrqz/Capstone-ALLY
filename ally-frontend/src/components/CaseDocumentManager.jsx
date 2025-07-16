@@ -604,10 +604,9 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
                         {doc.documentName}
                       </h4>
                       <p className="text-sm text-gray-500">
-                        documentTypeUploaded {documentService.formatDate(doc.uploadedAt)}
-                        {doc.uploaderName && doc.uploaderRole && (
-                          <> • Uploaded by {doc.uploaderName} ({doc.uploaderRole === 'CLIENT' ? 'Client' : doc.uploaderRole === 'LAWYER' ? 'Lawyer' : doc.uploaderRole})</>
-                        )}
+                        Uploaded at {documentService.formatDate(doc.uploadedAt)}
+                        • Uploaded by  ({doc.uploaderRole === 'CLIENT' ? 'Client' : doc.uploaderRole === 'LAWYER' ? 'Lawyer' : doc.uploaderRole})
+
                       </p>
                     </div>
                   </div>
