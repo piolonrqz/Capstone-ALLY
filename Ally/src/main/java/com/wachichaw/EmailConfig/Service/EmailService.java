@@ -1,4 +1,4 @@
-package com.wachichaw.EmailConfig;
+package com.wachichaw.EmailConfig.Service;
 
 
 

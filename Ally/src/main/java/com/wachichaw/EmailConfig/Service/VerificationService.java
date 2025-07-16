@@ -1,4 +1,4 @@
-package com.wachichaw.EmailConfig;
+package com.wachichaw.EmailConfig.Service;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

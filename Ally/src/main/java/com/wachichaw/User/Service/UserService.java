@@ -18,7 +18,7 @@ import com.wachichaw.Admin.Entity.AdminEntity;
 import com.wachichaw.Client.Entity.ClientEntity;
 import com.wachichaw.Client.Entity.TempClient;
 import com.wachichaw.Config.JwtUtil;
-import com.wachichaw.EmailConfig.VerificationService;
+import com.wachichaw.EmailConfig.Service.VerificationService;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
 import com.wachichaw.Lawyer.Entity.TempLawyer;
 import com.wachichaw.User.Entity.AccountType;

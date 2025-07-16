@@ -1,7 +1,7 @@
-package com.wachichaw.EmailConfig;
+package com.wachichaw.EmailConfig.Controller;
 
 import com.wachichaw.EmailConfig.EmailRequest;
-import com.wachichaw.EmailConfig.EmailService;
+import com.wachichaw.EmailConfig.Service.EmailService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
