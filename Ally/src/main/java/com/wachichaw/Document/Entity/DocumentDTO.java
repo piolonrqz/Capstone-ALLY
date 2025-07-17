@@ -25,6 +25,9 @@ public class DocumentDTO {
     @JsonProperty("uploaderName")
     private String uploaderName;
     
+    @JsonProperty("uploaderRole")
+    private String uploaderRole;
+    
     @JsonProperty("documentName")
     private String documentName;
     
@@ -50,6 +53,7 @@ public class DocumentDTO {
         this.caseTitle = document.getCaseEntity().getTitle();
         this.uploadedById = document.getUploadedBy().getUserId();
         this.uploaderName = document.getUploadedBy().getFname() + " " + document.getUploadedBy().getLname();
+        this.uploaderRole = document.getUploadedBy().getAccountType().toString();
         this.documentName = document.getDocumentName();
         this.documentType = document.getDocumentType();
         this.uploadedAt = document.getUploadedAt();
@@ -96,6 +100,14 @@ public class DocumentDTO {
 
     public void setUploaderName(String uploaderName) {
         this.uploaderName = uploaderName;
+    }
+
+    public String getUploaderRole() {
+        return uploaderRole;
+    }
+
+    public void setUploaderRole(String uploaderRole) {
+        this.uploaderRole = uploaderRole;
     }
 
     public String getDocumentName() {

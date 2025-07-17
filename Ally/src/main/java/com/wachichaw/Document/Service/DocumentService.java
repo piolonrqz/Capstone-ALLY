@@ -3,10 +3,6 @@ package com.wachichaw.Document.Service;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -21,8 +17,8 @@ import com.google.firebase.cloud.StorageClient;
 import com.wachichaw.Case.Entity.CaseStatus;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
 import com.wachichaw.Case.Repo.LegalCaseRepo;
-import com.wachichaw.Client.Entity.ClientEntity;
-import com.wachichaw.Client.Repo.ClientRepo;
+import com.wachichaw.User.Entity.UserEntity;
+import com.wachichaw.User.Repo.UserRepo;
 import com.wachichaw.Document.Entity.DocumentEntity;
 import com.wachichaw.Document.Repo.DocumentRepo;
 
@@ -32,14 +28,14 @@ public class DocumentService {
     @Autowired
     private final DocumentRepo documentRepo;
     @Autowired
-    private ClientRepo clientRepo;
+    private UserRepo userRepo;
     @Autowired
     private LegalCaseRepo legalCaseRepo;
 
     // Allowed file types
     private static final String[] ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt", ".jpg", ".jpeg", ".png"};
     private static final long MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/src/main/resources/static/docs";
+    //private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/src/main/resources/static/docs";
 
     public DocumentService(DocumentRepo documentRepo) {
         this.documentRepo = documentRepo;
@@ -80,8 +76,8 @@ public class DocumentService {
     /**
      * Enhanced upload with case validation and security checks
      */
-    public DocumentEntity uploadDocumentToCase(LegalCasesEntity legalCase, int clientId, 
-                                             MultipartFile file, String documentName, 
+    public DocumentEntity uploadDocumentToCase(LegalCasesEntity legalCase, int userId,
+                                             MultipartFile file, String documentName,
                                              String documentType, String status) throws IOException {
         
         // Validate case is ACCEPTED
@@ -89,9 +85,12 @@ public class DocumentService {
             throw new RuntimeException("Documents can only be uploaded to ACCEPTED cases");
         }
 
-        // Validate client is case owner
-        if (legalCase.getClient().getUserId() != clientId) {
-            throw new RuntimeException("Client can only upload documents to their own cases");
+        // Validate user has access to this case (either client or assigned lawyer)
+        boolean hasAccess = (legalCase.getClient().getUserId() == userId) ||
+                           (legalCase.getLawyer() != null && legalCase.getLawyer().getUserId() == userId);
+        
+        if (!hasAccess) {
+            throw new RuntimeException("User can only upload documents to their own cases or cases they are assigned to");
         }
 
         // Validate file type
@@ -114,22 +113,22 @@ public class DocumentService {
                                   file.getBytes(),
                                   file.getContentType());
 
-        String encodedFileName = URLEncoder.encode(blob.getName(), StandardCharsets.UTF_8);
-DocumentFileURL = String.format(
-    "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
-    bucket.getName(),
-    encodedFileName
-);
+        String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString());
+        DocumentFileURL = String.format(
+            "https://firebasestorage.googleapis.com/v0/b/%s/o/documents%%2F%s?alt=media",
+            bucket.getName(),
+            encodedFileName
+        );
     }
 
-        // Get client entity
-        ClientEntity client = clientRepo.findById(clientId)
-            .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
+        // Get user entity
+        UserEntity user = userRepo.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
         // Create document entity
         DocumentEntity document = new DocumentEntity();
         document.setCaseEntity(legalCase);
-        document.setUploadedBy(client);
+        document.setUploadedBy(user);
         document.setDocumentName(documentName);
         document.setDocumentType(documentType);
         document.setUploadedAt(LocalDateTime.now());
@@ -142,14 +141,14 @@ DocumentFileURL = String.format(
     /**
      * Legacy upload method - maintained for backward compatibility
      */
-    public DocumentEntity uploadDocument(LegalCasesEntity legalCase, int clientId, String documentName, 
+    public DocumentEntity uploadDocument(LegalCasesEntity legalCase, int userId, String documentName,
                                        String filePath, String documentType, LocalDateTime uploadedAt, String status) {
-        ClientEntity client = clientRepo.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
+        UserEntity user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
         
         DocumentEntity document = new DocumentEntity();
         document.setCaseEntity(legalCase);
-        document.setUploadedBy(client);
+        document.setUploadedBy(user);
         document.setDocumentName(documentName);
         document.setDocumentType(documentType);
         document.setUploadedAt(uploadedAt);
@@ -179,23 +178,29 @@ DocumentFileURL = String.format(
         DocumentEntity document = documentRepo.findById(documentId)
             .orElseThrow(() -> new RuntimeException("Document not found"));
 
-        // Only clients can delete their own documents
-        if (!userRole.equals("CLIENT") || document.getUploadedBy().getUserId() != userId) {
-            throw new RuntimeException("Access denied: Only document owners can delete documents");
+        if (!validateDocumentAccess(document, userId, userRole)) {
+            throw new RuntimeException("Access denied: User does not have permission to delete this document");
         }
 
         try {
-            // Delete physical file
-            Path filePath = Paths.get(System.getProperty("user.dir") + "/src/main/resources" + document.getFilePath());
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
+            String fileUrl = document.getFilePath();
+            if (fileUrl != null && !fileUrl.isEmpty()) {
+                // Extract file name from URL
+                String blobName = fileUrl.substring(fileUrl.indexOf("/o/") + 3, fileUrl.indexOf("?alt=media"));
+                String decodedBlobName = java.net.URLDecoder.decode(blobName, StandardCharsets.UTF_8.toString());
+
+                Bucket bucket = StorageClient.getInstance().bucket();
+                Blob blob = bucket.get(decodedBlobName);
+                
+                if (blob != null && blob.exists()) {
+                    blob.delete();
+                }
             }
 
-            // Delete database record
             documentRepo.delete(document);
             return true;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to delete document file: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete document: " + e.getMessage());
         }
     }
 

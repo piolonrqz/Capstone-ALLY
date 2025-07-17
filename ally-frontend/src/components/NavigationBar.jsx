@@ -29,10 +29,7 @@ const NavigationBar = () => {
           const details = await fetchUserDetails(authData.userId);
           setUserDetails(details);
           
-          // Add this: Store profile photo URL in localStorage if it exists
-          if (details.profilePhotoUrl) {
-            localStorage.setItem('profilePhoto', details.profilePhotoUrl);
-          }
+          
         } catch (error) {
           console.error('Failed to fetch user details:', error);
           setUserDetails(null);
@@ -44,8 +41,6 @@ const NavigationBar = () => {
 
     getUserDetails();
   }, [isLoggedIn, authData?.userId]);
-  
-    const profilePhoto = localStorage.getItem("profile_photo");
     
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -100,13 +95,8 @@ const NavigationBar = () => {
     if (userDetails?.firstName && userDetails?.lastName) {
       return `${userDetails.firstName.charAt(0)}${userDetails.lastName.charAt(0)}`.toUpperCase();
     }
-    if (userDetails?.firstName) {
-      return userDetails.firstName.charAt(0).toUpperCase();
-    }
-    if (authData?.email) {
-      return authData.email.charAt(0).toUpperCase();
-    }
-    return 'U';
+    
+    
   };
 
   // Get user type for badge display
@@ -190,9 +180,9 @@ const NavigationBar = () => {
                       onClick={toggleDropdown}
                       className="flex items-center gap-2 hover:bg-gray-50 rounded-full p-2 transition-all duration-200"
                     >
-                      {localStorage.getItem('profilePhoto') ? (
+                      {userDetails?.profilePhotoUrl ? (
                         <img
-                          src={localStorage.getItem('profilePhoto')}
+                          src={userDetails.profilePhotoUrl}
                           alt="Profile"
                           className="w-8 h-8 rounded-full object-cover"
                         />
@@ -210,7 +200,7 @@ const NavigationBar = () => {
                         <div className="px-4 py-2 border-b border-gray-200">
                           <p className="text-sm text-gray-600">Signed in as</p>
                           <p className="text-sm font-semibold text-gray-900 truncate">
-                            {userDetails?.email || authData?.email || 'User'}
+                            {authData?.email || 'User'}
                           </p>
                         </div>
                         <button
