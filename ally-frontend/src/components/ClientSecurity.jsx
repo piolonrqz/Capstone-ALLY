@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { User, Shield, Trash2, Bell, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Shield, Trash2, Bell, Lock, Eye, EyeOff } from 'lucide-react';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 
@@ -8,15 +8,6 @@ const ClientSecurity = ({ user }) => {
   const location = useLocation();
   const path = location.pathname;
   const token = localStorage.getItem('token');
-
-  // Email change states
-  const [emailChange, setEmailChange] = useState({
-    newEmail: '',
-    verificationCode: '',
-    isCodeSent: false,
-    isVerifying: false,
-    isLoading: false
-  });
 
   // Password change states
   const [passwordChange, setPasswordChange] = useState({
@@ -28,98 +19,6 @@ const ClientSecurity = ({ user }) => {
     showNewPassword: false,
     showConfirmPassword: false
   });
-
-  // Handle email change request
-  const handleEmailChangeRequest = async () => {
-    if (!emailChange.newEmail) {
-      alert('Please enter a new email address.');
-      return;
-    }
-
-    if (emailChange.newEmail === user?.email) {
-      alert('New email must be different from current email.');
-      return;
-    }
-
-    setEmailChange(prev => ({ ...prev, isLoading: true }));
-
-    try {
-      const response = await fetch('http://localhost:8080/auth/request-email-change', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          newEmail: emailChange.newEmail
-        })
-      });
-
-      if (response.ok) {
-        setEmailChange(prev => ({ 
-          ...prev, 
-          isCodeSent: true,
-          isLoading: false 
-        }));
-        alert('Verification code sent to your current email address.');
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to send verification code: ${errorData.message || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error('Email change request error:', error);
-      alert('Failed to send verification code. Please try again.');
-    } finally {
-      setEmailChange(prev => ({ ...prev, isLoading: false }));
-    }
-  };
-
-  // Handle email change verification
-  const handleEmailChangeVerification = async () => {
-    if (!emailChange.verificationCode) {
-      alert('Please enter the verification code.');
-      return;
-    }
-
-    setEmailChange(prev => ({ ...prev, isVerifying: true }));
-
-    try {
-      const response = await fetch('http://localhost:8080/auth/verify-email-change', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          newEmail: emailChange.newEmail,
-          verificationCode: emailChange.verificationCode
-        })
-      });
-
-      if (response.ok) {
-        setEmailChange({
-          newEmail: '',
-          verificationCode: '',
-          isCodeSent: false,
-          isVerifying: false,
-          isLoading: false
-        });
-        alert('Email has been changed successfully!');
-        // Optionally redirect to login or refresh user data
-      } else {
-        const errorData = await response.json();
-        alert(`Email verification failed: ${errorData.message || 'Invalid verification code'}`);
-      }
-    } catch (error) {
-      console.error('Email verification error:', error);
-      alert('Email verification failed. Please try again.');
-    } finally {
-      setEmailChange(prev => ({ ...prev, isVerifying: false }));
-    }
-  };
-
 
   const handlePasswordChange = async () => {
     if (!passwordChange.currentPassword || !passwordChange.newPassword || !passwordChange.confirmPassword) {
@@ -181,17 +80,6 @@ const ClientSecurity = ({ user }) => {
     }
   };
 
-  // Reset email change form
-  const resetEmailChange = () => {
-    setEmailChange({
-      newEmail: '',
-      verificationCode: '',
-      isCodeSent: false,
-      isVerifying: false,
-      isLoading: false
-    });
-  };
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -237,82 +125,6 @@ const ClientSecurity = ({ user }) => {
       <div className="flex-1 p-8 ml-64">
         <div className="max-w-4xl mx-auto">
           <h1 className="mb-6 text-2xl font-bold text-gray-800">Security Settings</h1>
-
-          {/* Current Account Information */}
-          <Section title="Current Account Information">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Mail className="w-5 h-5 mr-3 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Current Email</p>
-                    <p className="font-medium text-gray-800">{user?.email || 'Not available'}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center">
-                  <Lock className="w-5 h-5 mr-3 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Password</p>
-                    <p className="font-medium text-gray-800">••••••••</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Change Email Section */}
-          <Section title="Change Email Address">
-            <div className="space-y-4">
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <InputField
-                    label="New Email Address"
-                    type="email"
-                    value={emailChange.newEmail}
-                    onChange={(e) => setEmailChange(prev => ({ ...prev, newEmail: e.target.value }))}
-                    placeholder="Enter new email address"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <button
-                    onClick={handleEmailChangeRequest}
-                    disabled={emailChange.isLoading}
-                    className="px-6 py-3 text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {emailChange.isLoading ? 'Sending...' : 'Send Verification Code'}
-                  </button>
-                </div>
-              </div>
-              
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <InputField
-                    label="Verification Code"
-                    type="text"
-                    value={emailChange.verificationCode}
-                    onChange={(e) => setEmailChange(prev => ({ ...prev, verificationCode: e.target.value }))}
-                    placeholder="Enter 6-digit verification code"
-                    maxLength={6}
-                  />
-                </div>
-                <div className="flex items-end">
-                  <button
-                    onClick={handleEmailChangeVerification}
-                    disabled={emailChange.isVerifying}
-                    className="px-6 py-3 text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {emailChange.isVerifying ? 'Verifying...' : 'Verify'}
-                  </button>
-                </div>
-              </div>
-              
-              <p className="text-sm text-gray-600">
-                A verification code will be sent to your current email address.
-              </p>
-            </div>
-          </Section>
 
           {/* Change Password Section */}
           <Section title="Change Password">
@@ -398,7 +210,6 @@ const ClientSecurity = ({ user }) => {
                   <li>• Use a strong, unique password for your account</li>
                   <li>• Don't share your login credentials with anyone</li>
                   <li>• Regularly update your password</li>
-                  <li>• Keep your email address up to date for security notifications</li>
                 </ul>
               </div>
             </div>
