@@ -122,44 +122,71 @@ public class LawyerRecommendationService {
     }
     
     private double calculateMatchScore(LawyerRecommendationRequest request, LawyerEntity lawyer) throws Exception {
-        // Create instance for prediction
-        Instance instance = new DenseInstance(trainingDataset.numAttributes());
-        instance.setDataset(trainingDataset);
-        
-        // Set case attributes
-        instance.setValue(0, request.getCaseType() != null ? request.getCaseType() : "Civil");
-        instance.setValue(1, request.getUrgencyLevel() != null ? request.getUrgencyLevel() : "Medium");
-        
-        // Set lawyer attributes
-        int years = parseExperienceToYears(lawyer.getExperience());
-        instance.setValue(2, years);
-        instance.setValue(3, lawyer.getCasesHandled() != 0 ? lawyer.getCasesHandled() : 10);
-        
-        // Set specialization attributes
-        List<String> lawyerSpecs = lawyer.getSpecialization();
-        int specIndex = 4;
-        for (String spec : Arrays.asList("Criminal", "Civil", "Family", "Corporate", "Labor", "Real Estate")) {
-            instance.setValue(specIndex++, lawyerSpecs.contains(spec) ? "Yes" : "No");
-        }
-        
-        // Get prediction distribution
-        double[] distribution = decisionTree.distributionForInstance(instance);
-        
-        // Calculate weighted score based on prediction confidence
-        double score = 0.0;
-        String[] suitabilityLevels = {"Poor", "Fair", "Good", "Excellent"};
-        double[] weights = {1.0, 2.0, 3.0, 4.0};
-        
-        for (int i = 0; i < distribution.length; i++) {
-            score += distribution[i] * weights[i];
-        }
-        
-        // Apply additional business logic scoring
-        score = applyBusinessLogicScoring(score, request, lawyer);
-        
-        // Normalize to 0-100 scale
-        return Math.min(100.0, (score / 4.0) * 100.0);
+    // Create instance for prediction
+    Instance instance = new DenseInstance(trainingDataset.numAttributes());
+    instance.setDataset(trainingDataset);
+
+    // Set case attributes
+    String caseType = request.getCaseType() != null ? request.getCaseType() : "Civil";
+    System.out.println("Allowed caseType values:");
+    for (int i = 0; i < trainingDataset.attribute(0).numValues(); i++) {
+        System.out.println("  " + trainingDataset.attribute(0).value(i));
     }
+    System.out.println("Passed caseType value: " + caseType);
+    instance.setValue(0, caseType);
+
+    String urgency = request.getUrgencyLevel() != null ? request.getUrgencyLevel() : "Medium";
+    System.out.println("Allowed urgencyLevel values:");
+    for (int i = 0; i < trainingDataset.attribute(1).numValues(); i++) {
+        System.out.println("  " + trainingDataset.attribute(1).value(i));
+    }
+    System.out.println("Passed urgencyLevel value: " + urgency);
+    instance.setValue(1, urgency);
+
+    // Set lawyer attributes
+    int years = parseExperienceToYears(lawyer.getExperience());
+    instance.setValue(2, years);
+    instance.setValue(3, lawyer.getCasesHandled() != 0 ? lawyer.getCasesHandled() : 10);
+
+    // Set specialization attributes
+    List<String> lawyerSpecs = lawyer.getSpecialization();
+int specIndex = 4;
+for (String spec : Arrays.asList("CRIMINAL_DEFENSE", "CIVIL", "FAMILY_LAW", "Corporate", "Labor", "REAL_ESTATE", "BUSINESS_LAW")) {
+    boolean hasSpec = lawyerSpecs.contains(spec);
+    String value = hasSpec ? "YES" : "NO";
+    System.out.println("Allowed values for specialization " + spec + ":");
+    for (int i = 0; i < trainingDataset.attribute(specIndex).numValues(); i++) {
+        System.out.println("  " + trainingDataset.attribute(specIndex).value(i));
+    }
+    System.out.println("Passed value for specialization " + spec + ": " + value);
+
+    // Handle both nominal and numeric attributes
+    if (trainingDataset.attribute(specIndex).isNominal() || trainingDataset.attribute(specIndex).isString()) {
+        instance.setValue(specIndex, value);
+    } else if (trainingDataset.attribute(specIndex).isNumeric()) {
+        instance.setValue(specIndex, hasSpec ? 1 : 0);
+    }
+    specIndex++;
+}
+
+    // Get prediction distribution
+    double[] distribution = decisionTree.distributionForInstance(instance);
+
+    // Calculate weighted score based on prediction confidence
+    double score = 0.0;
+    String[] suitabilityLevels = {"Poor", "Fair", "Good", "Excellent"};
+    double[] weights = {1.0, 2.0, 3.0, 4.0};
+
+    for (int i = 0; i < distribution.length; i++) {
+        score += distribution[i] * weights[i];
+    }
+
+    // Apply additional business logic scoring
+    score = applyBusinessLogicScoring(score, request, lawyer);
+
+    // Normalize to 0-100 scale
+    return Math.min(100.0, (score / 4.0) * 100.0);
+}
     
     private double applyBusinessLogicScoring(double baseScore, LawyerRecommendationRequest request, LawyerEntity lawyer) {
         double adjustedScore = baseScore;

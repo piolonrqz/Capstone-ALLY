@@ -47,7 +47,7 @@ public class LegalCasesEntity {
 
     @ManyToOne
     @JoinColumn(name = "lawyer_id")
-    @JsonBackReference(value = "lawyer-case")
+    // @JsonBackReference(value = "lawyer-case")
     private LawyerEntity lawyer;
 
     @ManyToOne
