@@ -82,6 +82,7 @@ public class CaseSubmissionIntegrationService {
             }
             
             LawyerRecommendationRequest request = createRecommendationRequest(legalCase);
+            
             return recommendationService.recommendLawyers(request);
             
         } catch (Exception e) {
