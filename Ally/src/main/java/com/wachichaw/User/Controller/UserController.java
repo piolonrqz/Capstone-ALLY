@@ -483,4 +483,62 @@ credentialsFileURL = String.format(
         return ResponseEntity.ok(statistics);
     }
 
+    @PostMapping("/change-password")
+    @Operation(summary = "Change user password", description = "Allows authenticated users to change their password")
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, Object> request) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Extract token from Authorization header
+            String token = authHeader.replace("Bearer ", "");
+            
+            // Extract user ID from token
+            int userId = Integer.parseInt(jwtUtil.extractUserId(token));
+            
+            // Get request parameters
+            String currentPassword = (String) request.get("currentPassword");
+            String newPassword = (String) request.get("newPassword");
+            
+            // Validate input
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Current password is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "New password is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (newPassword.length() < 8) {
+                response.put("success", false);
+                response.put("message", "New password must be at least 8 characters long");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // Call service method
+            boolean success = userService.changePassword(userId, currentPassword, newPassword);
+            
+            if (success) {
+                response.put("success", true);
+                response.put("message", "Password changed successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "Current password is incorrect");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Failed to change password: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 }
