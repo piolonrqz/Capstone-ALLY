@@ -6,6 +6,10 @@ import re
 import os
 from urllib.parse import urljoin
 
+# Prerequisites:
+#   pip install requests beautifulsoup4
+
+
 # Create CSV file with headers
 def create_csv(filename):
     if not os.path.exists(filename):
@@ -304,8 +308,15 @@ def scrape_month(month, year, max_cases=None):
     # Create URL for the specified month and year
     url = f"https://elibrary.judiciary.gov.ph/thebookshelf/docmonth/{month}/{year}/1"
     
+    month_map = {
+        "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4,
+        "May": 5, "Jun": 6, "Jul": 7, "Aug": 8,
+        "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12
+    }
+    month_number = month_map.get(month, 0)
+
     # Create a specific CSV file for this month
-    csv_filename = f"scraped_{month}-{year}-dataset.csv"
+    csv_filename = f"{month_number}_scraped_{month}-{year}-dataset.csv"
     create_csv(csv_filename)
     
     print(f"\nScraping cases for {month} {year} from {url}")
