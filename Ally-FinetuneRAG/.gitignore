@@ -1,0 +1,4 @@
+venv
+myvenv
+.env
+service-account-key.json
