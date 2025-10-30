@@ -1,0 +1,7 @@
+Project: ALLY: Leveraging Digital Platforms to Enhance Access to Legal Aid (Philippines)
+Context: I will be finetuning Vertex AI for my project "ALLY" it will be a chatbot powered by AI. The AI will be added additional knowledge from a dataset.
+
+To do: Make JSON Dataset format for me to feed/finetune on Vertex, make sure to follow the format. (one liner only for each prompt) (follow proper spacing same as this)
+{"contents": [{"role": "user", "parts": [{"text":"What if my neighbor built over my property line?"}]}, {"role":"model","parts":[{"text":"If your neighbor builds over your property line without permission, you can file an ejectment case or quiet title action. First, demand removal and cite building permits. If ignored, file in Municipal Trial Court or Regional Trial Court depending on value and nature of claims. Include all necessary parties and supporting documents. Courts will determine property ownership and order restoration."}]}]}
+
+Note: QUESTIONS should be broad and not specified to a case, these will only just serve to be basis of the output (verdict, ruling, decision)

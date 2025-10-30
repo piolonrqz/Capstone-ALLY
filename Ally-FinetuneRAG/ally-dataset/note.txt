@@ -9,13 +9,16 @@ Dataset on Ver 3.0
 ---------------------------------------------------------
 
 Line 1-37 : Ver 1.0
-    Line 1-21 : January 2025
-    Line 22-37 : January 2024
+    Line 1-21     : January 2025
+    Line 22-37    : January 2024
 
 Line 38-481  : Ver 2.0
-    Line 38-156 : February 2025
-    Line 157-226 : April 2024
+    Line 38-156   : February 2025
+    Line 157-226  : April 2024
     Line 227-481  : May 2024
 
 Line 482-  : Version 3.0
-    Line 482-  :    
+    Line 482-487  : June 2024
+    Line 488-554  : July 2024
+    Line 555-687  : FAQ (as of 10/29/2025)
+    Line 688-     : 
