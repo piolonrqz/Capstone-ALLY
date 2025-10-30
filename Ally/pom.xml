@@ -53,6 +53,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId> <!-- Use the latest version if available -->
+			<version>1.18.42</version>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
     <groupId>org.springframework.boot</groupId>
@@ -111,12 +113,13 @@
 			<scope>runtime</scope>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>com.google.firebase</groupId>
 			<artifactId>firebase-admin</artifactId>
 			<version>9.2.0</version>
 		</dependency>
-
+-->
 		<!-- WEKA Dependencies -->
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
