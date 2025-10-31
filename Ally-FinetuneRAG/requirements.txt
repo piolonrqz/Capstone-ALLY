@@ -7,3 +7,6 @@ sentence-transformers
 torch
 google-generativeai
 google-cloud-aiplatform
+fastapi
+uvicorn
+pydantic
