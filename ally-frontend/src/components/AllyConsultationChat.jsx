@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle } from 'lucide-react';
-import { sendConsultationMessage } from '../services/allyConsultationService';
-import Footer from './Footer';
+import { Send, MessageCircle, Search } from 'lucide-react';
+import { sendConsultationMessage, checkRagHealth } from '../services/allyConsultationService';
 
 const AllyConsultationChat = () => {
   const [messages, setMessages] = useState([
@@ -15,6 +14,8 @@ const AllyConsultationChat = () => {
   const messageIdCounter = useRef(2);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [useRAG, setUseRAG] = useState(false); // NEW: RAG toggle state
+  const [ragAvailable, setRagAvailable] = useState(true); // NEW: RAG service status
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -25,17 +26,31 @@ const AllyConsultationChat = () => {
     scrollToBottom();
   }, [messages]);
 
+  // NEW: Check RAG service health on mount
+  useEffect(() => {
+    const checkRAG = async () => {
+      const isHealthy = await checkRagHealth();
+      setRagAvailable(isHealthy);
+    };
+    checkRAG();
+  }, []);
+
   const getAIResponse = async (userMessage) => {
     setIsTyping(true);
     
     try {
-      const response = await sendConsultationMessage(userMessage);
+      const data = await sendConsultationMessage(userMessage, useRAG);
       
+      // data is now always an object with { response, relevantCases, etc. }
       const aiMessage = {
         id: `msg-${Date.now()}-${messageIdCounter.current++}`,
-        text: response,
+        text: data.response,  // Changed from response.response to data.response
         sender: 'ai',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        relevantCases: data.relevantCases,
+        caseCount: data.caseCount,
+        confidence: data.confidence,
+        ragEnabled: data.ragEnabled
       };
       
       setMessages(prev => [...prev, aiMessage]);
@@ -66,7 +81,6 @@ const AllyConsultationChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     
-    // Simulate AI response
     getAIResponse(inputMessage);
   };
 
@@ -92,7 +106,7 @@ const AllyConsultationChat = () => {
       ]);
       messageIdCounter.current = 2;
     } catch (error) {
-      // Optionally show error to user
+      console.error('Error resetting chat:', error);
     }
   };
 
@@ -110,7 +124,10 @@ const AllyConsultationChat = () => {
               <p className="text-sm text-gray-500">AI Legal Assistant</p>
             </div>
           </div>
-          <button className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" onClick={handleNewChat}>
+          <button 
+            className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" 
+            onClick={handleNewChat}
+          >
             <MessageCircle className="w-4 h-4" />
             <span className="text-sm">New Chat</span>
           </button>
@@ -120,19 +137,76 @@ const AllyConsultationChat = () => {
       {/* Chat Messages */}
       <div className="p-4 space-y-4 overflow-y-auto h-96 bg-gray-50">
         {messages.map((message) => (
-          <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-              message.sender === 'user' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-white text-gray-800 border border-gray-200'
-            }`}>
-              <p className="text-sm">{message.text}</p>
-              <p className={`text-xs mt-1 ${
-                message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+          <div key={message.id}>
+            {/* Main Message */}
+            <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                message.sender === 'user' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-white text-gray-800 border border-gray-200'
               }`}>
-                {message.timestamp}
-              </p>
+                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                <p className={`text-xs mt-1 ${
+                  message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                }`}>
+                  {message.timestamp}
+                </p>
+              </div>
             </div>
+
+            {/* Display Relevant Cases if RAG was used */}
+            {message.sender === 'ai' && message.ragEnabled && (
+              <div className="mt-2 ml-2">
+                {message.relevantCases && message.relevantCases.length > 0 ? (
+                  // Show cases if found above threshold
+                  <div className="max-w-md p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xs font-semibold text-yellow-800 flex items-center gap-1">
+                        <Search className="w-3 h-3" />
+                        Found {message.caseCount} Relevant Case{message.caseCount > 1 ? 's' : ''}
+                      </h4>
+                      {message.confidence && message.confidence !== 'Low relevance' && (
+                        <span className="text-xs text-yellow-700 font-medium">
+                          ✓ {message.confidence}
+                        </span>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {message.relevantCases.map((legalCase, idx) => (
+                        <div key={idx} className="p-2 bg-white rounded border border-yellow-100">
+                          <p className="text-xs font-semibold text-gray-800">
+                            {idx + 1}. {legalCase.title}
+                          </p>
+                          <p className="text-xs text-gray-600 mt-0.5">
+                            Relevance: {legalCase.score?.toFixed(1)}%
+                          </p>
+                          {legalCase.citation && (
+                            <p className="text-xs text-gray-500 mt-0.5 italic">
+                              {legalCase.citation}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : message.confidence === 'Low relevance' || message.caseCount === 0 ? (
+                  // Show "no relevant cases" message
+                  <div className="max-w-md p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Search className="w-4 h-4 text-red-600" />
+                      <h4 className="text-xs font-semibold text-red-800">
+                        No Highly Relevant Cases Found
+                      </h4>
+                    </div>
+                    <p className="text-xs text-red-700 leading-relaxed">
+                      The search didn't find cases with high relevance (≥54%) to your question. 
+                      <br />
+                      <strong>Try:</strong> Providing more specific details, using legal terms, or specifying the area of law.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
         ))}
         
@@ -153,6 +227,28 @@ const AllyConsultationChat = () => {
 
       {/* Input Area */}
       <div className="p-4 bg-white border-t border-gray-200">
+        {/* NEW: RAG Toggle Button */}
+        <div className="mb-2 flex items-center justify-between">
+          <button
+            onClick={() => setUseRAG(!useRAG)}
+            disabled={!ragAvailable}
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg transition-all ${
+              useRAG 
+                ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            title={!ragAvailable ? 'RAG service unavailable' : 'Toggle case search'}
+          >
+            <Search className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              {useRAG ? '🔍 Case Search: ON' : 'Search for Relevant Case'}
+            </span>
+          </button>
+          {!ragAvailable && (
+            <span className="text-xs text-red-500">⚠️ Search unavailable</span>
+          )}
+        </div>
+
         <div className="flex items-center space-x-2">
           <div className="relative flex-1">
             <textarea
@@ -186,7 +282,6 @@ const AllyConsultationChat = () => {
         </div>
       </div>
     </div>
-    
   );
 };
 
