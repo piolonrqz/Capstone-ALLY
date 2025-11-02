@@ -23,7 +23,8 @@ class VectorDatabaseIndexer:
     def __init__(
         self, 
         collection_name: str = "ph_supreme_court_cases",
-        embedding_model: str = "BAAI/bge-large-en-v1.5",  # Best free legal model
+        embedding_model: str = "BAAI/bge-large-en-v1.5",  # Higher memory usage model
+        # embedding_model: str = "BAAI/bge-small-en",     # Less memory usage model
         qdrant_path: str = "./vector-db"
     ):
         self.collection_name = collection_name
