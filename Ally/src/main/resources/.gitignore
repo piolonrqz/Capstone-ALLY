@@ -3,3 +3,4 @@ ally.db
 application.properties
 ally-firebasesdk.json
 service-account-key.json
+ally-firebase-service-account.json
