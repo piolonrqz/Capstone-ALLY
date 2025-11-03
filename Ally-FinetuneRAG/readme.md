@@ -75,15 +75,22 @@ python scripts/2_index_vectordb.py
 ```
 Creates the Qdrant vector database in `vector-db/` using sentence-transformers embeddings.
 
+#### 3. Ingest processed data into vector database
+```bash
+python scripts/3_ingest_data.py
+```
+Uploads or syncs additional processed documents into the Qdrant vector store without rebuilding it entirely.
+Useful for incremental updates (e.g., adding new court cases, laws, or datasets).
+
 ### Testing & Development
 
-#### 3. Test query system (Interactive Mode)
+#### 4. Test query system (Interactive Mode)
 ```bash
-python scripts/3_query_system.py
+python scripts/4_query_system.py
 ```
 Opens an interactive terminal to test queries against the RAG system.
 
-#### 4. Test Gemini integration
+#### 5. Test Gemini integration
 ```bash
 python geminitest.py
 ```
@@ -121,7 +128,7 @@ The Spring Boot `ALLYService` makes HTTP requests to `http://localhost:8001/api/
 ## Troubleshooting
 
 ### Vector DB errors
-- Confirm `vector-db/` folder exists (run script 2)
+- Confirm `vector-db/` folder exists (run script 2 or 3)
 - Check Qdrant database is not corrupted
 
 ### Model connection errors
@@ -130,7 +137,7 @@ The Spring Boot `ALLYService` makes HTTP requests to `http://localhost:8001/api/
 - Ensure `service-account-key.json` exists and is valid
 
 ### Slow indexing
-- Batch size can be adjusted in `2_index_vectordb.py`
+- Batch size can be adjusted in `2_index_vectordb.py` `3_ingest_data.py`
 - Embedding model is cached after first run
 
 ### Memory issues
