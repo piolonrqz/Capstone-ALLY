@@ -70,7 +70,7 @@ print(f"   ✅ Loaded {len(chunks)} chunks")
 
 # Generate embeddings and upload
 print(f"\n⬆️  Uploading vectors to Pinecone...")
-print("   This may take 5-10 minutes...")
+print("   This may take 10-30 minutes...")
 
 batch_size = 100
 vectors_to_upsert = []
