@@ -302,4 +302,4 @@ if __name__ == "__main__":
     processor.save_chunks(chunks)
     
     print("\n✅ Data processing complete!")
-    print("Next: Run scripts/2_index_pinecone.py")
+    print("Next: Run scripts/2_index_vectordb.py")
