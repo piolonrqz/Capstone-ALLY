@@ -1,4 +1,4 @@
-qdrant-client
+# qdrant-client : for LOCAL vector database
 pandas
 dotenv
 tqdm
@@ -10,3 +10,4 @@ google-cloud-aiplatform
 fastapi
 uvicorn
 pydantic
+pinecone
