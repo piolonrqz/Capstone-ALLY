@@ -83,7 +83,7 @@ Ally-FinetuneRAG/
 
 ## Usage
 
-### Production Setup (Pinecone Cloud) - ONE-TIME SETUP
+### Production Setup (Pinecone Cloud) - ONE-TIME SETUP (or if new case data are added)
 
 #### 1. Process CSV data
 ```bash
@@ -95,28 +95,15 @@ Processes cases from `ally-dataset/csv-dataset/` into chunks stored in `processe
 - `processed-for-rag/chunks.jsonl` - All case chunks with embeddings metadata
 - `processed-for-rag/processing_metadata.json` - Processing statistics
 
-#### 2. Create Pinecone Index (Manual Step)
-
-Before running the indexing script, create a Pinecone index:
-
-1. Go to [Pinecone Console](https://app.pinecone.io)
-2. Click "Create Index"
-3. Configure:
-   - **Name**: `ally-supreme-court-cases`
-   - **Dimensions**: `1024` (for BAAI/bge-large-en-v1.5)
-   - **Metric**: `cosine`
-   - **Region**: `us-east-1` (or closest to you)
-4. Click "Create Index"
-
-#### 3. Upload vectors to Pinecone
+#### 2. Upload vectors to Pinecone
 ```bash
 python scripts/2_index_pinecone.py
 ```
 Uploads all processed chunks as vectors to Pinecone cloud. **This only needs to be run ONCE** (or when adding new data).
 
-**This will take 5-10 minutes** depending on dataset size.
+**This will take 10-30 minutes** depending on dataset size.
 
-#### 4. Test query system (Interactive Mode)
+#### 3. Test query system (Interactive Mode)
 ```bash
 python scripts/3_query_system.py
 ```
@@ -139,7 +126,7 @@ Tests connection to Vertex AI fine-tuned model.
 
 #### Run FastAPI server
 ```bash
-uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 The main Spring Boot application will communicate with this API endpoint.
@@ -161,7 +148,7 @@ The main Spring Boot application will communicate with this API endpoint.
 
 **Example curl request:**
 ```bash
-curl -X POST http://localhost:8001/api/query \
+curl -X POST http://localhost:8000/api/query \
   -H "Content-Type: application/json" \
   -d '{"question":"How do I report an Illegal Recruitment?"}'
 ```
@@ -174,12 +161,12 @@ React Frontend (Vite)
        ↓
 Spring Boot (Port 8080)
        ↓
-Ally-FinetuneRAG FastAPI (Port 8001)
+Ally-FinetuneRAG FastAPI (Port 8000)
        ↓
 Pinecone Cloud Vector DB + Vertex AI Model
 ```
 
-The Spring Boot `ALLYService` makes HTTP requests to `http://localhost:8001/api/query`.
+The Spring Boot `ALLYService` makes HTTP requests to `http://localhost:8000/api/query`.
 
 ---
 
