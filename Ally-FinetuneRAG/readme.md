@@ -5,6 +5,7 @@ RAG (Retrieval-Augmented Generation) feature for the ALLY Legal Assistant chatbo
 ## Prerequisites
 - Python 3.11+
 - pip
+- at least 2GB RAM
 
 ## Installation
 
@@ -47,8 +48,8 @@ Ally-FinetuneRAG/
 ├── scripts/
 │   ├── 1_process_csv.py       # Process CSV data into chunks
 │   ├── 2_index_vectordb.py    # Build Qdrant vector database
-│   ├── 3_query_system.py      # Interactive query system
-│   └── 4_ingest_data.py       # Ingest data into vector DB
+│   └── 3_ingest_data.py       # Ingest data into vector DB
+│   ├── 4_query_system.py      # Interactive query system
 ├── vector-db/                 # Qdrant SQLite database
 │   └── collection/
 │       └── ph_supreme_court_cases/
