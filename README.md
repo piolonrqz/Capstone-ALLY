@@ -5,20 +5,17 @@
 
 ALLY is a digital platform designed to streamline and secure the process of finding legal assistance and managing initial legal interactions. It connects clients with legal professionals, facilitates preliminary consultations, and organizes virtual legal processes, aiming to make legal services more accessible, efficient, and secure.
 
-Built with a modern technology stack, ALLY leverages **Spring Boot** for a robust backend and **Kotlin** for native Android mobile support, providing a seamless experience for users on the go.
-
 ---
 
 ## ✨ Features
 
 ALLY offers a suite of features designed to improve the legal engagement process:
 
+* **🤖 AI-Powered Legal Assistant (RAG):** An advanced chatbot that answers legal questions by retrieving relevant information from cases of Philippine Supreme Court. Uses fine-tuned Gemini models, Pinecone cloud vector database, and semantic search to provide accurate, citation-backed legal information in real-time.
 * **🧠 Client-Lawyer Matching:** An intelligent system that uses AI to connect clients with the most suitable lawyers based on specialization, location, and availability. Lawyers benefit from a dedicated dashboard to manage their profiles and appointments.
 * **🗂 Virtual Legal Process Organization:** Provides a secure, centralized repository for document uploads and management, significantly reducing reliance on physical paperwork and improving accessibility.
-* **🤖 AI-Powered Legal Assistant (RAG):** An advanced chatbot that answers legal questions by retrieving relevant information from a database of Philippine Supreme Court cases. Uses fine-tuned Gemini models and vector search to provide accurate, citation-backed legal information in real-time.
 * **💬 On-the-Spot Online Consultations:** A temporary, real-time chat system for clients to ask quick legal queries and receive immediate preliminary advice. Designed with privacy in mind, messages are not stored long-term.
 * **📈 Case Tracking and Updates:** Keeps clients informed with automated email notifications on case progress. A unique case tracking ID allows clients to independently check their case status on the platform.
-* **📚 Educational Resources:** Offers a wealth of legal guides, FAQs, and document templates accessible offline, empowering clients with basic legal knowledge.
 * **🔐 Security and Privacy:** Ensures the highest level of security with end-to-end encryption for all communications and data. Multi-factor authentication adds an extra layer of protection for user accounts.
 
 ---
@@ -46,10 +43,17 @@ cd Ally-FinetuneRAG
 ```
 
 **Create and activate Python virtual environment:**
+
+**Windows (PowerShell):**
 ```bash
 python -m venv venv
-
 .\venv\Scripts\Activate.ps1
+```
+
+**Linux:**
+```bash
+python -m venv venv
+source venv/bin/activate
 ```
 
 **Install Python dependencies:**
@@ -57,27 +61,44 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-**Configure environment variables** - Create `.env` file:
+**Configure environment variables** - Create `.env` file in `Ally-FinetuneRAG/`:
 ```env
-GOOGLE_PROJECT_ID=your-project-id
-GOOGLE_ENDPOINT_ID=your-endpoint-id
+# Vertex AI Fine-tuned Model Configuration
+GOOGLE_PROJECT_ID=your-project-id-here
+GOOGLE_ENDPOINT_ID=your-endpoint-id-here
 GOOGLE_REGION=us-central1
+
+# Only needed if you want to run/test "3_query_system.py"
+# Place your Google Cloud service account key as `service-account-key.json` in the `Ally-FinetuneRAG/` folder
 GOOGLE_APPLICATION_CREDENTIALS=./service-account-key.json
+
+# Pinecone Cloud Vector Database (PRODUCTION)
+PINECONE_API_KEY=your-pinecone-api-key-here
+PINECONE_ENVIRONMENT=us-east-1
+PINECONE_INDEX_NAME=ally-supreme-court-cases
+
+# Qdrant Local Vector Database (LOCAL TESTING ONLY - Optional)
 QDRANT_PATH=./vector-db
 ```
 
-**Place your Google Cloud service account key** as `service-account-key.json`
-
-**Run one-time setup to build vector database:**
+**Run one-time setup to process data and upload to Pinecone:**
 ```bash
 python scripts/1_process_csv.py
-python scripts/2_index_vectordb.py
+python scripts/2_index_pinecone.py
+```
+⚠️ **Note:** Step 2 (uploading to Pinecone) takes 10-30 minutes and only needs to be run once (or when adding new data).
+
+**Test the RAG system (Optional):**
+```bash
+python scripts/3_query_system.py
 ```
 
 **Start the ALLY FastAPI server:**
 ```bash
-uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+The RAG API will be available at `http://localhost:8000`
 
 ### 4. Frontend Setup (Vite + React):
 
@@ -101,15 +122,48 @@ npm run dev
 
 ---
 
+## 🏗️ Architecture
+
+```
+React Frontend (Vite - Port 5173)
+       ↓
+Spring Boot Backend (Port 8080)
+       ↓
+Ally-FinetuneRAG FastAPI (Port 8000)
+       ↓
+Pinecone Cloud Vector DB + Vertex AI Fine-tuned Model
+```
+
+The main Spring Boot backend communicates with the FastAPI RAG service for AI-powered legal assistance.
+
+---
+
 ## 🛠️ Tech Stack
 
-* **Backend**: Spring Boot
+* **Backend**: Spring Boot (Java)
 * **Frontend**: ReactJS (Vite)
-* **RAG**: Python (FastAPI)
-* **Database**: MySQL (backend), SQLite (RAG)
-* **AI Model**: Google Gemini Flash 2.0 - Lite (Finetuned - VertexAI)
-* **ML Embeddings**: [BAAI/bge-large-en-v1.5](https://huggingface.co/BAAI/bge-large-en-v1.5) and [sentence-transformers](https://huggingface.co/sentence-transformers)
+* **RAG Service**: Python (FastAPI)
+* **Database**: 
+  * MySQL (backend application data)
+  * Pinecone (cloud vector database for RAG)
+  * Qdrant (optional - local vector database for testing)
+* **AI Model**: Google Gemini Flash 2.0 - Lite (Fine-tuned via Vertex AI)
+* **ML Embeddings**: [BAAI/bge-large-en-v1.5](https://huggingface.co/BAAI/bge-large-en-v1.5)
+* **Vector Search**: Pinecone Cloud (Production), Qdrant (Local Testing - Optional)
 
+---
+
+## 📚 RAG System Details
+
+The ALLY Legal Assistant uses Retrieval-Augmented Generation (RAG) to provide accurate legal information:
+
+1. **Data Processing**: Philippine Supreme Court cases are processed from CSV files into semantic chunks
+2. **Embedding Generation**: Each chunk is converted to a 1024-dimensional vector using BAAI/bge-large-en-v1.5
+3. **Vector Storage**: Embeddings are stored in Pinecone cloud vector database for fast similarity search
+4. **Query Processing**: User questions are embedded and matched against stored case vectors
+5. **Response Generation**: Relevant cases are retrieved and passed to a fine-tuned Gemini model for natural language response
+
+For detailed RAG setup instructions, see [`Ally-FinetuneRAG/readme.md`](./Ally-FinetuneRAG/readme.md)
 
 ---
 
@@ -125,15 +179,16 @@ npm run dev
 
 ---
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - Philippine Supreme Court for case data: [elibrary](https://elibrary.judiciary.gov.ph/thebookshelf/)
 - Google Vertex AI for model infrastructure
+- Pinecone for cloud vector database services
 - [BAAI/bge-large-en-v1.5](https://huggingface.co/BAAI/bge-large-en-v1.5) and [sentence-transformers](https://huggingface.co/sentence-transformers) for embeddings 
 
 ---
 
-## Citation
+## 📖 Citation
 
 ```bibtex
 @misc{bge_embedding,
@@ -151,8 +206,11 @@ npm run dev
 
 This project is currently intended for educational and prototyping purposes. The specific licensing terms will be determined based on institutional and legal review upon potential further development or deployment.
 
+---
 
-⚠️Disclaimer: **This is legal information, not legal advice.** ALLY provides general information about Philippine law based on Supreme Court cases. For specific legal situations, consult a licensed Philippine lawyer.
+## ⚠️ Disclaimer
+
+**This is legal information, not legal advice.** ALLY provides general information about Philippine law based on Supreme Court cases. For specific legal situations, consult a licensed Philippine lawyer.
 
 ---
 
