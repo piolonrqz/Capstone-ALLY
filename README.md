@@ -1,7 +1,12 @@
-# ALLY – Digital Legal Engagement Platform
+# ALLY – Digital Legal Engagement Platform  
+
 
 ![Project Status](https://img.shields.io/badge/Status-Prototype-blue)
-![License](https://img.shields.io/badge/License-Educational%20Use-orange)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104-teal.svg)](https://fastapi.tiangolo.com/)
 
 ALLY is a digital platform designed to streamline and secure the process of finding legal assistance and managing initial legal interactions. It connects clients with legal professionals, facilitates preliminary consultations, and organizes virtual legal processes, aiming to make legal services more accessible, efficient, and secure.
 
@@ -204,7 +209,10 @@ For detailed RAG setup instructions, see [`Ally-FinetuneRAG/readme.md`](./Ally-F
 
 ## ⚖️ License
 
-This project is currently intended for educational and prototyping purposes. The specific licensing terms will be determined based on institutional and legal review upon potential further development or deployment.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Copyright (c) 2025 Team 23 - ALLY Development Team**  
+All contributors retain equal rights to this codebase.
 
 ---
 
