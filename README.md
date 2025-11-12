@@ -204,7 +204,10 @@ For detailed RAG setup instructions, see [`Ally-FinetuneRAG/readme.md`](./Ally-F
 
 ## ⚖️ License
 
-This project is currently intended for educational and prototyping purposes. The specific licensing terms will be determined based on institutional and legal review upon potential further development or deployment.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Copyright (c) 2025 Team 23 - ALLY Development Team**  
+All contributors retain equal rights to this codebase.
 
 ---
 
