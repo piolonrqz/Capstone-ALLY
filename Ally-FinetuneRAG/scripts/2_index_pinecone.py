@@ -70,9 +70,9 @@ print(f"   ✅ Loaded {len(chunks)} chunks")
 
 # Generate embeddings and upload
 print(f"\n⬆️  Uploading vectors to Pinecone...")
-print("   This may take 10-30 minutes...")
+print("   This may take 30 minutes to hours depending on batch size and data size...")
 
-batch_size = 100
+batch_size = 500
 vectors_to_upsert = []
 
 for idx, chunk in enumerate(tqdm(chunks, desc="Processing")):
