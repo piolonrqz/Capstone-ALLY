@@ -1,7 +1,12 @@
-# ALLY – Digital Legal Engagement Platform
+# ALLY – Digital Legal Engagement Platform  
+
 
 ![Project Status](https://img.shields.io/badge/Status-Prototype-blue)
-![License](https://img.shields.io/badge/License-Educational%20Use-orange)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-18.2-blue.svg)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104-teal.svg)](https://fastapi.tiangolo.com/)
 
 ALLY is a digital platform designed to streamline and secure the process of finding legal assistance and managing initial legal interactions. It connects clients with legal professionals, facilitates preliminary consultations, and organizes virtual legal processes, aiming to make legal services more accessible, efficient, and secure.
 
