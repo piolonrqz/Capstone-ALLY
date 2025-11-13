@@ -101,7 +101,7 @@ python scripts/2_index_pinecone.py
 ```
 Uploads all processed chunks as vectors to Pinecone cloud. **This only needs to be run ONCE** (or when adding new data).
 
-**This will take 10-30 minutes** depending on dataset size.
+**This will take around 30 minutes to hours** depending on dataset size.
 
 #### 3. Test query system (Interactive Mode)
 ```bash
@@ -223,8 +223,8 @@ Interactive mode using local Qdrant database instead of Pinecone.
 - Test with `python geminitest.py`
 
 ### Slow indexing
-- Pinecone upload takes 5-10 minutes for full dataset
-- Batch size can be adjusted in `2_index_pinecone.py` (default: 100)
+- Pinecone upload takes 30 minutes to hours (depending on size) for full dataset
+- Batch size can be adjusted in `2_index_pinecone.py` (default: 500)
 - Embedding model is cached after first run
 
 ### Memory issues

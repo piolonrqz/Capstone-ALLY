@@ -91,7 +91,7 @@ QDRANT_PATH=./vector-db
 python scripts/1_process_csv.py
 python scripts/2_index_pinecone.py
 ```
-⚠️ **Note:** Step 2 (uploading to Pinecone) takes 10-30 minutes and only needs to be run once (or when adding new data).
+⚠️ **Note:** Step 2 (uploading to Pinecone) takes around 30 minutes to hours (depending on size) and only needs to be run once (or when adding new data).
 
 **Test the RAG system (Optional):**
 ```bash
