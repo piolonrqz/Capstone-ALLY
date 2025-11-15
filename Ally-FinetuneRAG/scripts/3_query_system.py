@@ -1,9 +1,9 @@
 """
 ALLY - Complete RAG Query System with Vertex AI Fine-tuned Model
-File: scripts/3_query_system.py
+File: scripts/4_loc_query_system.py (Pinecone Version)
 
 Usage:
-    python scripts/3_query_system.py
+    python scripts/4_loc_query_system.py
 """
 
 import os
@@ -12,8 +12,8 @@ from dataclasses import dataclass
 import json
 from dotenv import load_dotenv
 
-# Vector database
-from qdrant_client import QdrantClient
+# Vector database - PINECONE
+from pinecone import Pinecone
 
 # FREE Embeddings
 from sentence_transformers import SentenceTransformer
@@ -51,17 +51,24 @@ class ALLYAssistant:
     
     def __init__(
         self,
-        qdrant_path: str = "./vector-db",
-        collection_name: str = "ph_supreme_court_cases",
+        index_name: str = None,
         embedding_model: str = "BAAI/bge-large-en-v1.5",
         use_finetuned: bool = False
     ):
         print("🚀 Initializing ALLY Legal Assistant...")
         
-        # Load vector database
-        print("   📦 Loading vector database...")
-        self.qdrant_client = QdrantClient(path=qdrant_path)
-        self.collection_name = collection_name
+        # Load Pinecone vector database
+        print("   📦 Connecting to Pinecone...")
+        api_key = os.getenv('PINECONE_API_KEY')
+        if index_name is None:
+            index_name = os.getenv('PINECONE_INDEX_NAME', 'ally-supreme-court-cases')
+        
+        if not api_key:
+            raise ValueError("PINECONE_API_KEY not found in .env file")
+        
+        pc = Pinecone(api_key=api_key)
+        self.pinecone_index = pc.Index(index_name)
+        print(f"   ✅ Connected to Pinecone index: {index_name}")
         
         # Load FREE embedding model
         print(f"   🤖 Loading embedding model (cached)...")
@@ -114,7 +121,7 @@ class ALLYAssistant:
         limit: int = 5,
         score_threshold: float = 0.7
     ) -> List[SearchResult]:
-        """Retrieve relevant cases from vector database"""
+        """Retrieve relevant cases from Pinecone vector database"""
         
         # Generate query embedding (FREE!)
         query_vector = self.embedding_model.encode(
@@ -122,25 +129,27 @@ class ALLYAssistant:
             normalize_embeddings=True
         )[0].tolist()
         
-        # Search vector database
-        results = self.qdrant_client.search(
-            collection_name=self.collection_name,
-            query_vector=query_vector,
-            limit=limit,
-            score_threshold=score_threshold
+        # Search Pinecone
+        results = self.pinecone_index.query(
+            vector=query_vector,
+            top_k=limit,
+            include_metadata=True
         )
         
-        # Convert to SearchResult objects
+        # Convert Pinecone results to SearchResult objects
         search_results = []
-        for result in results:
-            search_results.append(SearchResult(
-                case_number=result.payload['case_number'],
-                case_title=result.payload['case_title'],
-                chunk_type=result.payload['chunk_type'],
-                text=result.payload['text'],
-                score=result.score,
-                category=result.payload['metadata']['category']
-            ))
+        for match in results['matches']:
+            # Filter by score threshold
+            if match['score'] >= score_threshold:
+                metadata = match['metadata']
+                search_results.append(SearchResult(
+                    case_number=metadata.get('case_number', ''),
+                    case_title=metadata.get('case_title', 'Unknown Case'),
+                    chunk_type=metadata.get('chunk_type', ''),
+                    text=metadata.get('text', ''),
+                    score=match['score'],
+                    category=metadata.get('category', '')
+                ))
         
         return search_results
     
@@ -296,7 +305,8 @@ ANSWER:"""
         print("""
 ╔═══════════════════════════════════════════════════════════╗
 ║                    ALLY Legal Assistant                   ║
-║          Anonymous Legal Liaison for You (v1.0)           ║
+║          Anonymous Legal Liaison for You (v2.0)           ║
+║                   Vector DB: Pinecone (Cloud)             ║
 ╠═══════════════════════════════════════════════════════════╣
 ║  Ask me about Philippine Supreme Court cases and law      ║
 ║  Type 'quit' or 'exit' to stop                            ║
@@ -328,15 +338,14 @@ ANSWER:"""
 
 # ===== EXAMPLE USAGE =====
 if __name__ == "__main__":
-    # Option 1: Use fine-tuned Vertex AI model
+    # Option 1: Use fine-tuned Vertex AI model (RECOMMENDED)
     ally = ALLYAssistant(
-        qdrant_path="./vector-db",
+        index_name="ally-supreme-court-cases",  # Optional, defaults to env var
         use_finetuned=True  # Set to True to use your fine-tuned model
     )
     
     # Option 2: Use base Gemini (for testing/comparison)
     # ally = ALLYAssistant(
-    #     qdrant_path="./vector-db",
     #     use_finetuned=False
     # )
     
