@@ -62,4 +62,7 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Intege
             @Param("now") LocalDateTime now,
             @Param("futureDate") LocalDateTime futureDate
     );
+
+    // Find all schedules within a given time range
+    List<ScheduleEntity> findByBookingStartTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
 }

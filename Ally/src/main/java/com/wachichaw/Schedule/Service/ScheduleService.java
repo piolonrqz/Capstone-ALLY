@@ -2,7 +2,6 @@ package com.wachichaw.Schedule.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +34,8 @@ public class ScheduleService {
     private LawyerRepo lawyerRepo;
     @Autowired
     private LegalCaseRepo legalCaseRepo;
+    @Autowired
+    private ReminderService reminderService;
 
     public ScheduleService(ScheduleRepository scheduleRepository) {
         this.scheduleRepository = scheduleRepository;
@@ -315,6 +316,8 @@ public class ScheduleService {
         
         schedule.setStatus(AppointmentStatus.ACCEPTED);
         schedule.setDeclineReason(null); // Clear any previous decline reason
+        
+        reminderService.sendAppointmentReminders(schedule);
         
         return scheduleRepository.save(schedule);
     }
