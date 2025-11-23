@@ -5,7 +5,6 @@ tqdm
 python-dotenv
 sentence-transformers
 torch
-google-generativeai
 google-cloud-aiplatform
 fastapi
 uvicorn
