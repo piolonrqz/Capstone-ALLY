@@ -554,4 +554,6 @@ if __name__ == "__main__":
     print("ALLY Legal Assistant API")
     print("Version: 7.0.0 (Gemini Classification)")
     print("="*60 + "\n")
-    uvicorn.run(app, host="0.0.0.0")
+    
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
