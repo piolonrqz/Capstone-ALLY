@@ -19,27 +19,17 @@ import { AppointmentsPage } from './pages/AppointmentsPage'
 import DocumentsPage from './pages/DocumentsPage'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
-import NavigationBar from './components/NavigationBar'
 import MyCasesPage from './pages/MyCasesPage'
-import { shouldShowNavigation } from './utils/navigation.js'
 import LawyerSettings from './components/LawyerSettings'
 import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler'
 import AllyConsultationChat from './components/AllyConsultationChat'
 import ClientSecurity from './components/ClientSecurity'
 
-// Custom hook to determine if navigation bar should be visible
-const useNavigationVisibility = () => {
-  const location = useLocation();
-  return shouldShowNavigation(location.pathname);
-};
-
 function AppContent() {
-  const showNavigation = useNavigationVisibility();
   
   return (
     <>
-      <NavigationBar />
-      <div className={showNavigation ? "pt-[104px]" : ""}>
+      <div>
         <Routes>
 
         <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />

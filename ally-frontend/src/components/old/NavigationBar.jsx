@@ -130,12 +130,33 @@ const NavigationBar = () => {
             <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
           </div>
           
-          {/* Right Side */}
+          {/* Navigation Links */}
           <div className="flex items-center">
             {isLoggedIn ? (
               <>
+                <div className="flex items-center gap-8">
+                  <Link
+                    to="/my-cases"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    My Cases
+                  </Link>
+                  <Link
+                    to="/appointments"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Appointment
+                  </Link>
+                  <Link
+                    to="/documents"
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Documents
+                  </Link>
+                </div>
+
                 {/* Right Side Icons and Profile */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 ml-8 border-l pl-8">
                   {/* Message and Notification Icons */}
                   <div className="relative" ref={notificationRef}>
                     <button
@@ -150,35 +171,27 @@ const NavigationBar = () => {
                       currentUser={userDetails}
                     />
                   </div>
-
-                  <button
-                    onClick={() => navigate('/chat')}
-                    className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-50 transition-all duration-200"
-                  >
-                    <MessageCircle className="w-5 h-5 text-[#2B62C4]" strokeWidth={1.8} />
-                  </button>
+                  
+                  {/* User Type Badge */}
+                  <UserTypeBadge />
                   
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={toggleDropdown}
-                      className="flex items-center gap-2 hover:bg-gray-50 rounded-full px-3 py-2 transition-all duration-200"
+                      className="flex items-center gap-2 hover:bg-gray-50 rounded-full p-2 transition-all duration-200"
                     >
                       {userDetails?.profilePhotoUrl ? (
                         <img
                           src={userDetails.profilePhotoUrl}
                           alt="Profile"
-                          className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
+                          className="w-8 h-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold border-2 border-blue-100">
+                        <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold">
                           {getUserInitials()}
                         </div>
                       )}
-                      <span className="text-sm font-medium text-gray-800">
-                        {userDetails?.firstName && userDetails?.lastName 
-                          ? `${userDetails.firstName}, ${userDetails.lastName}`
-                          : 'User'}
-                      </span>
+                      <ChevronDown className={`w-4 h-4 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
                   
                     {/* Dropdown Menu */}
@@ -210,20 +223,42 @@ const NavigationBar = () => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => navigate('/login')}
-                  className="px-5 py-2 text-sm font-medium text-[#2563EB] hover:text-blue-700 transition-colors"
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="px-5 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Get Started
-                </button>
-              </div>
+              <>
+                <div className="flex items-center gap-8">
+                  <Link 
+                    to="#" 
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    About
+                  </Link>
+                  <Link 
+                    to="#" 
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    Legal Resources
+                  </Link>
+                  <Link 
+                    to="#" 
+                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
+                  >
+                    FAQ
+                  </Link>
+                </div>
+                <div className="flex items-center gap-4 ml-8 border-l pl-8">
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="px-4 py-2 text-sm font-medium text-[#1A6EFF] hover:text-blue-700 transition-colors"
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    onClick={() => navigate('/signup')}
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#1A6EFF] rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Get Started
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -233,3 +268,4 @@ const NavigationBar = () => {
 };
 
 export default NavigationBar;
+
