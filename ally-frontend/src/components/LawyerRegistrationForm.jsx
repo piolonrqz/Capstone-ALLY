@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from './Logo';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from '../firebase/config';
 import { Eye, EyeOff } from 'lucide-react';
+import { toast, Toaster } from 'sonner';
 
 export default function LawyerRegistrationForm() {
   const [step, setStep] = useState(1); // Start with step 1 for proper form flow
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const oemail = localStorage.getItem("email");
   const fname = localStorage.getItem("fName");
   const lname = localStorage.getItem("lName");
@@ -45,6 +46,8 @@ export default function LawyerRegistrationForm() {
     credentials: null,
     agreeToTerms: false
   });
+  const [selectedPracticeAreas, setSelectedPracticeAreas] = useState([]);
+  const [practiceAreaInput, setPracticeAreaInput] = useState("");
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -73,6 +76,67 @@ export default function LawyerRegistrationForm() {
         ...errors,
         [name]: ""
       });
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    let value = e.target.value;
+    // Remove all non-numeric characters
+    const numbersOnly = value.replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limitedNumbers = numbersOnly.slice(0, 10);
+    
+    // Format with spaces for display: 917 123 4567
+    let formatted = limitedNumbers;
+    if (limitedNumbers.length > 3) {
+      formatted = limitedNumbers.slice(0, 3) + ' ' + limitedNumbers.slice(3);
+    }
+    if (limitedNumbers.length > 6) {
+      formatted = limitedNumbers.slice(0, 3) + ' ' + limitedNumbers.slice(3, 6) + ' ' + limitedNumbers.slice(6);
+    }
+    
+    setFormData({
+      ...formData,
+      phoneNumber: formatted
+    });
+    
+    // Clear error if exists
+    if (errors.phoneNumber) {
+      setErrors({
+        ...errors,
+        phoneNumber: ""
+      });
+    }
+  };
+
+  const handlePracticeAreaInputChange = (e) => {
+    setPracticeAreaInput(e.target.value);
+  };
+
+  const handleAddPracticeArea = (area) => {
+    const trimmedArea = area.trim();
+    if (trimmedArea && !selectedPracticeAreas.includes(trimmedArea)) {
+      setSelectedPracticeAreas([...selectedPracticeAreas, trimmedArea]);
+      setPracticeAreaInput("");
+      // Clear error if exists
+      if (errors.practiceAreas) {
+        setErrors({
+          ...errors,
+          practiceAreas: ""
+        });
+      }
+    }
+  };
+
+  const handleRemovePracticeArea = (areaToRemove) => {
+    setSelectedPracticeAreas(selectedPracticeAreas.filter(area => area !== areaToRemove));
+  };
+
+  const handlePracticeAreaKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddPracticeArea(practiceAreaInput);
     }
   };
 
@@ -105,7 +169,17 @@ export default function LawyerRegistrationForm() {
   const validateStep2 = () => {
     const newErrors = {};
     
-    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Phone number is required";
+    } else {
+      const numbersOnly = formData.phoneNumber.replace(/\D/g, '');
+      if (numbersOnly.length !== 10) {
+        newErrors.phoneNumber = "Phone number must be 10 digits";
+      } else if (!numbersOnly.startsWith('9')) {
+        newErrors.phoneNumber = "Phone number must start with 9";
+      }
+    }
+    
     if (!formData.address.trim()) newErrors.address = "Address is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
     if (!formData.province.trim()) newErrors.province = "Province is required";
@@ -118,6 +192,7 @@ export default function LawyerRegistrationForm() {
   const validateStep3 = () => {
     const newErrors = {};
     // Disabled: if (!formData.prcNumber.trim()) newErrors.prcNumber = "Bar Number is required";
+    if (selectedPracticeAreas.length === 0) newErrors.practiceAreas = "At least one practice area is required";
     if (!formData.educationInstitution.trim()) newErrors.educationInstitution = "Education institution is required";
     if (!formData.yearsOfExperience.trim()) newErrors.yearsOfExperience = "Years of experience is required";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms";
@@ -144,14 +219,16 @@ export default function LawyerRegistrationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep3()) {
+      setIsSubmitting(true);
       try {
-       
         const body = new FormData();
         body.append("email", formData.email);
         body.append("password", formData.password);
         body.append("Fname", formData.firstName);
         body.append("Lname", formData.lastName);
-        body.append("phoneNumber", formData.phoneNumber);
+        // Format phone number for database: +639171234567 (no spaces)
+        const phoneNumberForDB = "+63" + formData.phoneNumber.replace(/\D/g, '');
+        body.append("phoneNumber", phoneNumberForDB);
         body.append("address", formData.address);
         body.append("city", formData.city);
         body.append("province", formData.province);
@@ -160,59 +237,73 @@ export default function LawyerRegistrationForm() {
         body.append("experience", formData.yearsOfExperience);
         body.append("educationInstitution", formData.educationInstitution);
         if (formData.profile_photo) {
-            body.append("profilePhoto", formData.profile_photo);
-            console.log("Profile photo added to FormData:", formData.profile_photo);
-          } else {
-            console.log("No profile photo to add");
-          }
+          body.append("profilePhoto", formData.profile_photo);
+          console.log("Profile photo added to FormData:", formData.profile_photo);
+        } else {
+          console.log("No profile photo to add");
+        }
           
-        const practiceAreas = formData.practiceAreas;
-        Object.keys(practiceAreas).forEach(area => {
-          if (practiceAreas[area]) {
-            body.append("specialization", area);
-          }
+        // Send selected practice areas
+        selectedPracticeAreas.forEach(area => {
+          body.append("specialization", area);
         });
         body.append("credentials", formData.credentials);
         console.log("Submitting form with:", body);
+        
         const response = await fetch("http://localhost:8080/users/Lawyer", {
-        method: "POST",
-        body: body
-      });
+          method: "POST",
+          body: body
+        });
 
-      if (response.ok) {
-        alert("Registration successful! Please verify the email.");
-        navigate('/signup/verifyLawyer', { state: { email: formData.email } });
-      } else {
-        // Try to get error message from backend
-        const errorData = await response.json().catch(() => ({}));
-        if (
-          response.status === 409 ||
-          (errorData && errorData.message && errorData.message.toLowerCase().includes("email"))
-        ) {
-          alert("Email already exists.");
-          navigate('/signup');
+        if (response.ok) {
+          navigate('/signup/verifyLawyer', { state: { email: formData.email } });
         } else {
-          alert(errorData.message || "Registration failed. Please try again.");
+          // Try to get error message from backend
+          const errorData = await response.json().catch(() => ({}));
+          if (
+            response.status === 409 ||
+            (errorData && errorData.message && errorData.message.toLowerCase().includes("email"))
+          ) {
+            toast.error("Email already exists.", { duration: 3000 });
+            setTimeout(() => {
+              navigate('/signup');
+            }, 3000);
+          } else {
+            toast.error(errorData.message || "Registration failed. Please try again.", { duration: 3000 });
+          }
         }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        toast.error('Registration failed. Please try again.', { duration: 3000 });
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert('Registration failed. Please try again.');
     }
-  }
-};
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-6 bg-white">
-      <Logo className="hidden mb-6 md:block" />
-      <div className={`bg-stone-100 p-4 sm:p-6 md:p-8 rounded-lg shadow-sm w-full ${
+    <div className="flex items-center justify-center min-h-screen font-['Poppins'] relative p-4">
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-[1440px] mx-auto px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div onClick={() => navigate('/')} className="cursor-pointer">
+              <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className={`w-full p-6 mt-24 bg-white border rounded-lg shadow-lg sm:p-8 md:p-10 ${
         step === 3 
-          ? 'max-w-[1200px] lg:max-w-[70%]' 
+          ? 'max-w-4xl' 
           : step === 2 
             ? 'max-w-[900px]' 
-            : 'max-w-[836px]'
-      } mx-auto overflow-hidden`}>        <h2 className="py-2 mb-2 text-xl font-bold text-center sm:text-2xl">Register as a Lawyer</h2>
-        <p className="py-2 mb-6 text-xs text-center text-gray-600 sm:text-sm">Create your professional account to connect with clients</p>
+            : 'max-w-4xl'
+      } mx-auto`}>
+        <h2 className="mb-2 text-2xl sm:text-3xl md:text-4xl font-semibold text-center text-[#11265A] font-['Poppins']">Register as a <span className="text-blue-600">Lawyer</span></h2>
+        <p className="mb-6 sm:mb-8 text-sm sm:text-base text-center text-gray-450 font-['Poppins']">Create your professional account to connect with clients</p>
         
         {/* Progress Bar */}
         <div className="mb-6 sm:mb-8">
@@ -234,9 +325,9 @@ export default function LawyerRegistrationForm() {
             <div className="space-y-6">
               {/* Profile Photo Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 text-start">Profile Photo</label>
-                <div className="flex flex-row items-center gap-6 mt-2">
-                  <div className="relative flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
+                <label className="block text-sm font-medium text-gray-700 text-start mb-2">Profile Photo</label>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="relative flex-shrink-0 w-20 h-20">
                     {formData.profile_photo ? (
                       <img 
                         src={URL.createObjectURL(formData.profile_photo)} 
@@ -252,7 +343,7 @@ export default function LawyerRegistrationForm() {
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="inline-block px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
+                    <label className="inline-block px-4 py-2 text-sm text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
                       Upload Photo
                       <input
                         type="file"
@@ -266,7 +357,7 @@ export default function LawyerRegistrationForm() {
                               profile_photo: file
                             });
                           } else {
-                            alert("File size should not exceed 5MB");
+                            toast.error("File size should not exceed 5MB", { duration: 3000 });
                           }
                         }}
                       />
@@ -276,29 +367,32 @@ export default function LawyerRegistrationForm() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-                <div className="w-full sm:w-1/2">
-                  <label htmlFor="firstName" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+              <div className="flex gap-6">
+                <div className="w-1/2">
+                  <label htmlFor="firstName" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                     First Name
                   </label>
                   <input
                     id="firstName"
                     type="text"
                     name="firstName"
-                    className={`w-full p-2.5 border rounded-md ${errors.firstName ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    placeholder="Enter your first name"
+                    className={`w-full p-3 border rounded-lg ${errors.firstName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
                     value={formData.firstName}
                     onChange={handleChange}
                   />
                   {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
-                </div>                <div className="w-full sm:w-1/2">
-                  <label htmlFor="lastName" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                </div>
+                <div className="w-1/2">
+                  <label htmlFor="lastName" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                     Last Name
                   </label>
                   <input
                     id="lastName"
                     type="text"
                     name="lastName"
-                    className={`w-full p-2.5 border rounded-md ${errors.lastName ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    placeholder="Enter your last name"
+                    className={`w-full p-3 border rounded-lg ${errors.lastName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
                     value={formData.lastName}
                     onChange={handleChange}
                   />
@@ -307,13 +401,14 @@ export default function LawyerRegistrationForm() {
               </div>
               
               <div>
-                <label htmlFor="email" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                   Email
                 </label>
                 <input
                   id="email"
                   type="email"
                   name="email"
+                  placeholder="your.email@example.com"
                   className={`w-full p-2.5 border rounded-md ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   value={formData.email}
                   onChange={handleChange}
@@ -322,7 +417,7 @@ export default function LawyerRegistrationForm() {
               </div>
               
               <div>
-                <label htmlFor="password" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                   Password
                 </label>
                 <div className="relative">
@@ -330,6 +425,7 @@ export default function LawyerRegistrationForm() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     name="password"
+                    placeholder="Enter your password"
                     className={`w-full p-2.5 pr-10 border rounded-md ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.password}
                     onChange={handleChange}
@@ -347,11 +443,11 @@ export default function LawyerRegistrationForm() {
                   </button>
                 </div>
                 {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
-                <p className="mt-1 text-xs text-gray-400 text-start">Password must be at least 8 characters long</p>
+                <p className="mt-1 text-xs text-gray-400 text-start">Password must be at least 6 characters long</p>
               </div>
               
               <div>
-                <label htmlFor="confirmPassword" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -359,6 +455,7 @@ export default function LawyerRegistrationForm() {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
+                    placeholder="Re-enter your password"
                     className={`w-full p-2.5 pr-10 border rounded-md ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -394,29 +491,32 @@ export default function LawyerRegistrationForm() {
               <div>
                 <label htmlFor="phoneNumber" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Phone Number
-                </label>                <div className="relative">
+                </label>
+                <div className="relative">
                   <span className="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">+63</span>
                   <input
                     id="phoneNumber"
                     type="tel"
                     name="phoneNumber"
-                    placeholder="9XXXXXXXXX"
+                    placeholder="917 123 4567"
                     className={`w-full p-2.5 pl-11 border rounded-md ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.phoneNumber}
-                    onChange={handleChange}
+                    onChange={handlePhoneChange}
                   />
                 </div>
                 {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber}</p>}
+                <p className="mt-1 text-xs text-gray-400 text-start">Enter 10-digit mobile number starting with 9</p>
               </div>
               
               <div>
-                <label htmlFor="address" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                <label htmlFor="address" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                   Address
                 </label>
                 <input
                   id="address"
                   type="text"
                   name="address"
+                  placeholder="Enter your street address"
                   className={`w-full p-2.5 border rounded-md ${errors.address ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   value={formData.address}
                   onChange={handleChange}
@@ -424,50 +524,53 @@ export default function LawyerRegistrationForm() {
                 {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address}</p>}
               </div>
               
-              <div className="space-y-4">                <div className="flex flex-col gap-4 sm:flex-row">
-                  <div className="w-full sm:w-1/2">
-                    <label htmlFor="city" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
-                      City
-                    </label>
-                    <input
-                      id="city"
-                      type="text"
-                      name="city"
-                      className={`w-full p-2.5 border rounded-md ${errors.city ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      value={formData.city}
-                      onChange={handleChange}
-                    />
-                    {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
-                  </div>                  <div className="w-full sm:w-1/2">
-                    <label htmlFor="province" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
-                      Province
-                    </label>
-                    <input
-                      id="province"
-                      type="text"
-                      name="province"
-                      className={`w-full p-2.5 border rounded-md ${errors.province ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      value={formData.province}
-                      onChange={handleChange}
-                    />
-                    {errors.province && <p className="mt-1 text-xs text-red-500">{errors.province}</p>}
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="zipCode" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
-                    ZIP Code
+              <div className="flex gap-4">
+                <div className="w-1/2">
+                  <label htmlFor="city" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                    City
                   </label>
                   <input
-                    id="zipCode"
+                    id="city"
                     type="text"
-                    name="zipCode"
-                    className={`w-full p-2.5 border rounded-md ${errors.zipCode ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                    value={formData.zipCode}
+                    name="city"
+                    placeholder="Enter your city"
+                    className={`w-full p-2.5 border rounded-md ${errors.city ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    value={formData.city}
                     onChange={handleChange}
                   />
-                  {errors.zipCode && <p className="mt-1 text-xs text-red-500">{errors.zipCode}</p>}
+                  {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
                 </div>
+                <div className="w-1/2">
+                  <label htmlFor="province" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                    Province
+                  </label>
+                  <input
+                    id="province"
+                    type="text"
+                    name="province"
+                    placeholder="Enter your province"
+                    className={`w-full p-2.5 border rounded-md ${errors.province ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    value={formData.province}
+                    onChange={handleChange}
+                  />
+                  {errors.province && <p className="mt-1 text-xs text-red-500">{errors.province}</p>}
+                </div>
+              </div>
+                
+              <div>
+                <label htmlFor="zipCode" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                  Zip Code
+                </label>
+                <input
+                  id="zipCode"
+                  type="text"
+                  name="zipCode"
+                  placeholder="Enter your zip code"
+                  className={`w-full p-2.5 border rounded-md ${errors.zipCode ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  value={formData.zipCode}
+                  onChange={handleChange}
+                />
+                {errors.zipCode && <p className="mt-1 text-xs text-red-500">{errors.zipCode}</p>}
               </div>
                 <div className="flex flex-col justify-between gap-4 mt-6 sm:flex-row">
                 <button
@@ -496,6 +599,7 @@ export default function LawyerRegistrationForm() {
                 <input
                   type="text"
                   name="prcNumber"
+                  placeholder="e.g., 123456"
                   className={`w-full p-2 border rounded ${errors.prcNumber ? 'border-red-500' : 'border-gray-300'}`}
                   value={formData.prcNumber}
                   onChange={handleChange}
@@ -505,113 +609,64 @@ export default function LawyerRegistrationForm() {
              
               
               <div>
-                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Practice Areas</label>                <div className="p-3 border border-gray-300 rounded">                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="familyLaw"
-                        name="practiceAreas.familyLaw"
-                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
-                        checked={formData.practiceAreas.familyLaw}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="familyLaw" className="ml-2 text-xs text-gray-700">
-                        Family Law
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="criminalDefense"
-                        name="practiceAreas.criminalDefense"
-                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
-                        checked={formData.practiceAreas.criminalDefense}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="criminalDefense" className="ml-2 text-xs text-gray-700">
-                        Criminal Defense
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="realEstate"
-                        name="practiceAreas.realEstate"
-                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
-                        checked={formData.practiceAreas.realEstate}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="realEstate" className="ml-2 text-xs text-gray-700">
-                        Real Estate
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="businessLaw"
-                        name="practiceAreas.businessLaw"
-                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
-                        checked={formData.practiceAreas.businessLaw}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="businessLaw" className="ml-2 text-xs text-gray-700">
-                        Business Law
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="personalInjury"
-                        name="practiceAreas.personalInjury"
-                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
-                        checked={formData.practiceAreas.personalInjury}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="personalInjury" className="ml-2 text-xs text-gray-700">
-                        Personal Injury
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="estatePlanning"
-                        name="practiceAreas.estatePlanning"
-                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
-                        checked={formData.practiceAreas.estatePlanning}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="estatePlanning" className="ml-2 text-xs text-gray-700">
-                        Estate Planning
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="immigration"
-                        name="practiceAreas.immigration"
-                        className="w-4 h-4 text-blue-500 border-gray-300 rounded"
-                        checked={formData.practiceAreas.immigration}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="immigration" className="ml-2 text-xs text-gray-700">
-                        Immigration
-                      </label>
-                    </div>                  </div>
-                  <div className="mt-4">
-                    <label htmlFor="otherPracticeArea" className="block mb-2 text-sm font-medium text-gray-700">
-                      Others (specify)
-                    </label>
-                    <input
-                      type="text"
-                      id="otherPracticeArea"
-                      name="otherPracticeArea"
-                      placeholder="Enter your other specialty areas"
-                      className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={formData.otherPracticeArea}
-                      onChange={handleChange}
-                    />
+                <label className="block mb-1 text-sm font-medium text-gray-700 text-start">Practice Areas</label>
+                
+                {/* Display selected practice areas as chips */}
+                {selectedPracticeAreas.length > 0 && (
+                  <div className="flex flex-wrap gap-2 p-3 mb-2 border border-gray-300 rounded bg-gray-50">
+                    {selectedPracticeAreas.map((area, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 text-sm text-blue-700 bg-blue-100 border border-blue-300 rounded-full"
+                      >
+                        {area}
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePracticeArea(area)}
+                          className="ml-2 text-blue-500 hover:text-blue-700 focus:outline-none"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
                   </div>
+                )}
+                
+                {/* Input field with datalist for suggestions */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    list="practiceAreaOptions"
+                    placeholder="Type or select a practice area and press Enter"
+                    className={`w-full p-2 border rounded ${errors.practiceAreas ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    value={practiceAreaInput}
+                    onChange={handlePracticeAreaInputChange}
+                    onKeyDown={handlePracticeAreaKeyDown}
+                  />
+                  <datalist id="practiceAreaOptions">
+                    <option value="Criminal Law" />
+                    <option value="Civil Law" />
+                    <option value="Family Law" />
+                    <option value="Corporate & Business Law" />
+                    <option value="Labor & Employment Law" />
+                    <option value="Property & Real Estate Law" />
+                    <option value="Immigration Law" />
+                    <option value="Taxation Law" />
+                    <option value="Intellectual Property Law" />
+                    <option value="Estate Planning & Succession" />
+                    <option value="Environmental & Energy Law" />
+                    <option value="Litigation & Dispute Resolution" />
+                  </datalist>
+                  <button
+                    type="button"
+                    onClick={() => handleAddPracticeArea(practiceAreaInput)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600"
+                  >
+                    Add
+                  </button>
                 </div>
+                {errors.practiceAreas && <p className="mt-1 text-xs text-red-500">{errors.practiceAreas}</p>}
+                <p className="mt-1 text-xs text-gray-400 text-start">Select from suggestions or type your own specialty areas</p>
               </div>
               
               <div>
@@ -619,6 +674,7 @@ export default function LawyerRegistrationForm() {
                 <input
                   type="number"
                   name="yearsOfExperience"
+                  placeholder="e.g., 5"
                   className={`w-full p-2 border rounded ${errors.yearsOfExperience ? 'border-red-500' : 'border-gray-300'}`}
                   value={formData.yearsOfExperience}
                   onChange={handleChange}
@@ -657,13 +713,14 @@ export default function LawyerRegistrationForm() {
                 </div>
               </div>
               <div>
-                <label htmlFor="email" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                <label htmlFor="educationInstitution" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
                   Education Institution
                 </label>
                 <input
                   id="educationInstitution"
-                  type="educationInstitution"
+                  type="text"
                   name="educationInstitution"
+                  placeholder="e.g., University of the Philippines College of Law"
                   className={`w-full p-2.5 border rounded-md ${errors.educationInstitution ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   value={formData.educationInstitution}
                   onChange={handleChange}
@@ -695,9 +752,20 @@ export default function LawyerRegistrationForm() {
                 </button>
                 <button
                   type="submit"
-                  className="order-1 w-full px-4 py-2 text-white bg-blue-500 rounded-lg sm:w-auto hover:bg-blue-600 sm:order-2"
+                  className="order-1 w-full px-6 py-2 text-white bg-blue-500 rounded-lg sm:w-auto hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2 sm:order-2"
+                  disabled={isSubmitting}
                 >
-                  Submit Application
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit'
+                  )}
                 </button>
               </div>
             </div>
@@ -712,6 +780,7 @@ export default function LawyerRegistrationForm() {
           )}
         </form>
       </div>
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

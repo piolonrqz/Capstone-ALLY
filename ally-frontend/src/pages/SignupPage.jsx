@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { useSearchParams } from 'react-router-dom';
-import { Shield } from 'lucide-react';
+import { Handshake, Scale } from 'lucide-react';
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -16,9 +16,9 @@ const SignUpPage = () => {
   localStorage.setItem('lName', lname || ''); 
 
   return (   
-    <div className="flex items-center justify-center min-h-screen bg-blue-50 font-['Poppins'] relative p-4">
+    <div className="flex items-center justify-center min-h-screen font-['Poppins'] relative p-4">
       {/* Navigation Bar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-[1440px] mx-auto px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
