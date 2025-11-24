@@ -96,6 +96,11 @@ Classify this user query into ONE category:
 
 QUERY: "{query}"
 
+Be warm and encouraging in your responses. Remember:
+- If it's legal → help them
+- If it's a greeting → be friendly
+- If it's off-topic → politely redirect with personality
+
 CATEGORIES:
 1. LEGAL - Questions about Philippine law, court cases, legal rights, lawsuits, crimes, contracts, legal procedures
 2. GREETING - Simple greetings like "hi", "hello", "how are you", "good morning"
@@ -266,14 +271,14 @@ async def validate_question(request: ValidationRequest):
                     "patient rights, or healthcare-related legal matters, I can help!"
                 ),
                 "OTHER": (
-                    "Your question doesn't appear to be about Philippine law or legal matters. "
+                    "Your question doesn't appear to be about law or legal matters. "
                     "I specialize in helping with:\n\n"
                     "• Legal rights and obligations\n"
                     "• Filing lawsuits and complaints\n"
                     "• Court procedures and cases\n"
                     "• Philippine laws and regulations\n"
                     "• Legal remedies and penalties\n\n"
-                    "Feel free to ask me anything about Philippine law! 🇵🇭"
+                    "Feel free to ask me anything about legal matters!"
                 )
             }
             
