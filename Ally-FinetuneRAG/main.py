@@ -25,11 +25,6 @@ app = FastAPI(
     version="7.0.0"
 )
 
-@app.get("/")
-async def root():
-    """Quick health check - responds immediately"""
-    return {"status": "starting", "message": "ALLY API"}
-
 @app.get("/ping")
 async def ping():
     """Immediate ping response"""
@@ -559,4 +554,4 @@ if __name__ == "__main__":
     print("ALLY Legal Assistant API")
     print("Version: 7.0.0 (Gemini Classification)")
     print("="*60 + "\n")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0")
