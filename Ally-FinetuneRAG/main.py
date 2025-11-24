@@ -1,6 +1,6 @@
 """
-ALLY FastAPI Server - Zero-Shot Classification (More Accurate)
-Uses facebook/bart-large-mnli for robust classification without semantic similarity
+ALLY FastAPI Server - Gemini Classification (Vercel Compatible)
+Run with: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 """
 
 from fastapi import FastAPI, HTTPException
@@ -8,14 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 from sentence_transformers import SentenceTransformer
-from transformers import pipeline
 from pinecone import Pinecone
 import os
 from dotenv import load_dotenv
-import torch
 import re
 
-# Vertex AI for fine-tuned model
+# Vertex AI for classification AND answer generation
 from vertexai.preview.generative_models import GenerativeModel
 import vertexai
 
@@ -23,8 +21,8 @@ load_dotenv()
 
 app = FastAPI(
     title="ALLY Legal Assistant API",
-    description="RAG with Zero-Shot Legal Classification",
-    version="5.0.0"
+    description="RAG with Gemini Classification",
+    version="7.0.0"
 )
 
 # CORS
@@ -45,7 +43,6 @@ class SearchRequest(BaseModel):
 
 class ValidationRequest(BaseModel):
     query: str
-    threshold: Optional[float] = 0.50  # For zero-shot, 50% confidence threshold
 
 class ValidationResponse(BaseModel):
     is_valid: bool
@@ -76,126 +73,84 @@ class QueryResponse(BaseModel):
 # ==========================================
 embedding_model = None
 pinecone_index = None
-gemini_model = None
-zero_shot_classifier = None
+gemini_flash_model = None  # For classification (fast + cheap)
 
 # ==========================================
-# GREETING/META DETECTION
+# GEMINI CLASSIFIER
 # ==========================================
-def is_greeting_or_meta_question(message: str) -> bool:
-    """Check if message is a greeting or meta-question about ALLY"""
-    if not message or not message.strip():
-        return False
-    
-    lower = message.lower().strip()
-    
-    # Simple greetings (short messages only, <= 30 chars)
-    if len(lower) <= 30:
-        greetings = [
-            "hi", "hello", "hey", "sup",
-            "good morning", "good afternoon", "good evening",
-            "how are you", "what's up", "whats up"
-        ]
-        
-        for greeting in greetings:
-            if re.match(f"^{greeting}\\s*[.!?]*$", lower):
-                return True
-    
-    # Meta questions about ALLY
-    if "ally" in lower:
-        if any(word in lower for word in ["who", "what", "why", "how"]):
-            return True
-    
-    # Questions about the bot itself
-    if re.search(r"(who|what).*(you|your|this bot|this assistant)", lower, re.IGNORECASE):
-        return True
-    
-    # Questions about creators/purpose
-    if re.search(r"(your|the)\s+(name|creator|developer|team|purpose|project)", lower, re.IGNORECASE):
-        return True
-    
-    # School project questions
-    if any(word in lower for word in ["capstone", "thesis"]):
-        return True
-    
-    if "school" in lower and "project" in lower:
-        return True
-    
-    return False
-
-
-# ==========================================
-# ZERO-SHOT CLASSIFIER
-# ==========================================
-class ZeroShotLegalClassifier:
+def classify_with_gemini(query: str) -> tuple[bool, str, str, float]:
     """
-    Uses pre-trained NLI model for classification
-    Much more accurate than semantic similarity for edge cases
+    Use Gemini Flash to classify queries
+    Fast, cheap, and accurate
+    
+    Returns:
+        (is_valid, category, reason, confidence)
     """
+    if gemini_flash_model is None:
+        # Fallback if Gemini not available
+        return True, "fallback", "Gemini not available", 0.5
     
-    def __init__(self):
-        print("   Loading zero-shot classifier...")
-        self.classifier = pipeline(
-            "zero-shot-classification",
-            model="facebook/bart-large-mnli",
-            device=0 if torch.cuda.is_available() else -1
-        )
-        print("   ✅ Zero-shot classifier loaded")
-    
-    def classify(self, query: str, threshold: float = 0.50) -> tuple[bool, float, dict]:
-        """
-        Classify using zero-shot learning
-        
-        Args:
-            query: User question
-            threshold: Confidence threshold (default 0.50 = 50%)
-        
-        Returns:
-            (is_legal, confidence, details)
-        """
-        
-        # Define candidate labels with detailed descriptions
-        candidate_labels = [
-            "Philippine legal matters, court cases, lawsuits, legal rights, and legal procedures",
-            "Cooking, recipes, food preparation, and restaurants",
-            "Weather, climate, and forecasts",
-            "Entertainment, movies, music, and games",
-            "Technology, programming, and computers",
-            "Health, medical issues, and symptoms",
-            "Travel, tourism, and vacation planning",
-            "Mathematics, education, and homework",
-            "General conversation and casual topics"
-        ]
-        
-        result = self.classifier(
-            query,
-            candidate_labels,
-            multi_label=False
+    prompt = f"""You are a classifier for a Philippine legal assistant chatbot named ALLY.
+
+Classify this user query into ONE category:
+
+QUERY: "{query}"
+
+CATEGORIES:
+1. LEGAL - Questions about Philippine law, court cases, legal rights, lawsuits, crimes, contracts, legal procedures
+2. GREETING - Simple greetings like "hi", "hello", "how are you", "good morning"
+3. META - Questions about the chatbot itself (who are you, what can you do, who created you, what is ALLY)
+4. COOKING - Recipes, food preparation, cooking instructions
+5. WEATHER - Weather forecasts, temperature, climate
+6. ENTERTAINMENT - Movies, music, games (unless about copyright/legal aspects)
+7. TECHNOLOGY - Programming, coding, tech troubleshooting (unless about cyber law)
+8. MEDICAL - Health symptoms, medical advice (unless about malpractice)
+9. OTHER - General knowledge, math, travel, shopping
+
+RESPONSE FORMAT (respond ONLY with this):
+CATEGORY: [category name]
+CONFIDENCE: [0.0-1.0]
+REASON: [brief explanation]
+
+Examples:
+- "Can I sue my landlord?" → LEGAL
+- "I was scammed" → LEGAL (victim needs legal help)
+- "Hello" → GREETING
+- "What is ALLY?" → META
+- "Recipe for adobo" → COOKING
+- "What planet is closest to sun?" → OTHER
+
+Your classification:"""
+
+    try:
+        response = gemini_flash_model.generate_content(
+            prompt,
+            generation_config={
+                "temperature": 0.1,  # Low temperature for consistent classification
+                "max_output_tokens": 150,
+            }
         )
         
-        top_label = result['labels'][0]
-        top_score = result['scores'][0]
+        text = response.text.strip()
         
-        # Check if top label is legal-related
-        is_legal = "Philippine legal matters" in top_label
+        # Parse response
+        category_match = re.search(r'CATEGORY:\s*(\w+)', text, re.IGNORECASE)
+        confidence_match = re.search(r'CONFIDENCE:\s*([\d.]+)', text, re.IGNORECASE)
+        reason_match = re.search(r'REASON:\s*(.+?)(?:\n|$)', text, re.IGNORECASE)
         
-        # Confidence is the score of the top prediction
-        confidence = top_score if is_legal else (1 - top_score)
+        category = category_match.group(1).upper() if category_match else "OTHER"
+        confidence = float(confidence_match.group(1)) if confidence_match else 0.7
+        reason = reason_match.group(1).strip() if reason_match else "Classification completed"
         
-        details = {
-            "top_category": top_label,
-            "top_score": round(top_score, 3),
-            "all_scores": {
-                label: round(score, 3) 
-                for label, score in zip(result['labels'][:3], result['scores'][:3])
-            },
-            "threshold": threshold
-        }
+        # Determine if valid
+        is_valid = category in ["LEGAL", "GREETING", "META"]
         
-        # Decision based on threshold
-        is_valid = is_legal and top_score >= threshold
+        return is_valid, category, reason, confidence
         
-        return is_valid, confidence, details
+    except Exception as e:
+        print(f"   ⚠️  Gemini classification error: {e}")
+        # Fail open - allow through
+        return True, "error", str(e), 0.5
 
 
 # ==========================================
@@ -204,22 +159,14 @@ class ZeroShotLegalClassifier:
 @app.on_event("startup")
 async def startup_event():
     """Initialize models on startup"""
-    global embedding_model, pinecone_index, gemini_model, zero_shot_classifier
+    global embedding_model, pinecone_index, gemini_flash_model
     
-    print("🚀 Starting ALLY System (Zero-Shot Classification)...")
+    print("🚀 Starting ALLY System (Gemini Classification)...")
     
-    # Load embedding model (still needed for RAG)
+    # Load embedding model
     print("   🤖 Loading embedding model...")
     embedding_model = SentenceTransformer('BAAI/bge-large-en-v1.5')
     print("   ✅ Embedding model loaded")
-    
-    # Initialize zero-shot classifier
-    print("   🧠 Initializing zero-shot classifier...")
-    try:
-        zero_shot_classifier = ZeroShotLegalClassifier()
-    except Exception as e:
-        print(f"   ⚠️  Zero-shot classifier failed: {e}")
-        zero_shot_classifier = None
     
     # Initialize Pinecone
     print("   🔌 Connecting to Pinecone...")
@@ -238,27 +185,27 @@ async def startup_event():
         print(f"   ❌ Pinecone failed: {e}")
         return
     
-    # Initialize Vertex AI
-    print("   🧠 Connecting to Vertex AI...")
+    # Initialize Gemini Flash for classification
+    print("   🧠 Connecting to Gemini Flash (classifier)...")
     try:
         project_id = os.getenv('GOOGLE_PROJECT_ID')
         location = os.getenv('GOOGLE_REGION', 'us-central1')
-        endpoint_id = os.getenv('GOOGLE_ENDPOINT_ID')
         credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
         
-        if all([project_id, endpoint_id, credentials_path]):
+        if all([project_id, credentials_path]):
             os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
             vertexai.init(project=project_id, location=location)
-            gemini_model = GenerativeModel(
-                f"projects/{project_id}/locations/{location}/endpoints/{endpoint_id}"
-            )
-            print(f"   ✅ Vertex AI loaded")
+            
+            # Use Gemini Flash for fast classification
+            gemini_flash_model = GenerativeModel("gemini-2.5-flash")
+            
+            print(f"   ✅ Gemini Flash loaded (classifier)")
         else:
-            print("   ⚠️  Vertex AI config incomplete")
+            print("   ⚠️  Gemini config incomplete")
     except Exception as e:
-        print(f"   ⚠️  Vertex AI failed: {e}")
+        print(f"   ⚠️  Gemini failed: {e}")
     
-    print("✅ ALLY Ready with Zero-Shot Classification!\n")
+    print("✅ ALLY Ready with Gemini Classification!\n")
 
 
 # ==========================================
@@ -267,84 +214,58 @@ async def startup_event():
 @app.post("/api/validate", response_model=ValidationResponse)
 async def validate_question(request: ValidationRequest):
     """
-    Validate using zero-shot classification
-    More accurate than semantic similarity
+    Validate using Gemini Flash
+    Fast and accurate classification
     """
     try:
         query = request.query
         
-        print(f"\n🔍 Validating (Zero-Shot): {query}")
+        print(f"\n🔍 Validating (Gemini): {query}")
         
-        # Check if greeting or meta question first
-        if is_greeting_or_meta_question(query):
-            print(f"   💬 Greeting/Meta detected - AUTO PASS")
-            return ValidationResponse(
-                is_valid=True,
-                rejection_reason=None,
-                confidence=1.0,
-                method="greeting_meta",
-                details={"type": "greeting_or_meta"}
-            )
+        # Classify with Gemini
+        is_valid, category, reason, confidence = classify_with_gemini(query)
         
-        # Use zero-shot classifier
-        if zero_shot_classifier is None:
-            print("   ⚠️  Zero-shot classifier not loaded - fallback pass")
-            return ValidationResponse(
-                is_valid=True,
-                rejection_reason=None,
-                confidence=0.5,
-                method="fallback"
-            )
-        
-        threshold = request.threshold or 0.50
-        is_valid, confidence, details = zero_shot_classifier.classify(query, threshold)
-        
-        print(f"   📊 Category: {details['top_category']}")
-        print(f"   📊 Score: {details['top_score']:.3f}")
+        print(f"   📊 Category: {category}")
+        print(f"   📊 Confidence: {confidence:.3f}")
+        print(f"   📝 Reason: {reason}")
         
         if not is_valid:
-            print(f"   ❌ Rejected by zero-shot classifier")
+            print(f"   ❌ Rejected by Gemini classifier")
             
-            # Provide specific feedback based on detected category
-            top_category = details['top_category']
-            
-            if "Cooking" in top_category or "recipes" in top_category:
-                rejection_msg = (
-                    "Your question appears to be about cooking or food preparation. "
+            # Context-aware rejection messages
+            rejection_messages = {
+                "COOKING": (
+                    "I noticed you're asking about cooking or recipes. "
                     "I specialize in Philippine legal matters, not culinary advice.\n\n"
-                    "💡 If you have questions about food business permits, health regulations, "
-                    "or restaurant-related legal issues, I can help with those!"
-                )
-            elif "Weather" in top_category:
-                rejection_msg = (
-                    "Your question is about weather or climate. "
+                    "💡 However, if you have questions about food business permits, "
+                    "health regulations, or restaurant legal compliance, I can help with those!"
+                ),
+                "WEATHER": (
+                    "I see you're asking about weather. "
                     "I specialize in Philippine legal matters.\n\n"
-                    "💡 If you need legal information about disaster-related laws, "
-                    "force majeure, or insurance claims, please ask specifically about those topics."
-                )
-            elif "Entertainment" in top_category:
-                rejection_msg = (
-                    "Your question appears to be about entertainment. "
+                    "💡 If you need legal information about natural disaster laws, "
+                    "force majeure in contracts, or weather-related insurance claims, "
+                    "I can help with those legal aspects!"
+                ),
+                "ENTERTAINMENT": (
+                    "I noticed you're asking about entertainment. "
                     "I specialize in Philippine legal matters.\n\n"
-                    "💡 If you have questions about copyright, piracy laws, "
-                    "or entertainment contracts, I can help with those legal aspects!"
-                )
-            elif "Technology" in top_category or "programming" in top_category:
-                rejection_msg = (
-                    "Your question appears to be about technology or programming. "
+                    "💡 If you have questions about copyright law, piracy, "
+                    "entertainment contracts, or defamation, I can help with those legal topics!"
+                ),
+                "TECHNOLOGY": (
+                    "I see you're asking about technology or programming. "
                     "I specialize in Philippine legal matters.\n\n"
-                    "💡 If you need information about data privacy laws, "
-                    "cybercrime, or tech-related legal issues, please ask specifically about those!"
-                )
-            elif "Health" in top_category or "medical" in top_category:
-                rejection_msg = (
-                    "Your question appears to be about health or medical issues. "
+                    "💡 If you need information about the Cybercrime Prevention Act, "
+                    "Data Privacy Act, or tech-related legal issues, I can help with those!"
+                ),
+                "MEDICAL": (
+                    "I noticed you're asking about health or medical topics. "
                     "I specialize in Philippine legal matters, not medical advice.\n\n"
                     "💡 If you have questions about medical malpractice, "
-                    "healthcare rights, or health-related legal matters, I can help with those!"
-                )
-            else:
-                rejection_msg = (
+                    "patient rights, or healthcare-related legal matters, I can help!"
+                ),
+                "OTHER": (
                     "Your question doesn't appear to be about Philippine law or legal matters. "
                     "I specialize in helping with:\n\n"
                     "• Legal rights and obligations\n"
@@ -352,25 +273,28 @@ async def validate_question(request: ValidationRequest):
                     "• Court procedures and cases\n"
                     "• Philippine laws and regulations\n"
                     "• Legal remedies and penalties\n\n"
-                    "Please rephrase your question to focus on the legal aspects."
+                    "Feel free to ask me anything about Philippine law! 🇵🇭"
                 )
+            }
+            
+            rejection_msg = rejection_messages.get(category, rejection_messages["OTHER"])
             
             return ValidationResponse(
                 is_valid=False,
                 rejection_reason=rejection_msg,
                 confidence=confidence,
-                method="zero_shot",
-                details=details
+                method="gemini",
+                details={"category": category, "reason": reason}
             )
         
-        print(f"   ✅ Passed zero-shot classifier (confidence: {confidence:.3f})")
+        print(f"   ✅ Passed Gemini classifier")
         
         return ValidationResponse(
             is_valid=True,
             rejection_reason=None,
             confidence=confidence,
-            method="zero_shot",
-            details=details
+            method="gemini",
+            details={"category": category, "reason": reason}
         )
         
     except Exception as e:
@@ -389,7 +313,7 @@ async def validate_question(request: ValidationRequest):
 # ==========================================
 @app.post("/search")
 async def search_cases(request: SearchRequest):
-    """Search cases with zero-shot classification"""
+    """Search cases with Gemini classification"""
     try:
         if not pinecone_index:
             return {
@@ -403,36 +327,34 @@ async def search_cases(request: SearchRequest):
         
         query = request.query
         
-        # Check if greeting/meta
-        if is_greeting_or_meta_question(query):
-            print(f"   💬 Greeting/Meta - skipping classification")
+        # Gemini validation
+        is_valid, category, reason, confidence = classify_with_gemini(query)
+        
+        if not is_valid:
+            print(f"   ❌ Gemini rejected: {category}")
+            return {
+                "cases": [],
+                "count": 0,
+                "query": query,
+                "rejected": True,
+                "rejection_stage": "gemini_filter",
+                "rejection_reason": reason,
+                "confidence": confidence
+            }
+        
+        print(f"   ✅ Gemini passed: {category}")
+        
+        # If greeting/meta, return empty (Spring Boot handles)
+        if category in ['GREETING', 'META']:
             return {
                 "cases": [],
                 "count": 0,
                 "query": query,
                 "rejected": False,
-                "confidence": 1.0
+                "confidence": confidence
             }
         
-        # Zero-shot validation
-        if zero_shot_classifier:
-            is_valid, confidence, details = zero_shot_classifier.classify(query)
-            
-            if not is_valid:
-                print(f"   ❌ Zero-shot rejected: {details['top_category']}")
-                return {
-                    "cases": [],
-                    "count": 0,
-                    "query": query,
-                    "rejected": True,
-                    "rejection_stage": "zero_shot_filter",
-                    "rejection_reason": "Question not legal-related",
-                    "confidence": confidence
-                }
-            
-            print(f"   ✅ Zero-shot passed: {details['top_category']}")
-        
-        # Vector search
+        # Vector search for legal questions
         query_embedding = embedding_model.encode(
             query,
             normalize_embeddings=True
@@ -523,11 +445,10 @@ async def health_check():
         return {
             "status": "healthy",
             "vector_db": "pinecone",
-            "model": "BAAI/bge-large-en-v1.5",
+            "embedding_model": "BAAI/bge-large-en-v1.5",
             "vectors_count": stats.total_vector_count,
-            "gemini_available": gemini_model is not None,
-            "classifier": "facebook/bart-large-mnli (zero-shot)",
-            "greeting_detection": "enabled",
+            "classifier": "Gemini Flash 1.5",
+            "classification_type": "LLM-based",
             "relevance_threshold": "54%"
         }
     except Exception as e:
@@ -541,9 +462,10 @@ async def health_check():
 async def root():
     return {
         "message": "ALLY Legal Assistant API",
-        "version": "5.0.0",
-        "classifier": "zero-shot (BART-large-NLI)",
-        "features": ["zero-shot classification", "greeting detection", "context-aware rejection"]
+        "version": "7.0.0",
+        "classifier": "Gemini Flash 1.5",
+        "deployment": "Vercel-compatible",
+        "features": ["LLM classification", "context-aware", "fast and cheap"]
     }
 
 
@@ -551,6 +473,6 @@ if __name__ == "__main__":
     import uvicorn
     print("\n" + "="*60)
     print("ALLY Legal Assistant API")
-    print("Version: 5.0.0 (Zero-Shot Classification)")
+    print("Version: 7.0.0 (Gemini Classification)")
     print("="*60 + "\n")
     uvicorn.run(app, host="0.0.0.0", port=8000)
