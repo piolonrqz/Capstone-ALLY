@@ -105,7 +105,7 @@ const AllyConsultationChat = () => {
       {!hasChatStarted ? (
         // INITIAL STATE - Before first message (centered)
         <div className="flex flex-col items-center justify-center min-h-[calc(90vh-64px)] px-4">
-          <h1 className="text-4xl font-bold mb-8 text-center text-gray-800">
+          <h1 className="text-4xl font-semibold mb-8 text-center text-gray-800">
             How can <span className="text-blue-600">ALLY</span> help you today?
           </h1>
           
