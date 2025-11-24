@@ -43,7 +43,7 @@ public class ChatController {
         String enhancedPrompt = request.getMessage();
 
         // ==========================================
-        // STAGE 1: Python Gemini Validation (FIRST!)
+        // STAGE 1: Python Gemini Validation
         // ==========================================
         System.out.println("🔍 Stage 1: Running Python Gemini validation...");
         ValidationResponse pythonValidation = ragService.validateQuestion(request.getMessage());
@@ -69,7 +69,7 @@ public class ChatController {
         }
 
         // ==========================================
-        // STAGE 2: Basic Java Validation (Length only)
+        // STAGE 2: Basic Java Validation
         // ==========================================
         LegalQuestionValidator.ValidationResult javaValidation = validator.validate(request.getMessage());
 
@@ -204,7 +204,7 @@ public class ChatController {
                     contextBuilder.append("Cite specific cases using [Case 1], [Case 2] format in your response. ");
                     contextBuilder.append("Provide a clear answer with legal basis and practical implications. ");
                     contextBuilder.append("End with the disclaimer: '⚠️ This is legal information, not legal advice. ");
-                    contextBuilder.append("For your specific situation, please consult a qualified Philippine lawyer.'");
+                    contextBuilder.append("For your specific situation, please consult a qualified lawyer.'");
                     
                     enhancedPrompt = contextBuilder.toString();
                     

@@ -1,5 +1,5 @@
 """
-ALLY FastAPI Server - Gemini Classification (Vercel Compatible)
+ALLY FastAPI Server - Gemini Classification
 Run with: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 """
 
@@ -269,6 +269,43 @@ async def validate_question(request: ValidationRequest):
                     "I specialize in Philippine legal matters, not medical advice.\n\n"
                     "💡 If you have questions about medical malpractice, "
                     "patient rights, or healthcare-related legal matters, I can help!"
+                ),
+                "FINANCE": (
+                    "It seems you're asking about business, money, or financial topics. "
+                    "I specialize in Philippine legal matters, not investment or financial advice.\n\n"
+                    "💡 But if you need help with the legal side—such as loan agreements, debt collection laws, "
+                    "business registration, BIR requirements, consumer protection, or corporate compliance—"
+                    "I can assist with those legal aspects!"
+                ),
+                "RELATIONSHIP": (
+                    "It looks like you're asking for personal or relationship advice. "
+                    "While I specialize in legal information, I can't provide emotional or psychological guidance.\n\n"
+                    "💡 However, if your concern involves legal matters such as adultery, VAWC, child custody, "
+                    "annulment, or property issues between partners, I can help explain the legal processes."
+                ),
+                "TRAVEL": (
+                    "It seems you're asking about travel plans or tourism. "
+                    "I specialize in Philippine legal matters, not general travel advice.\n\n"
+                    "💡 If you have questions about immigration rules, visa requirements, airport regulations, "
+                    "or travel-related legal issues, I can help explain those!"
+                ),
+                "SHOPPING": (
+                    "It appears you're asking about shopping, product choices, or general consumer topics. "
+                    "I specialize in legal matters.\n\n"
+                    "💡 But if your situation involves consumer rights, online scam issues, refund disputes, "
+                    "warranty laws, or DTI complaints, I can help with the legal side!"
+                ),
+                "SPORTS": (
+                    "It looks like you're asking about sports or fitness. "
+                    "I specialize in Philippine legal matters, not athletic guidance.\n\n"
+                    "💡 But if the topic involves contracts, liabilities, injuries, or sports-related legal concerns, "
+                    "I can guide you legally."
+                ),
+                "INAPPROPRIATE": (
+                    "I noticed inappropriate or aggressive language in your message. "
+                    "I'm here to provide helpful and respectful legal information.\n\n"
+                    "💡 If you have a legal concern or need help understanding your rights, "
+                    "I'm ready to assist."
                 ),
                 "OTHER": (
                     "Your question doesn't appear to be about law or legal matters. "

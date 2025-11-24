@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class LegalQuestionValidator {
     
     /**
-     * Simplified validator - only checks basic sanity
+     * Backup if Gemini is unreachable
      * Real validation is done by Gemini in Python backend
      */
     public ValidationResult validate(String question) {
