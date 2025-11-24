@@ -25,6 +25,16 @@ app = FastAPI(
     version="7.0.0"
 )
 
+@app.get("/")
+async def root():
+    """Quick health check - responds immediately"""
+    return {"status": "starting", "message": "ALLY API"}
+
+@app.get("/ping")
+async def ping():
+    """Immediate ping response"""
+    return {"ping": "pong"}
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -167,11 +177,17 @@ async def startup_event():
     global embedding_model, pinecone_index, gemini_flash_model
     
     print("🚀 Starting ALLY System (Gemini Classification)...")
+    print(f"   📍 Environment: {'Render' if os.getenv('RENDER') else 'Local'}")
     
-    # Load embedding model
-    print("   🤖 Loading embedding model...")
-    embedding_model = SentenceTransformer('BAAI/bge-large-en-v1.5')
-    print("   ✅ Embedding model loaded")
+    # Load embedding model with error handling
+    try:
+        print("   🤖 Loading embedding model...")
+        embedding_model = SentenceTransformer('BAAI/bge-large-en-v1.5')
+        print("   ✅ Embedding model loaded")
+    except Exception as e:
+        print(f"   ❌ Embedding model failed: {e}")
+        print("   ⚠️  Continuing without embeddings (search will fail)")
+        embedding_model = None
     
     # Initialize Pinecone
     print("   🔌 Connecting to Pinecone...")
@@ -180,15 +196,14 @@ async def startup_event():
     
     if not api_key:
         print("   ⚠️  PINECONE_API_KEY not found")
-        return
-    
-    try:
-        pc = Pinecone(api_key=api_key)
-        pinecone_index = pc.Index(index_name)
-        print(f"   ✅ Connected to Pinecone: {index_name}")
-    except Exception as e:
-        print(f"   ❌ Pinecone failed: {e}")
-        return
+    else:
+        try:
+            pc = Pinecone(api_key=api_key)
+            pinecone_index = pc.Index(index_name)
+            print(f"   ✅ Connected to Pinecone: {index_name}")
+        except Exception as e:
+            print(f"   ❌ Pinecone failed: {e}")
+            pinecone_index = None
     
     # Initialize Gemini Flash for classification
     print("   🧠 Connecting to Gemini Flash (classifier)...")
@@ -196,7 +211,7 @@ async def startup_event():
         project_id = os.getenv('GOOGLE_PROJECT_ID')
         location = os.getenv('GOOGLE_REGION', 'us-central1')
         
-        # Check for service account JSON in environment variable
+        # Check for service account JSON in environment variable (Render)
         service_account_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_JSON')
         
         if project_id:
@@ -218,7 +233,7 @@ async def startup_event():
                 
                 if not os.path.exists(credentials_path):
                     print(f"   ⚠️  Service account file not found: {credentials_path}")
-                    return
+                    raise FileNotFoundError(f"Service account file not found: {credentials_path}")
                 
                 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
             
@@ -231,11 +246,15 @@ async def startup_event():
             print(f"   ✅ Gemini Flash loaded (classifier)")
         else:
             print("   ⚠️  GOOGLE_PROJECT_ID not found")
+            gemini_flash_model = None
     except Exception as e:
         print(f"   ⚠️  Gemini failed: {e}")
+        import traceback
+        traceback.print_exc()
+        gemini_flash_model = None
     
     print("✅ ALLY Ready with Gemini Classification!\n")
-
+    
 # ==========================================
 # VALIDATION ENDPOINT
 # ==========================================
