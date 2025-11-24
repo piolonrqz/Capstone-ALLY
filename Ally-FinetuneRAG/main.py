@@ -195,10 +195,34 @@ async def startup_event():
     try:
         project_id = os.getenv('GOOGLE_PROJECT_ID')
         location = os.getenv('GOOGLE_REGION', 'us-central1')
-        credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
         
-        if all([project_id, credentials_path]):
-            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+        # Check for service account JSON in environment variable
+        service_account_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_JSON')
+        
+        if project_id:
+            if service_account_json:
+                # RENDER: Use JSON from environment variable
+                print("   📋 Using service account from environment variable (Render)")
+                import json
+                import tempfile
+                
+                with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+                    f.write(service_account_json)
+                    credentials_path = f.name
+                
+                os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+            else:
+                # LOCAL: Use file path from .env
+                credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', './service-account-key.json')
+                print(f"   📁 Using service account from file: {credentials_path}")
+                
+                if not os.path.exists(credentials_path):
+                    print(f"   ⚠️  Service account file not found: {credentials_path}")
+                    return
+                
+                os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
+            
+            # Initialize Vertex AI
             vertexai.init(project=project_id, location=location)
             
             # Use Gemini Flash for fast classification
@@ -206,12 +230,11 @@ async def startup_event():
             
             print(f"   ✅ Gemini Flash loaded (classifier)")
         else:
-            print("   ⚠️  Gemini config incomplete")
+            print("   ⚠️  GOOGLE_PROJECT_ID not found")
     except Exception as e:
         print(f"   ⚠️  Gemini failed: {e}")
     
     print("✅ ALLY Ready with Gemini Classification!\n")
-
 
 # ==========================================
 # VALIDATION ENDPOINT
