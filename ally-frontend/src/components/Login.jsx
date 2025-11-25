@@ -107,7 +107,7 @@ const Login = () => {
       </nav>
       
       <div className="w-full max-w-md p-6 mt-16 bg-white border rounded-lg shadow-lg sm:max-w-lg md:max-w-2xl sm:p-8 md:p-10 sm:mt-0">
-        <h2 className="mb-2 text-2xl sm:text-3xl md:text-4xl font-semibold text-center text-[#11265A] font-['Poppins']">Log in To ALLY</h2>
+        <h2 className="mb-2 text-2xl sm:text-3xl md:text-4xl font-semibold text-center text-[#11265A] font-['Poppins']">Sign In to ALLY</h2>
         <p className="mb-6 sm:mb-8 text-sm sm:text-base text-center text-gray-450 font-['Poppins']">Enter your credentials to access your account</p>
 
         <form onSubmit={handleLogin} className="space-y-4">

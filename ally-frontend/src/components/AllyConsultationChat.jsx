@@ -222,7 +222,7 @@ const AllyConsultationChat = () => {
           </div>
 
           {/* Input Area - Fixed at bottom */}
-          <div className="border-t bg-white">
+          <div className="bg-white">
             <div className="max-w-4xl mx-auto px-4 py-4">
               {/* Input Row */}
               <div className="flex items-center gap-3 bg-white border border-gray-300 rounded-full px-4 py-2 shadow-sm">

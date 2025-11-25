@@ -4,11 +4,13 @@ import { User, LogOut, Settings, ChevronDown, MessageCircle, Bell } from 'lucide
 import { getAuthData, isAuthenticated, logout, fetchUserDetails } from '../utils/auth.jsx';
 import { shouldHideNavigation } from '../utils/navigation.js';
 import NotificationDropdown from './NotificationDropdown';
+import { useSidebar } from '../contexts/SidebarContext';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isLoggedIn = isAuthenticated();
+  const { isExpanded } = useSidebar();
   
   // Memoize authData to prevent infinite re-renders
   const authData = useMemo(() => getAuthData(), [isLoggedIn]);
@@ -122,16 +124,22 @@ const NavigationBar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-      <div className="max-w-[1440px] mx-auto px-8 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div onClick={() => navigate('/')} className="cursor-pointer">
-            <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
-          </div>
+    <nav className={`fixed top-0 z-40 bg-white shadow-sm h-16 transition-all duration-300 ${
+      isLoggedIn 
+        ? `${isExpanded ? 'left-[240px]' : 'left-[60px]'} right-0` 
+        : 'left-0 right-0'
+    }`}>
+      <div className="h-full px-8">
+        <div className="h-full flex items-center justify-between">
+          {/* Logo - Only show when NOT logged in */}
+          {!isLoggedIn && (
+            <div onClick={() => navigate('/')} className="cursor-pointer">
+              <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+            </div>
+          )}
           
           {/* Right Side */}
-          <div className="flex items-center">
+          <div className={`flex items-center ${isLoggedIn ? 'ml-auto' : ''}`}>
             {isLoggedIn ? (
               <>
                 {/* Right Side Icons and Profile */}
@@ -158,54 +166,23 @@ const NavigationBar = () => {
                     <MessageCircle className="w-5 h-5 text-[#2B62C4]" strokeWidth={1.8} />
                   </button>
                   
-                  <div className="relative" ref={dropdownRef}>
-                    <button
-                      onClick={toggleDropdown}
-                      className="flex items-center gap-2 hover:bg-gray-50 rounded-full px-3 py-2 transition-all duration-200"
-                    >
-                      {userDetails?.profilePhotoUrl ? (
-                        <img
-                          src={userDetails.profilePhotoUrl}
-                          alt="Profile"
-                          className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold border-2 border-blue-100">
-                          {getUserInitials()}
-                        </div>
-                      )}
-                      <span className="text-sm font-medium text-gray-800">
-                        {userDetails?.firstName && userDetails?.lastName 
-                          ? `${userDetails.firstName}, ${userDetails.lastName}`
-                          : 'User'}
-                      </span>
-                    </button>
-                  
-                    {/* Dropdown Menu */}
-                    {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                        <div className="px-4 py-2 border-b border-gray-200">
-                          <p className="text-sm text-gray-600">Signed in as</p>
-                          <p className="text-sm font-semibold text-gray-900 truncate">
-                            {authData?.email || 'User'}
-                          </p>
-                        </div>
-                        <button
-                          onClick={handleProfileSettings}
-                          className="flex items-center gap-3 w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
-                        >
-                          <Settings className="w-5 h-5 text-gray-500" />
-                          <span>Profile Settings</span>
-                        </button>
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center w-full gap-3 px-4 py-2 text-left text-red-600 hover:bg-red-50"
-                        >
-                          <LogOut className="w-5 h-5 text-red-500" />
-                          <span>Logout</span>
-                        </button>              
+                  <div className="flex items-center gap-2 px-3 py-2">
+                    {userDetails?.profilePhotoUrl ? (
+                      <img
+                        src={userDetails.profilePhotoUrl}
+                        alt="Profile"
+                        className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold border-2 border-blue-100">
+                        {getUserInitials()}
                       </div>
                     )}
+                    <span className="text-sm font-medium text-gray-800">
+                      {userDetails?.firstName && userDetails?.lastName 
+                        ? `${userDetails.firstName}, ${userDetails.lastName}`
+                        : 'User'}
+                    </span>
                   </div>
                 </div>
               </>
