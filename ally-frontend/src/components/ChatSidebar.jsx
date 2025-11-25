@@ -58,24 +58,24 @@ const ChatSidebar = ({ userRole }) => {
       {/* Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className="absolute -right-3 top-20 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-200 hover:bg-gray-50 z-50"
+        className="absolute -right-3 top-20 w-8 h-8 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:border-blue-400 transition-all duration-200 hover:bg-blue-50 z-50"
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
       >
         {isExpanded ? (
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
+          <ChevronLeft className="w-5 h-5 text-gray-700" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+          <ChevronRight className="w-5 h-5 text-gray-700" />
         )}
       </button>
 
       {/* Navigation Items */}
-      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
+      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
           
           return (
-            <div key={item.path} className="relative group">
+            <div key={item.path}>
               <button
                 onClick={() => handleNavigation(item)}
                 className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-[8px] text-base font-medium transition-all duration-200 ${
@@ -88,14 +88,6 @@ const ChatSidebar = ({ userRole }) => {
                 <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-white' : 'text-gray-500'}`} />
                 {isExpanded && <span className="truncate">{item.name}</span>}
               </button>
-              
-              {/* Tooltip for collapsed state */}
-              {!isExpanded && (
-                <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 top-1/2 -translate-y-1/2 pointer-events-none">
-                  {item.name}
-                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
-                </div>
-              )}
             </div>
           );
         })}
@@ -103,7 +95,7 @@ const ChatSidebar = ({ userRole }) => {
 
       {/* Bottom Section */}
       <div className="px-3 py-4 space-y-2">
-        <div className="relative group">
+        <div>
           <button
             onClick={() => navigate('/settings')}
             className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-[8px] text-base font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200 ${
@@ -114,16 +106,9 @@ const ChatSidebar = ({ userRole }) => {
             <Settings className="w-5 h-5 flex-shrink-0 text-gray-500" />
             {isExpanded && <span>Settings</span>}
           </button>
-          
-          {!isExpanded && (
-            <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 top-1/2 -translate-y-1/2 pointer-events-none">
-              Settings
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
-            </div>
-          )}
         </div>
         
-        <div className="relative group">
+        <div>
           <button
             onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-[8px] text-base font-medium text-red-600 hover:bg-red-50 transition-all duration-200 ${
@@ -134,13 +119,6 @@ const ChatSidebar = ({ userRole }) => {
             <LogOut className="w-5 h-5 flex-shrink-0 text-red-500" />
             {isExpanded && <span>Sign out</span>}
           </button>
-          
-          {!isExpanded && (
-            <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 top-1/2 -translate-y-1/2 pointer-events-none">
-              Sign out
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
-            </div>
-          )}
         </div>
       </div>
     </div>
