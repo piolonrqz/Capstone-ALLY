@@ -555,5 +555,5 @@ if __name__ == "__main__":
     print("Version: 7.0.0 (Gemini Classification)")
     print("="*60 + "\n")
     
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.environ.get("PORT", 8000))  # default to 8000 if PORT isn't set
     uvicorn.run(app, host="0.0.0.0", port=port)
