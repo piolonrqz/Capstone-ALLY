@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
 import './App.css'
 import LandingPage from './pages/LandingPage'
 import SignUpPage from './pages/SignupPage'
@@ -25,6 +25,13 @@ import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler'
 import AllyConsultationChat from './components/AllyConsultationChat'
 import ClientSecurity from './components/ClientSecurity'
 import { SidebarProvider } from './contexts/SidebarContext'
+import PageLayout from './components/PageLayout.jsx'
+
+const LayoutRoutes = () => (
+  <PageLayout>
+    <Outlet />
+  </PageLayout>
+)
 
 function AppContent() {
   
@@ -40,15 +47,17 @@ function AppContent() {
           <Route path="/signup/verifyClient" element={<VerifyClient/>} />
           <Route path="/signup/verifyLawyer" element={<VerifyLawyer/>} />
           <Route path="/login" element={<Login />} />          
-          <Route path="/lawyers" element={<LawyerDirectoryPage />} />
-          <Route path="/appointments" element={<AppointmentsPage />} />
-          <Route path="/my-cases" element={<MyCasesPage />} />
-          <Route path="/documents" element={<DocumentsPage />} />
-          <Route path="/documents/:caseId" element={<DocumentsPage />} />
-          <Route path="/settings" element={<AccountSettings />} />
-          <Route path="/settings/security" element={<ClientSecurity />} />
-          <Route path="/lawyer-settings" element={<LawyerSettings />} />
-          <Route path="/consult" element={<AllyConsultationChat />} />
+          <Route element={<LayoutRoutes />}>
+            <Route path="/lawyers" element={<LawyerDirectoryPage />} />
+            <Route path="/appointments" element={<AppointmentsPage />} />
+            <Route path="/my-cases" element={<MyCasesPage />} />
+            <Route path="/documents" element={<DocumentsPage />} />
+            <Route path="/documents/:caseId" element={<DocumentsPage />} />
+            <Route path="/settings" element={<AccountSettings />} />
+            <Route path="/settings/security" element={<ClientSecurity />} />
+            <Route path="/lawyer-settings" element={<LawyerSettings />} />
+            <Route path="/consult" element={<AllyConsultationChat />} />
+          </Route>
           {/* Chat Routes */}
           <Route path="/chat" element={<ChatContainer />} />
           <Route path="/messages/:chatroomId" element={<ChatContainer />} />

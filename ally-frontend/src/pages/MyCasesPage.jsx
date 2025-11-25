@@ -4,7 +4,6 @@ import { getAuthData } from '../utils/auth.jsx';
 import { caseService } from '../services/caseService.jsx';
 import CasesList from '../components/CasesList.jsx';
 import CaseSubmissionForm from '../components/CaseSubmissionForm.jsx';
-import PageLayout from '../components/PageLayout.jsx';
 
 const MyCasesPage = () => {
   const [cases, setCases] = useState([]);
@@ -95,37 +94,33 @@ const MyCasesPage = () => {
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <span className="ml-3 text-gray-600">Loading your cases...</span>
-        </div>
-      </PageLayout>
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <span className="ml-3 text-gray-600">Loading your cases...</span>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <PageLayout>
-        <div className="container max-w-5xl px-4 mx-auto py-8">
-          <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
+      <div className="container max-w-5xl px-4 mx-auto py-8">
+        <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
               </div>
             </div>
           </div>
         </div>
-      </PageLayout>
+      </div>
     );
   }
 
   return (
-    <PageLayout>
+    <>
       {/* Case Submission Modal */}
       {showSubmissionForm && (
         <CaseSubmissionForm
@@ -187,7 +182,7 @@ const MyCasesPage = () => {
           />
         </div>
       </div>
-    </PageLayout>
+    </>
   );
 };
 
