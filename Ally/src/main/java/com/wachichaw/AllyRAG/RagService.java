@@ -1,6 +1,5 @@
 package com.wachichaw.AllyRAG;
 
-import com.wachichaw.AllyRAG.RagSearchResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -21,6 +20,48 @@ public class RagService {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * NEW: Validate question using Python's semantic filtering
+     * This runs REGARDLESS of RAG setting
+     */
+    public ValidationResponse validateQuestion(String query) {
+        try {
+            String url = ragServiceUrl + "/api/validate";
+
+            Map<String, Object> request = new HashMap<>();
+            request.put("query", query);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+
+            ResponseEntity<ValidationResponse> response = restTemplate.postForEntity(
+                url, entity, ValidationResponse.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody();
+            }
+
+            // If validation endpoint fails, allow through (fail open)
+            ValidationResponse fallback = new ValidationResponse();
+            fallback.setValid(true);
+            fallback.setMethod("fallback");
+            return fallback;
+
+        } catch (Exception e) {
+            System.err.println("Python validation error: " + e.getMessage());
+            // On error, allow through (fail open)
+            ValidationResponse fallback = new ValidationResponse();
+            fallback.setValid(true);
+            fallback.setMethod("error");
+            return fallback;
+        }
+    }
+
+    /**
+     * Search relevant cases (only when RAG is enabled)
+     */
     public RagSearchResponse searchRelevantCases(String query, int topK) {
         try {
             String url = ragServiceUrl + "/search";

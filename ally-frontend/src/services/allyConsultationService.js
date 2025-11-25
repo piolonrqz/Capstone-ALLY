@@ -9,108 +9,83 @@ export const sendConsultationMessage = async (message, useRAG = false) => {
     const response = await axios.post(API_URL, 
       { 
         message,
-        useRAG  // NEW: Send RAG flag
+        useRAG
       }, 
       {
         headers: { 'Content-Type': 'application/json' },
-        responseType: 'json',  // Changed from 'text' to 'json' to handle new response format
+        responseType: 'json',
       }
     );
 
-    // NEW: Handle ChatResponse object format
-    if (response.data && typeof response.data === 'object') {
-      // Check if it's the new ChatResponse format with RAG data
-      if (response.data.response !== undefined) {
-        return {
-          response: response.data.response,
-          relevantCases: response.data.relevantCases || null,
-          caseCount: response.data.caseCount || 0,
-          confidence: response.data.confidence || null,
-          ragEnabled: response.data.ragEnabled || false,
-          timestamp: response.data.timestamp
-        };
-      }
-      
-      // Legacy format: Try to extract from Gemini JSON structure
-      if (response.data.candidates && response.data.candidates.length > 0) {
-        const candidate = response.data.candidates[0];
-        if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
-          return {
-            response: candidate.content.parts[0].text,
-            relevantCases: null,
-            caseCount: 0,
-            confidence: null,
-            ragEnabled: false
-          };
-        }
-      }
+    // Handle successful response (200 OK)
+    return parseResponseData(response.data);
+    
+  } catch (error) {
+    console.error('Error sending consultation message:', error);
+    
+    // CRITICAL FIX: Handle error responses (400, 500, etc.)
+    if (error.response && error.response.data) {
+      // Backend sent a structured error response (ChatResponse with rejection message)
+      return parseResponseData(error.response.data);
     }
+    
+    // Network error or other issues
+    throw error;
+  }
+};
 
-    // If backend returns a plain string
-    if (typeof response.data === 'string') {
-      // Try to parse as JSON
-      try {
-        const parsed = JSON.parse(response.data);
-        
-        // New ChatResponse format
-        if (parsed.response !== undefined) {
-          return {
-            response: parsed.response,
-            relevantCases: parsed.relevantCases || null,
-            caseCount: parsed.caseCount || 0,
-            confidence: parsed.confidence || null,
-            ragEnabled: parsed.ragEnabled || false,
-            timestamp: parsed.timestamp
-          };
-        }
-        
-        // Gemini format
-        if (parsed.candidates && parsed.candidates.length > 0) {
-          const candidate = parsed.candidates[0];
-          if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
-            return {
-              response: candidate.content.parts[0].text,
-              relevantCases: null,
-              caseCount: 0,
-              confidence: null,
-              ragEnabled: false
-            };
-          }
-        }
-      } catch (e) {
-        // Not JSON, return as plain text in response format
-        return {
-          response: response.data,
-          relevantCases: null,
-          caseCount: 0,
-          confidence: null,
-          ragEnabled: false
-        };
-      }
-      
-      // Fallback: return string as response
+// Helper function to parse response data consistently
+const parseResponseData = (data) => {
+  // New ChatResponse format (your backend's format)
+  if (data && typeof data === 'object' && data.response !== undefined) {
+    return {
+      response: data.response,
+      relevantCases: data.relevantCases || null,
+      caseCount: data.caseCount || 0,
+      confidence: data.confidence || null,
+      ragEnabled: data.ragEnabled || false,
+      timestamp: data.timestamp
+    };
+  }
+  
+  // Legacy Gemini format
+  if (data && data.candidates && data.candidates.length > 0) {
+    const candidate = data.candidates[0];
+    if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
       return {
-        response: response.data,
+        response: candidate.content.parts[0].text,
         relevantCases: null,
         caseCount: 0,
         confidence: null,
         ragEnabled: false
       };
     }
-    
-    // Last resort: stringify
-    return {
-      response: JSON.stringify(response.data),
-      relevantCases: null,
-      caseCount: 0,
-      confidence: null,
-      ragEnabled: false
-    };
-    
-  } catch (error) {
-    console.error('Error sending consultation message:', error);
-    throw error; // Let the component handle the error
   }
+  
+  // Plain string response
+  if (typeof data === 'string') {
+    try {
+      const parsed = JSON.parse(data);
+      return parseResponseData(parsed);
+    } catch (e) {
+      return {
+        response: data,
+        relevantCases: null,
+        caseCount: 0,
+        confidence: null,
+        ragEnabled: false
+      };
+    }
+  }
+  
+  // Fallback: stringify unknown format
+  return {
+    response: JSON.stringify(data),
+    relevantCases: null,
+    caseCount: 0,
+    confidence: null,
+    ragEnabled: false
+  };
 };
 
 // Check RAG service health
