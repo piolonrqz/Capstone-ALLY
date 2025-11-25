@@ -4,7 +4,9 @@ import { User, LogOut, Settings, ChevronDown, MessageCircle, Bell } from 'lucide
 import { getAuthData, isAuthenticated, logout, fetchUserDetails } from '../utils/auth.jsx';
 import { shouldHideNavigation } from '../utils/navigation.js';
 import NotificationDropdown from './NotificationDropdown';
+import MessageDropdown from './MessageDropdown';
 import { useSidebar } from '../contexts/SidebarContext';
+import { fetchActiveConversations } from '../services/chatService';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -17,12 +19,16 @@ const NavigationBar = () => {
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
+  const messageRef = useRef(null);
 
-  // Fetch user details when logged in
+  // Fetch user details and conversations when logged in
   useEffect(() => {
     const getUserDetails = async () => {
       if (isLoggedIn && authData?.userId && !isLoadingUser) {
@@ -31,7 +37,8 @@ const NavigationBar = () => {
           const details = await fetchUserDetails(authData.userId);
           setUserDetails(details);
           
-          
+          // Fetch conversations after getting user details
+          await loadConversations(details.id);
         } catch (error) {
           console.error('Failed to fetch user details:', error);
           setUserDetails(null);
@@ -43,6 +50,32 @@ const NavigationBar = () => {
 
     getUserDetails();
   }, [isLoggedIn, authData?.userId]);
+
+  // Load conversations
+  const loadConversations = async (userId) => {
+    if (!userId) return;
+    
+    setLoadingConversations(true);
+    try {
+      const activeConvos = await fetchActiveConversations(userId);
+      setConversations(activeConvos);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    } finally {
+      setLoadingConversations(false);
+    }
+  };
+
+  // Poll for new messages every 30 seconds
+  useEffect(() => {
+    if (!isLoggedIn || !userDetails?.id) return;
+
+    const interval = setInterval(() => {
+      loadConversations(userDetails.id);
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn, userDetails?.id]);
     
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -52,6 +85,9 @@ const NavigationBar = () => {
       }
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setIsNotificationOpen(false);
+      }
+      if (messageRef.current && !messageRef.current.contains(event.target)) {
+        setIsMessageOpen(false);
       }
     };
 
@@ -89,6 +125,13 @@ const NavigationBar = () => {
 
   const toggleNotifications = () => {
     setIsNotificationOpen(!isNotificationOpen);
+    setIsDropdownOpen(false);
+    setIsMessageOpen(false);
+  };
+
+  const toggleMessages = () => {
+    setIsMessageOpen(!isMessageOpen);
+    setIsNotificationOpen(false);
     setIsDropdownOpen(false);
   };
 
@@ -148,9 +191,14 @@ const NavigationBar = () => {
                   <div className="relative" ref={notificationRef}>
                     <button
                       onClick={toggleNotifications}
-                      className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-50 transition-all duration-200"
+                      className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                        isNotificationOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
                     >
-                      <Bell className="w-5 h-5 text-[#2B62C4]" strokeWidth={1.8} />
+                      <Bell 
+                        className={`w-5 h-5 ${isNotificationOpen ? 'text-blue-600' : 'text-[#2B62C4]'}`} 
+                        strokeWidth={1.8} 
+                      />
                     </button>
                     <NotificationDropdown
                       isOpen={isNotificationOpen}
@@ -159,14 +207,29 @@ const NavigationBar = () => {
                     />
                   </div>
 
-                  <button
-                    onClick={() => navigate('/chat')}
-                    className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-50 transition-all duration-200"
-                  >
-                    <MessageCircle className="w-5 h-5 text-[#2B62C4]" strokeWidth={1.8} />
-                  </button>
+                  <div className="relative" ref={messageRef}>
+                    <button
+                      onClick={toggleMessages}
+                      className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                        isMessageOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <MessageCircle 
+                        className={`w-5 h-5 ${isMessageOpen ? 'text-blue-600' : 'text-[#2B62C4]'}`} 
+                        strokeWidth={1.8} 
+                      />
+                    </button>
+                    <MessageDropdown
+                      isOpen={isMessageOpen}
+                      onClose={() => setIsMessageOpen(false)}
+                      conversations={conversations}
+                      currentUser={userDetails}
+                      loading={loadingConversations}
+                      onRefresh={() => loadConversations(userDetails?.id)}
+                    />
+                  </div>
                   
-                  <div className="flex items-center gap-2 px-3 py-2">
+                  <div className="flex items-center gap-2 px-3 py-2 cursor-pointer">
                     {userDetails?.profilePhotoUrl ? (
                       <img
                         src={userDetails.profilePhotoUrl}

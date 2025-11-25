@@ -29,6 +29,19 @@ const AllyConsultationChat = () => {
     checkRAG();
   }, []);
 
+  // Listen for reset-chat event from sidebar
+  useEffect(() => {
+    const handleResetChat = () => {
+      handleNewChat();
+    };
+
+    window.addEventListener('reset-chat', handleResetChat);
+    
+    return () => {
+      window.removeEventListener('reset-chat', handleResetChat);
+    };
+  }, []);
+
   const getAIResponse = async (userMessage) => {
     setIsTyping(true);
     
