@@ -6,9 +6,12 @@ import Chat from './Chat';
 const MessageDropdown = ({ isOpen, onClose, conversations = [], currentUser, loading = false, onRefresh }) => {
   const [showNewMessage, setShowNewMessage] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
-  const [suggestedLawyers, setSuggestedLawyers] = useState([]);
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+
+  // Check if current user is a lawyer
+  const isLawyer = currentUser?.accountType === 'LAWYER';
 
   // Refresh conversations when coming back from chat view
   useEffect(() => {
@@ -17,11 +20,18 @@ const MessageDropdown = ({ isOpen, onClose, conversations = [], currentUser, loa
     }
   }, [selectedConversation, isOpen]);
 
-  // Update suggested lawyers when conversations change
+  // Update suggested users when conversations change
   useEffect(() => {
-    const lawyers = conversations.filter(c => c.accountType === 'LAWYER');
-    setSuggestedLawyers(lawyers);
-  }, [conversations]);
+    if (isLawyer) {
+      // If current user is a lawyer, show clients
+      const clients = conversations.filter(c => c.accountType !== 'LAWYER');
+      setSuggestedUsers(clients);
+    } else {
+      // If current user is a client, show lawyers
+      const lawyers = conversations.filter(c => c.accountType === 'LAWYER');
+      setSuggestedUsers(lawyers);
+    }
+  }, [conversations, isLawyer]);
 
   const handleConversationClick = (conversation) => {
     setSelectedConversation(conversation);
@@ -46,8 +56,8 @@ const MessageDropdown = ({ isOpen, onClose, conversations = [], currentUser, loa
     }
   };
 
-  const filteredLawyers = suggestedLawyers.filter(lawyer =>
-    lawyer.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = suggestedUsers.filter(user =>
+    user.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Format message timestamp
@@ -158,7 +168,7 @@ const MessageDropdown = ({ isOpen, onClose, conversations = [], currentUser, loa
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search lawyers..."
+              placeholder={isLawyer ? "Search clients..." : "Search lawyers..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -166,11 +176,11 @@ const MessageDropdown = ({ isOpen, onClose, conversations = [], currentUser, loa
           </div>
         </div>
 
-        {/* Suggested Lawyers */}
+        {/* Suggested Users */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-2">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Suggested
+              {isLawyer ? "Potential Clients" : "Suggested Lawyers"}
             </p>
           </div>
           
@@ -178,30 +188,30 @@ const MessageDropdown = ({ isOpen, onClose, conversations = [], currentUser, loa
             <div className="flex items-center justify-center py-8">
               <div className="text-gray-500">Loading...</div>
             </div>
-          ) : filteredLawyers.length > 0 ? (
+          ) : filteredUsers.length > 0 ? (
             <div className="px-2">
-              {filteredLawyers.map((lawyer) => (
+              {filteredUsers.map((user) => (
                 <button
-                  key={lawyer.id}
-                  onClick={() => handleConversationClick(lawyer)}
+                  key={user.id}
+                  onClick={() => handleConversationClick(user)}
                   className="w-full flex items-center gap-3 px-3 py-3 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  {lawyer.profilePhotoUrl ? (
+                  {user.profilePhotoUrl ? (
                     <img
-                      src={lawyer.profilePhotoUrl}
-                      alt={lawyer.name}
+                      src={user.profilePhotoUrl}
+                      alt={user.name}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                       <span className="text-blue-600 font-semibold text-sm">
-                        {lawyer.name?.charAt(0) || 'L'}
+                        {user.name?.charAt(0) || '?'}
                       </span>
                     </div>
                   )}
                   <div className="flex-1 text-left">
-                    <p className="font-medium text-gray-900 text-sm">{lawyer.name}</p>
-                    <p className="text-xs text-gray-500">Lawyer</p>
+                    <p className="font-medium text-gray-900 text-sm">{user.name}</p>
+                    <p className="text-xs text-gray-500">{user.accountType === 'LAWYER' ? 'Lawyer' : 'Client'}</p>
                   </div>
                 </button>
               ))}
@@ -209,7 +219,9 @@ const MessageDropdown = ({ isOpen, onClose, conversations = [], currentUser, loa
           ) : (
             <div className="flex flex-col items-center justify-center py-8 px-4">
               <p className="text-gray-500 text-sm text-center">
-                {searchQuery ? 'No lawyers found' : 'No suggested lawyers available'}
+                {searchQuery 
+                  ? `No ${isLawyer ? 'clients' : 'lawyers'} found` 
+                  : `No suggested ${isLawyer ? 'clients' : 'lawyers'} available`}
               </p>
             </div>
           )}
