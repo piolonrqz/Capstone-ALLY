@@ -179,7 +179,7 @@ export const fetchUserDetails = async (userId) => {
       province: userData.province || '',
       zip: userData.zip || '',
       // 🔥 FIX: Include profile photo URL in returned user details
-      profilePhotoUrl: userData.profilePhotoUrl || null,
+      profilePhotoUrl: userData.profilePhotoUrl,
     };
   } catch (error) {
     console.error(`Error fetching user details for ${userId}:`, error);

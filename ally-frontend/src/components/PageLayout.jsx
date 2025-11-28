@@ -16,7 +16,7 @@ const PageLayout = ({ children }) => {
       {/* Main Content Area */}
       <div className={`transition-all duration-300 ${
         isLoggedIn 
-          ? (isExpanded ? 'ml-[240px]' : 'ml-[60px]')
+          ? `md:${isExpanded ? 'ml-[240px]' : 'ml-[60px]'}`
           : ''
       }`}>
         {/* Navigation Bar */}

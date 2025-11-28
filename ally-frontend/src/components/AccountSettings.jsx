@@ -30,6 +30,7 @@ const AccountSettings = () => {
         setUserType(data.accountType.toLowerCase());
         setUserData(data);
       } catch (err) {
+        console.error('Error loading user data:', err);
         setError('Failed to load user data. Please try again.');
       } finally {
         setLoading(false);
