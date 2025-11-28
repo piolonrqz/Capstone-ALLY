@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Shield, Trash2, Bell } from 'lucide-react';
+import { toast } from 'sonner';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 
@@ -11,6 +12,9 @@ const ClientSettings = ({ user }) => {
     title: 'Client',
     location: user?.location || user?.city || '',
   });
+
+  // State for hover effect on profile photo
+  const [isHoveringPhoto, setIsHoveringPhoto] = useState(false);
 
   // State for selected profile photo file and preview
   const [selectedProfileFile, setSelectedProfileFile] = useState(null);
@@ -106,13 +110,13 @@ const ClientSettings = ({ user }) => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file.');
+      toast.error('Please select a valid image file.');
       return;
     }
 
     // Validate file size (e.g., 5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB.');
+      toast.error('File size must be less than 5MB.');
       return;
     }
 
@@ -234,13 +238,13 @@ const ClientSettings = ({ user }) => {
           ...(profilePhotoUrl && { profilePhoto: profilePhotoUrl })
         }));
         
-        alert('Profile updated successfully!');
+        toast.success('Profile updated successfully!');
       } else {
-        alert('Profile update failed.');
+        toast.error('Profile update failed.');
       }
     } catch (error) {
       console.error('Update error:', error);
-      alert(`Update failed: ${error.message}`);
+      toast.error(`Update failed: ${error.message}`);
     }
   };
 
@@ -305,13 +309,31 @@ const ClientSettings = ({ user }) => {
           <Section title="My Profile">
             <div className="flex items-center justify-between space-x-4">
               <div className="flex items-center">
-                <div className="flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full">
+                <div 
+                  className="relative flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full cursor-pointer group"
+                  onMouseEnter={() => setIsHoveringPhoto(true)}
+                  onMouseLeave={() => setIsHoveringPhoto(false)}
+                >
                   {getProfilePhotoSource() ? (
-                    <img
-                      src={getProfilePhotoSource()}
-                      alt="Profile"
-                      className="object-cover w-full h-full"
-                    />
+                    <>
+                      <img
+                        src={getProfilePhotoSource()}
+                        alt="Profile"
+                        className="object-cover w-full h-full"
+                      />
+                      {/* Hover overlay with remove button */}
+                      {isHoveringPhoto && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
+                          <button
+                            onClick={handleRemoveProfilePhoto}
+                            className="p-2 text-white hover:text-red-400 transition-colors"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <span className="text-xl font-semibold text-blue-600">
                       {(

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 const NotificationDropdown = ({ isOpen, onClose, currentUser }) => {
     const [notifications, setNotifications] = useState([]);
@@ -23,6 +24,7 @@ const NotificationDropdown = ({ isOpen, onClose, currentUser }) => {
             setLoading(false);
         } catch (error) {
             console.error('Error loading notifications:', error);
+            toast.error('Failed to load notifications');
             setLoading(false);
         }
     };

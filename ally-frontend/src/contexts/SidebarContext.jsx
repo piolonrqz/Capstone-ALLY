@@ -26,8 +26,13 @@ export const SidebarProvider = ({ children }) => {
     setIsExpanded(prev => !prev);
   };
 
+  const resetSidebar = () => {
+    localStorage.removeItem('sidebar-expanded');
+    setIsExpanded(true);
+  };
+
   return (
-    <SidebarContext.Provider value={{ isExpanded, toggleSidebar }}>
+    <SidebarContext.Provider value={{ isExpanded, toggleSidebar, resetSidebar }}>
       {children}
     </SidebarContext.Provider>
   );

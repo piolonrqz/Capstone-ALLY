@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AppointmentCard } from './AppointmentCard';
 import { AppointmentDetailsModal } from './AppointmentDetailsModal';
 import { Loader2, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
 import { getAuthData } from '../utils/auth.jsx';
 import { scheduleService } from '../services/scheduleService.jsx';
 
@@ -107,17 +108,17 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           : apt
       ));
       
-      alert('Appointment cancelled successfully!');
+      toast.success('Appointment cancelled successfully!');
     } catch (error) {
       console.error('Error cancelling appointment:', error);
-      alert(error.message || 'Failed to cancel appointment. Please try again.');
+      toast.error(error.message || 'Failed to cancel appointment. Please try again.');
     }
   };
 
   const handleAccept = async (appointment) => {
     const authData = getAuthData();
     if (!authData || authData.accountType !== 'LAWYER') {
-      alert('Only lawyers can accept appointments');
+      toast.error('Only lawyers can accept appointments');
       return;
     }
 
@@ -131,17 +132,17 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           : apt
       ));
       
-      alert('Appointment accepted successfully!');
+      toast.success('Appointment accepted successfully!');
     } catch (error) {
       console.error('Error accepting appointment:', error);
-      alert(error.message || 'Failed to accept appointment. Please try again.');
+      toast.error(error.message || 'Failed to accept appointment. Please try again.');
     }
   };
 
   const handleDecline = async (appointment, reason) => {
     const authData = getAuthData();
     if (!authData || authData.accountType !== 'LAWYER') {
-      alert('Only lawyers can decline appointments');
+      toast.error('Only lawyers can decline appointments');
       return;
     }
 
@@ -155,10 +156,10 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           : apt
       ));
       
-      alert('Appointment declined successfully!');
+      toast.success('Appointment declined successfully!');
     } catch (error) {
       console.error('Error declining appointment:', error);
-      alert(error.message || 'Failed to decline appointment. Please try again.');
+      toast.error(error.message || 'Failed to decline appointment. Please try again.');
     }
   };
 

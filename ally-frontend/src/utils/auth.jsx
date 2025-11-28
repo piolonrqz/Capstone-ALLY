@@ -9,6 +9,67 @@ export const decodeJWT = (token) => {
   }
 };
 
+export const validateToken = async (token) => {
+  if (!token) {
+    return false;
+  }
+
+  try {
+    // Decode JWT to get userId
+    const payload = decodeJWT(token);
+    const userId = payload.sub;
+
+    if (!userId) {
+      return false;
+    }
+
+    // Make a lightweight API call to verify token is still valid
+    const response = await fetch(`http://localhost:8080/users/getUser/${userId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Token is valid if we get a 200 response
+    return response.ok;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return false;
+  }
+};
+
+export const validateAndGetAuthData = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      return null;
+    }
+
+    // Validate token with backend
+    const isValid = await validateToken(token);
+
+    if (!isValid) {
+      // Token is invalid, clear storage
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('department');
+      localStorage.removeItem('profilePhoto');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('sidebar-expanded');
+      return null;
+    }
+
+    // Token is valid, return auth data
+    return getAuthData();
+  } catch (error) {
+    console.error('Error validating auth data:', error);
+    return null;
+  }
+};
+
 export const getAuthData = () => {
   try {
     const token = localStorage.getItem('token');
@@ -131,5 +192,7 @@ export const logout = () => {
   localStorage.removeItem('role');
   localStorage.removeItem('department');
   localStorage.removeItem('profilePhoto');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('sidebar-expanded');
   window.location.href = '/login';
 };

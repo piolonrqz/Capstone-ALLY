@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Clock, Calendar as CalendarIcon, User, Loader2, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 import { Calendar } from './ui/calendar';
 import { scheduleService } from '../services/scheduleService.jsx';
 import { getAuthData, fetchUserDetails } from '../utils/auth.jsx';
@@ -161,7 +162,7 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
       }
       
       console.log('Appointment created successfully:', result);
-      alert('Consultation booked successfully!');
+      toast.success('Consultation booked successfully!');
       if (onSuccess) {
         onSuccess();
       } else {
