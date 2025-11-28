@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, Search } from 'lucide-react';
+import { Send, MessageCircle, Search, MessageSquarePlus } from 'lucide-react';
 import { sendConsultationMessage, checkRagHealth } from '../services/allyConsultationService';
 
 const AllyConsultationChat = () => {
@@ -61,7 +61,7 @@ const AllyConsultationChat = () => {
       };
       
       setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
+    } catch {
       const errorMessage = {
         id: `msg-${Date.now()}-${messageIdCounter.current++}`,
         text: "Sorry, I'm having trouble connecting to the legal assistant. Please try again later.",
@@ -237,23 +237,36 @@ const AllyConsultationChat = () => {
           {/* Input Area - Fixed at bottom */}
           <div className="bg-white border-t border-gray-200">
             <div className="max-w-4xl mx-auto px-4 py-4">
-              {/* RAG Toggle Button */}
-              <div className="mb-3 flex items-center justify-between">
-                <button
-                  onClick={() => setUseRAG(!useRAG)}
-                  disabled={!ragAvailable}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                    useRAG 
-                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  title={!ragAvailable ? 'RAG service unavailable' : 'Toggle case search'}
-                >
-                  <Search className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {useRAG ? 'Case Search: ON' : 'Search for Relevant Cases'}
-                  </span>
-                </button>
+              {/* Controls Row: RAG Toggle and New Chat */}
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setUseRAG(!useRAG)}
+                    disabled={!ragAvailable}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                      useRAG 
+                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    title={!ragAvailable ? 'RAG service unavailable' : 'Toggle case search'}
+                  >
+                    <Search className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      {useRAG ? 'Case Search: ON' : 'Search for Relevant Cases'}
+                    </span>
+                  </button>
+                  
+                  {/* New Chat Button - Visible to ALL users */}
+                  <button
+                    onClick={handleNewChat}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
+                    title="Start a new conversation"
+                  >
+                    <MessageSquarePlus className="w-4 h-4" />
+                    <span className="text-sm font-medium">New Chat</span>
+                  </button>
+                </div>
+                
                 {!ragAvailable && (
                   <span className="text-xs text-red-500">⚠️ Search unavailable</span>
                 )}

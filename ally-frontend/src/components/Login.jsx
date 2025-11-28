@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { toast } from 'sonner';
 import Logo from './Logo';
 import { Shield, Eye, EyeOff } from 'lucide-react';
 
@@ -60,7 +61,7 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (error) {
       console.error('Login failed:', error);
-      alert('Login failed. Please check your credentials.');
+      toast.error('Login failed. Please check your credentials.');
     }
   };
 

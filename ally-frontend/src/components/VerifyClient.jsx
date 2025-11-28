@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 
 const VerifyClient = () => {
   const [verificationCode, setVerificationCode] = useState('');
@@ -63,13 +63,12 @@ const VerifyClient = () => {
       await fetch("http://localhost:8080/resendCodeClient?email=" + email, {
         method: "POST"
       });
-    alert('Verification code resent!');
+    toast.success('Verification code resent!');
     }, 1500);
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen font-['Poppins'] relative p-4">
-      <Toaster position="top-center" richColors />
       <div className="w-full max-w-md p-8 bg-white border border-gray-200 shadow-md rounded-2xl">
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-bold text-gray-800">Verify Your Email</h2>

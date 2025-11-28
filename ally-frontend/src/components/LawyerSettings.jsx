@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { User, Shield, Users, FileOutput, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 import NavigationBar from './NavigationBar';
@@ -8,8 +9,6 @@ import { Button } from 'react-day-picker';
 
 // Accept user prop from AccountSettings
 const LawyerSettings = ({ user }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const profilePhoto = localStorage.getItem('profilePhoto');
   const token = localStorage.getItem('token');
 
@@ -33,6 +32,9 @@ const LawyerSettings = ({ user }) => {
     practiceAreas: user?.practiceAreas || '',
     educationInstitution: user?.educationInstitution || user?.education_institution || '',
   });
+
+  // State for hover effect on profile photo
+  const [isHoveringPhoto, setIsHoveringPhoto] = useState(false);
 
   const [address, setAddress] = useState({
     line1: user?.address || '',
@@ -240,21 +242,21 @@ const LawyerSettings = ({ user }) => {
         body: JSON.stringify(updatedUserData),
       });
       if (response.ok) {
-        alert('Profile updated successfully!');
+        toast.success('Profile updated successfully!');
         fetchUserData(); // re-fetch user data to update UI
       } else {
         const errorData = await response.text();
-        alert(`Update failed: ${errorData}`);
+        toast.error(`Update failed: ${errorData}`);
       }
-    } catch (error) {
-      alert('Something went wrong.');
+    } catch {
+      toast.error('Something went wrong.');
     }
   };
 
   const handleCredentialsUpdate = async () => {
   const credentials = document.getElementById('credentials-input').files[0];
   if (!credentials) {
-    alert('Please select a file.');
+    toast.error('Please select a file.');
     return;
   }
   const formData = new FormData();
@@ -269,14 +271,14 @@ const LawyerSettings = ({ user }) => {
       body: formData,
     });
     if (response.ok) {
-      alert('Credentials updated successfully!');
+      toast.success('Credentials updated successfully!');
     } else {
       const errorData = await response.text();
-      alert(`Failed to update credentials: ${errorData}`);
+      toast.error(`Failed to update credentials: ${errorData}`);
     }
   } catch (error) {
     console.error('Error updating credentials:', error);
-    alert('Failed to update credentials. Please try again.');
+    toast.error('Failed to update credentials. Please try again.');
   }
 };
   // Handler for profile photo change
@@ -306,11 +308,37 @@ const LawyerSettings = ({ user }) => {
         }));
       }
       
-      alert('Profile photo updated successfully!');
+      toast.success('Profile photo updated successfully!');
     } catch (err) {
-      alert('Failed to upload profile photo.');
+      toast.error('Failed to upload profile photo.');
       console.error(err);
     }
+  };
+
+  // Handler to remove profile photo
+  const handleRemoveProfilePhoto = () => {
+    // Clear profile photo from localStorage
+    localStorage.removeItem('profilePhoto');
+    
+    // Update local state to immediately hide the photo
+    setCurrentProfilePhoto(null);
+    
+    // Clear the currentUser object's prof_pic if it exists
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (currentUser.id) {
+      localStorage.setItem('currentUser', JSON.stringify({
+        ...currentUser,
+        prof_pic: null
+      }));
+    }
+    
+    // Reset file input
+    const fileInput = document.getElementById('profile-photo-input');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    toast.success('Profile photo removed successfully!');
   };
 
   // Chips-style multi-select for Practice Areas
@@ -440,13 +468,31 @@ const LawyerSettings = ({ user }) => {
         <Section title="My Profile">
           <div className="flex items-center justify-between space-x-4">
             <div className="flex items-center">
-              <div className="flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full">
+              <div 
+                className="relative flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full cursor-pointer group"
+                onMouseEnter={() => setIsHoveringPhoto(true)}
+                onMouseLeave={() => setIsHoveringPhoto(false)}
+              >
                 {profilePhoto ? (
-                  <img
-                    src={profilePhoto}
-                    alt="Profile"
-                    className="object-cover w-full h-full"
-                  />
+                  <>
+                    <img
+                      src={profilePhoto}
+                      alt="Profile"
+                      className="object-cover w-full h-full"
+                    />
+                    {/* Hover overlay with remove button */}
+                    {isHoveringPhoto && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
+                        <button
+                          onClick={handleRemoveProfilePhoto}
+                          className="p-2 text-white hover:text-red-400 transition-colors"
+                          title="Remove photo"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <span className="text-xl font-semibold text-blue-600">
                     {(

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 
@@ -19,22 +20,22 @@ const ClientSecurity = ({ user }) => {
 
   const handlePasswordChange = async () => {
     if (!passwordChange.currentPassword || !passwordChange.newPassword || !passwordChange.confirmPassword) {
-      alert('Please fill in all password fields.');
+      toast.error('Please fill in all password fields.');
       return;
     }
 
     if (passwordChange.newPassword !== passwordChange.confirmPassword) {
-      alert('New password and confirm password do not match.');
+      toast.error('New password and confirm password do not match.');
       return;
     }
 
     if (passwordChange.newPassword.length < 8) {
-      alert('New password must be at least 8 characters long.');
+      toast.error('New password must be at least 8 characters long.');
       return;
     }
 
     if (passwordChange.currentPassword === passwordChange.newPassword) {
-      alert('New password must be different from current password.');
+      toast.error('New password must be different from current password.');
       return;
     }
 
@@ -65,13 +66,13 @@ const ClientSecurity = ({ user }) => {
           showNewPassword: false,
           showConfirmPassword: false
         });
-        alert('Password changed successfully!');
+        toast.success('Password changed successfully!');
       } else {
-        alert(`Password change failed: ${data.message || 'Unknown error'}`);
+        toast.error(`Password change failed: ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Password change error:', error);
-      alert('Password change failed. Please try again.');
+      toast.error('Password change failed. Please try again.');
     } finally {
       setPasswordChange(prev => ({ ...prev, isLoading: false }));
     }

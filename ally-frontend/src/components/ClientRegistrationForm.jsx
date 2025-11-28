@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ClientRegistrationForm() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function ClientRegistrationForm() {
     profilePhoto: null
   });
   const [errors, setErrors] = useState({});
+  const [isHoveringPhoto, setIsHoveringPhoto] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -137,6 +139,21 @@ export default function ClientRegistrationForm() {
     setStep(1);
   };
 
+  const handleRemoveProfilePhoto = () => {
+    setFormData({
+      ...formData,
+      profilePhoto: null
+    });
+    
+    // Reset file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    toast.success('Profile photo removed');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep2()) {
@@ -176,15 +193,15 @@ export default function ClientRegistrationForm() {
             response.status === 409 ||
             (errorData && errorData.message && errorData.message.toLowerCase().includes("email"))
           ) {
-            alert("Email already exists.");
+            toast.error("Email already exists.");
             navigate('/signup');
           } else {
-            alert(errorData.message || "Registration failed. Please try again.");
+            toast.error(errorData.message || "Registration failed. Please try again.");
           }
         }
       } catch (error) {
         console.error("Error submitting form:", error);
-        alert('Registration failed. Please try again.');
+        toast.error('Registration failed. Please try again.');
       } finally {
         setIsSubmitting(false);
       }
@@ -232,13 +249,32 @@ export default function ClientRegistrationForm() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 text-start mb-2">Profile Photo</label>
                 <div className="flex items-center gap-4 mt-2">
-                  <div className="relative flex-shrink-0 w-20 h-20">
+                  <div 
+                    className="relative flex-shrink-0 w-20 h-20 cursor-pointer"
+                    onMouseEnter={() => setIsHoveringPhoto(true)}
+                    onMouseLeave={() => setIsHoveringPhoto(false)}
+                  >
                     {formData.profilePhoto ? (
-                      <img 
-                        src={URL.createObjectURL(formData.profilePhoto)} 
-                        alt="Profile" 
-                        className="object-cover w-full h-full rounded-full"
-                      />
+                      <>
+                        <img 
+                          src={URL.createObjectURL(formData.profilePhoto)} 
+                          alt="Profile" 
+                          className="object-cover w-full h-full rounded-full"
+                        />
+                        {/* Hover overlay with remove button */}
+                        {isHoveringPhoto && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full transition-opacity">
+                            <button
+                              type="button"
+                              onClick={handleRemoveProfilePhoto}
+                              className="p-2 text-white hover:text-red-400 transition-colors"
+                              title="Remove photo"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <img 
                         src="/add_profile.png" 
@@ -262,7 +298,7 @@ export default function ClientRegistrationForm() {
                               profilePhoto: file
                             });
                           } else {
-                            alert("File size should not exceed 5MB");
+                            toast.error("File size should not exceed 5MB");
                           }
                         }}
                       />

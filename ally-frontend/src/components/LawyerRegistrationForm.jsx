@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from '../firebase/config';
-import { Eye, EyeOff } from 'lucide-react';
-import { toast, Toaster } from 'sonner';
+import { Eye, EyeOff, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function LawyerRegistrationForm() {
   const [step, setStep] = useState(1); // Start with step 1 for proper form flow
@@ -13,6 +11,7 @@ export default function LawyerRegistrationForm() {
   const lname = localStorage.getItem("lName");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isHoveringPhoto, setIsHoveringPhoto] = useState(false);
   console.log("Initial email from search params:", oemail);
   console.log("Initial first name from search params:", fname);
   console.log("Initial last name from search params:", lname);
@@ -216,6 +215,21 @@ export default function LawyerRegistrationForm() {
   
   const navigate = useNavigate();
 
+  const handleRemoveProfilePhoto = () => {
+    setFormData({
+      ...formData,
+      profile_photo: null
+    });
+    
+    // Reset file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    toast.success('Profile photo removed');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateStep3()) {
@@ -327,13 +341,32 @@ export default function LawyerRegistrationForm() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 text-start mb-2">Profile Photo</label>
                 <div className="flex items-center gap-4 mt-2">
-                  <div className="relative flex-shrink-0 w-20 h-20">
+                  <div 
+                    className="relative flex-shrink-0 w-20 h-20 cursor-pointer"
+                    onMouseEnter={() => setIsHoveringPhoto(true)}
+                    onMouseLeave={() => setIsHoveringPhoto(false)}
+                  >
                     {formData.profile_photo ? (
-                      <img 
-                        src={URL.createObjectURL(formData.profile_photo)} 
-                        alt="Profile" 
-                        className="object-cover w-full h-full rounded-full"
-                      />
+                      <>
+                        <img 
+                          src={URL.createObjectURL(formData.profile_photo)} 
+                          alt="Profile" 
+                          className="object-cover w-full h-full rounded-full"
+                        />
+                        {/* Hover overlay with remove button */}
+                        {isHoveringPhoto && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full transition-opacity">
+                            <button
+                              type="button"
+                              onClick={handleRemoveProfilePhoto}
+                              className="p-2 text-white hover:text-red-400 transition-colors"
+                              title="Remove photo"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <img 
                         src="/add_profile.png" 
@@ -780,7 +813,6 @@ export default function LawyerRegistrationForm() {
           )}
         </form>
       </div>
-      <Toaster position="top-center" richColors />
     </div>
   );
 }

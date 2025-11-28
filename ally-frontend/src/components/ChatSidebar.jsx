@@ -4,10 +4,10 @@ import { MessageSquarePlus, Folder, FileText, Calendar, UserSearch, MessageCircl
 import { logout } from '../utils/auth.jsx';
 import { useSidebar } from '../contexts/SidebarContext';
 
-const ChatSidebar = ({ userRole }) => {
+const ChatSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isExpanded, toggleSidebar } = useSidebar();
+  const { isExpanded, toggleSidebar, resetSidebar } = useSidebar();
 
   const navigationItems = [
     { name: 'New Chat', path: '/', icon: MessageSquarePlus, action: 'newChat' },
@@ -23,6 +23,7 @@ const ChatSidebar = ({ userRole }) => {
   };
 
   const handleLogout = () => {
+    resetSidebar();
     logout();
     navigate('/');
   };
