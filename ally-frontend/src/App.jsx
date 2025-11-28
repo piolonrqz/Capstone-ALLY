@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
 import './App.css'
 import LandingPage from './pages/LandingPage'
 import SignUpPage from './pages/SignupPage'
@@ -19,47 +19,46 @@ import { AppointmentsPage } from './pages/AppointmentsPage'
 import DocumentsPage from './pages/DocumentsPage'
 import AccountSettings from './components/AccountSettings'
 import ChatContainer from './components/ChatContainer'
-import NavigationBar from './components/NavigationBar'
 import MyCasesPage from './pages/MyCasesPage'
-import { shouldShowNavigation } from './utils/navigation.js'
 import LawyerSettings from './components/LawyerSettings'
 import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler'
 import AllyConsultationChat from './components/AllyConsultationChat'
 import ClientSecurity from './components/ClientSecurity'
+import { SidebarProvider } from './contexts/SidebarContext'
+import PageLayout from './components/PageLayout.jsx'
 
-// Custom hook to determine if navigation bar should be visible
-const useNavigationVisibility = () => {
-  const location = useLocation();
-  return shouldShowNavigation(location.pathname);
-};
+const LayoutRoutes = () => (
+  <PageLayout>
+    <Outlet />
+  </PageLayout>
+)
 
 function AppContent() {
-  const showNavigation = useNavigationVisibility();
   
   return (
     <>
-      <NavigationBar />
-      <div className={showNavigation ? "pt-[104px]" : ""}>
+      <div>
         <Routes>
-
-        <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/signup/client" element={<ClientRegistrationForm />} />
-        <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
-        <Route path="/signup/verifyClient" element={<VerifyClient/>} />
-        <Route path="/signup/verifyLawyer" element={<VerifyLawyer/>} />
-        <Route path="/login" element={<Login />} />          
-        <Route path="/lawyers" element={<LawyerDirectoryPage />} />
-        <Route path="/appointments" element={<AppointmentsPage />} />
-        <Route path="/my-cases" element={<MyCasesPage />} />
-        <Route path="/documents" element={<DocumentsPage />} />
-        <Route path="/documents/:caseId" element={<DocumentsPage />} />
-        <Route path="/settings" element={<AccountSettings />} />
-        <Route path="/settings/security" element={<ClientSecurity />} />
-        <Route path="/lawyer-settings" element={<LawyerSettings />} />
-        <Route path="/consult" element={<AllyConsultationChat />} />
-                  {/* Chat Routes */}
+          <Route path="/oauth2-redirect" element={<OAuth2RedirectHandler />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signup/client" element={<ClientRegistrationForm />} />
+          <Route path="/signup/lawyer" element={<LawyerRegistrationForm />} />        
+          <Route path="/signup/verifyClient" element={<VerifyClient/>} />
+          <Route path="/signup/verifyLawyer" element={<VerifyLawyer/>} />
+          <Route path="/login" element={<Login />} />          
+          <Route element={<LayoutRoutes />}>
+            <Route path="/lawyers" element={<LawyerDirectoryPage />} />
+            <Route path="/appointments" element={<AppointmentsPage />} />
+            <Route path="/my-cases" element={<MyCasesPage />} />
+            <Route path="/documents" element={<DocumentsPage />} />
+            <Route path="/documents/:caseId" element={<DocumentsPage />} />
+            <Route path="/settings" element={<AccountSettings />} />
+            <Route path="/settings/security" element={<ClientSecurity />} />
+            <Route path="/lawyer-settings" element={<LawyerSettings />} />
+            <Route path="/consult" element={<AllyConsultationChat />} />
+          </Route>
+          {/* Chat Routes */}
           <Route path="/chat" element={<ChatContainer />} />
           <Route path="/messages/:chatroomId" element={<ChatContainer />} />
 
@@ -88,7 +87,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <SidebarProvider>
+        <AppContent />
+      </SidebarProvider>
     </Router>
   );
 }

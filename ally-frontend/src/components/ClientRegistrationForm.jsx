@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from './Logo';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function ClientRegistrationForm() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const oemail = localStorage.getItem("email");
   const fname = localStorage.getItem("fName");
   const lname = localStorage.getItem("lName");
@@ -46,6 +46,37 @@ export default function ClientRegistrationForm() {
     }
   };
 
+  const handlePhoneChange = (e) => {
+    let value = e.target.value;
+    // Remove all non-numeric characters
+    const numbersOnly = value.replace(/\D/g, '');
+    
+    // Limit to 10 digits
+    const limitedNumbers = numbersOnly.slice(0, 10);
+    
+    // Format with spaces for display: 917 123 4567
+    let formatted = limitedNumbers;
+    if (limitedNumbers.length > 3) {
+      formatted = limitedNumbers.slice(0, 3) + ' ' + limitedNumbers.slice(3);
+    }
+    if (limitedNumbers.length > 6) {
+      formatted = limitedNumbers.slice(0, 3) + ' ' + limitedNumbers.slice(3, 6) + ' ' + limitedNumbers.slice(6);
+    }
+    
+    setFormData({
+      ...formData,
+      phoneNumber: formatted
+    });
+    
+    // Clear error if exists
+    if (errors.phoneNumber) {
+      setErrors({
+        ...errors,
+        phoneNumber: ""
+      });
+    }
+  };
+
   const validateStep1 = () => {
     const newErrors = {};
     
@@ -75,7 +106,17 @@ export default function ClientRegistrationForm() {
   const validateStep2 = () => {
     const newErrors = {};
     
-    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = "Phone number is required";
+    } else {
+      const numbersOnly = formData.phoneNumber.replace(/\D/g, '');
+      if (numbersOnly.length !== 10) {
+        newErrors.phoneNumber = "Phone number must be 10 digits";
+      } else if (!numbersOnly.startsWith('9')) {
+        newErrors.phoneNumber = "Phone number must start with 9";
+      }
+    }
+    
     if (!formData.address.trim()) newErrors.address = "Address is required";
     if (!formData.city.trim()) newErrors.city = "City is required";
     if (!formData.province.trim()) newErrors.province = "Province is required";
@@ -97,59 +138,75 @@ export default function ClientRegistrationForm() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();    if (validateStep2()) {
-        try {
-          const body = new FormData();
-          body.append("email", formData.email);
-          body.append("password", formData.password);
-          body.append("Fname", formData.fName);
-          body.append("Lname", formData.lName);          
-          body.append("phoneNumber", formData.phoneNumber);
-          body.append("address", formData.address);
-          body.append("city", formData.city);
-          body.append("province", formData.province);
-          body.append("zip", formData.zip);          
-          if (formData.profilePhoto) {
-            body.append("profilePhoto", formData.profilePhoto);
-            console.log("Profile photo added to FormData:", formData.profilePhoto);
-          } else {
-            console.log("No profile photo to add");
-          }
-          console.log("Submitting form with:", body);
-          
-        const response = await fetch("http://localhost:8080/users/Client", {
-        method: "POST",
-        body: body
-      });
-
-      if (response.ok) {
-        alert("Registration successful! Please verify the email.");
-        navigate('/signup/verifyClient', { state: { email: formData.email } });
-      } else {
-        // Try to get error message from backend
-        const errorData = await response.json().catch(() => ({}));
-        if (
-          response.status === 409 ||
-          (errorData && errorData.message && errorData.message.toLowerCase().includes("email"))
-        ) {
-          alert("Email already exists.");
-          navigate('/signup');
+    e.preventDefault();
+    if (validateStep2()) {
+      setIsSubmitting(true);
+      try {
+        const body = new FormData();
+        body.append("email", formData.email);
+        body.append("password", formData.password);
+        body.append("Fname", formData.fName);
+        body.append("Lname", formData.lName);          
+        // Format phone number for database: +639171234567 (no spaces)
+        const phoneNumberForDB = "+63" + formData.phoneNumber.replace(/\D/g, '');
+        body.append("phoneNumber", phoneNumberForDB);
+        body.append("address", formData.address);
+        body.append("city", formData.city);
+        body.append("province", formData.province);
+        body.append("zip", formData.zip);          
+        if (formData.profilePhoto) {
+          body.append("profilePhoto", formData.profilePhoto);
+          console.log("Profile photo added to FormData:", formData.profilePhoto);
         } else {
-          alert(errorData.message || "Registration failed. Please try again.");
+          console.log("No profile photo to add");
         }
+        console.log("Submitting form with:", body);
+        
+        const response = await fetch("http://localhost:8080/users/Client", {
+          method: "POST",
+          body: body
+        });
+
+        if (response.ok) {
+          navigate('/signup/verifyClient', { state: { email: formData.email } });
+        } else {
+          // Try to get error message from backend
+          const errorData = await response.json().catch(() => ({}));
+          if (
+            response.status === 409 ||
+            (errorData && errorData.message && errorData.message.toLowerCase().includes("email"))
+          ) {
+            alert("Email already exists.");
+            navigate('/signup');
+          } else {
+            alert(errorData.message || "Registration failed. Please try again.");
+          }
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        alert('Registration failed. Please try again.');
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert('Registration failed. Please try again.');
     }
-  }
-};
+  };
   return (    
-    <div className="flex items-center justify-center w-full min-h-screen overflow-hidden bg-white font-['Poppins'] relative">
-      <Logo />
-      <div className="w-full max-w-4xl p-12 mx-auto shadow-lg bg-stone-100 border-stone-300 rounded-xl">
-        <h2 className="mb-3 text-4xl font-semibold text-center text-blue-900">Register as a Client</h2>
-        <p className="mb-8 text-base text-center text-neutral-600">Create your account to find legal help</p>
+    <div className="flex items-center justify-center min-h-screen font-['Poppins'] relative p-4">
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-[1440px] mx-auto px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div onClick={() => navigate('/')} className="cursor-pointer">
+              <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="w-full max-w-4xl p-6 mt-24 bg-white border rounded-lg shadow-lg sm:p-8 md:p-10">
+        <h2 className="mb-2 text-2xl sm:text-3xl md:text-4xl font-semibold text-center text-[#11265A] font-['Poppins']">Register as a <span className="text-blue-600">Client</span></h2>
+        <p className="mb-6 sm:mb-8 text-sm sm:text-base text-center text-gray-450 font-['Poppins']">Create your account to find legal help</p>
         
         {/* Progress Bar */}
         <div className="mb-8">
@@ -173,9 +230,9 @@ export default function ClientRegistrationForm() {
             <div className="space-y-4">
               {/* Profile Photo Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 text-start">Profile Photo</label>
-                <div className="flex items-center gap-6 mt-2">
-                  <div className="relative flex-shrink-0 w-24 h-24 sm:w-32 sm:h-32">
+                <label className="block text-sm font-medium text-gray-700 text-start mb-2">Profile Photo</label>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="relative flex-shrink-0 w-20 h-20">
                     {formData.profilePhoto ? (
                       <img 
                         src={URL.createObjectURL(formData.profilePhoto)} 
@@ -191,7 +248,7 @@ export default function ClientRegistrationForm() {
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="inline-block px-4 py-2 text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
+                    <label className="inline-block px-4 py-2 text-sm text-white bg-blue-500 rounded-lg cursor-pointer hover:bg-blue-600">
                       Upload Photo
                       <input
                         type="file"
@@ -217,10 +274,14 @@ export default function ClientRegistrationForm() {
 
               <div className="flex gap-6">
                 <div className="w-1/2">
+                  <label htmlFor="fName" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                    First Name
+                  </label>
                   <input
+                    id="fName"
                     type="text"
                     name="fName"
-                    placeholder="First Name"
+                    placeholder="Enter your first name"
                     className={`w-full p-3 border rounded-lg ${errors.fName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
                     value={formData.fName}
                     onChange={handleChange}
@@ -228,10 +289,14 @@ export default function ClientRegistrationForm() {
                   {errors.fName && <p className="mt-1 text-xs text-red-500">{errors.fName}</p>}
                 </div>
                 <div className="w-1/2">
+                  <label htmlFor="lName" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                    Last Name
+                  </label>
                   <input
+                    id="lName"
                     type="text"
                     name="lName"
-                    placeholder="Last Name"
+                    placeholder="Enter your last name"
                     className={`w-full p-3 border rounded-lg ${errors.lName ? 'border-red-500' : 'border-neutral-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none`}
                     value={formData.lName}
                     onChange={handleChange}
@@ -241,11 +306,15 @@ export default function ClientRegistrationForm() {
               </div>
               
               <div>
+                <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                  Email
+                </label>
                 <input
+                  id="email"
                   type="email"
                   name="email"
-                  placeholder="Email"
-                  className={`w-full p-2 border rounded ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="your.email@example.com"
+                  className={`w-full p-2.5 border rounded-md ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   value={formData.email}
                   onChange={handleChange}
                 />
@@ -253,7 +322,7 @@ export default function ClientRegistrationForm() {
               </div>
               
               <div>
-                <label htmlFor="password" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                   Password
                 </label>
                 <div className="relative">
@@ -261,6 +330,7 @@ export default function ClientRegistrationForm() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     name="password"
+                    placeholder="Enter your password"
                     className={`w-full p-2.5 pr-10 border rounded-md ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.password}
                     onChange={handleChange}
@@ -278,11 +348,11 @@ export default function ClientRegistrationForm() {
                   </button>
                 </div>
                 {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
-                <p className="mt-1 text-xs text-gray-400 text-start">Password must be at least 8 characters long</p>
+                <p className="mt-1 text-xs text-gray-400 text-start">Password must be at least 6 characters long</p>
               </div>
               
               <div>
-                <label htmlFor="confirmPassword" className="block py-2 mb-1 text-sm font-medium text-gray-700 text-start">
+                <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium text-gray-700 text-start">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -290,6 +360,7 @@ export default function ClientRegistrationForm() {
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
+                    placeholder="Re-enter your password"
                     className={`w-full p-2.5 pr-10 border rounded-md ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -322,26 +393,36 @@ export default function ClientRegistrationForm() {
           ) : (
             /* Step 2: Additional Details */
             <div className="space-y-4">
-              <div>                <div className="relative">
+              <div>
+                <label htmlFor="phoneNumber" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                  Phone Number
+                </label>
+                <div className="relative">
                   <span className="absolute text-gray-500 transform -translate-y-1/2 left-3 top-1/2">+63</span>
                   <input
+                    id="phoneNumber"
                     type="tel"
                     name="phoneNumber"
-                    placeholder="9XXXXXXXXX"
-                    className={`w-full p-2 pl-11 border rounded ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'}`}
+                    placeholder="917 123 4567"
+                    className={`w-full p-2.5 pl-11 border rounded-md ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.phoneNumber}
-                    onChange={handleChange}
+                    onChange={handlePhoneChange}
                   />
                 </div>
                 {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber}</p>}
+                <p className="mt-1 text-xs text-gray-400 text-start">Enter 10-digit mobile number starting with 9</p>
               </div>
               
               <div>
+                <label htmlFor="address" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                  Address
+                </label>
                 <input
+                  id="address"
                   type="text"
                   name="address"
-                  placeholder="Address"
-                  className={`w-full p-2 border rounded ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Enter your street address"
+                  className={`w-full p-2.5 border rounded-md ${errors.address ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   value={formData.address}
                   onChange={handleChange}
                 />
@@ -350,22 +431,30 @@ export default function ClientRegistrationForm() {
               
               <div className="flex gap-4">
                 <div className="w-1/2">
+                  <label htmlFor="city" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                    City
+                  </label>
                   <input
+                    id="city"
                     type="text"
                     name="city"
-                    placeholder="City"
-                    className={`w-full p-2 border rounded ${errors.city ? 'border-red-500' : 'border-gray-300'}`}
+                    placeholder="Enter your city"
+                    className={`w-full p-2.5 border rounded-md ${errors.city ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.city}
                     onChange={handleChange}
                   />
                   {errors.city && <p className="mt-1 text-xs text-red-500">{errors.city}</p>}
                 </div>
                 <div className="w-1/2">
+                  <label htmlFor="province" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                    Province
+                  </label>
                   <input
+                    id="province"
                     type="text"
                     name="province"
-                    placeholder="Province"
-                    className={`w-full p-2 border rounded ${errors.province ? 'border-red-500' : 'border-gray-300'}`}
+                    placeholder="Enter your province"
+                    className={`w-full p-2.5 border rounded-md ${errors.province ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     value={formData.province}
                     onChange={handleChange}
                   />
@@ -374,11 +463,15 @@ export default function ClientRegistrationForm() {
               </div>
               
               <div>
+                <label htmlFor="zip" className="block mb-1 text-sm font-medium text-gray-700 text-start">
+                  Zip Code
+                </label>
                 <input
+                  id="zip"
                   type="text"
                   name="zip"
-                  placeholder="Zip Code"
-                  className={`w-full p-2 border rounded ${errors.zip ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Enter your zip code"
+                  className={`w-full p-2.5 border rounded-md ${errors.zip ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   value={formData.zip}
                   onChange={handleChange}
                 />
@@ -410,10 +503,21 @@ export default function ClientRegistrationForm() {
                 </button>
                 <button
                   type="button"
-                  className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+                  className="px-6 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center gap-2"
                   onClick={handleSubmit}
+                  disabled={isSubmitting}
                 >
-                  Generate Verification Code →
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit'
+                  )}
                 </button>
               </div>
             </div>

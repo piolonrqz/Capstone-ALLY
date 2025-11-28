@@ -1,13 +1,10 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { isAuthenticated, getAuthData } from '../utils/auth.jsx';
-import NavigationBar from '../components/NavigationBar';
-import ChatSidebar from '../components/ChatSidebar';
-import AllyConsultationChat from '../components/AllyConsultationChat';
+import NavigationBar from './NavigationBar';
+import ChatSidebar from './ChatSidebar';
 import { useSidebar } from '../contexts/SidebarContext';
 
-const LandingPage = () => {
-  const navigate = useNavigate();
+const PageLayout = ({ children }) => {
   const isLoggedIn = isAuthenticated();
   const authData = getAuthData();
   const userRole = authData?.role || null;
@@ -28,12 +25,13 @@ const LandingPage = () => {
         <NavigationBar />
         
         {/* Main Content */}
-        <main className={isLoggedIn ? 'pt-16 h-[calc(100vh-4rem)]' : 'pt-16'}>
-          <AllyConsultationChat />
+        <main className="pt-16">
+          {children}
         </main>
       </div>
     </div>
   );
 };
 
-export default LandingPage;
+export default PageLayout;
+

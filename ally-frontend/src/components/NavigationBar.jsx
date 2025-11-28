@@ -4,23 +4,31 @@ import { User, LogOut, Settings, ChevronDown, MessageCircle, Bell } from 'lucide
 import { getAuthData, isAuthenticated, logout, fetchUserDetails } from '../utils/auth.jsx';
 import { shouldHideNavigation } from '../utils/navigation.js';
 import NotificationDropdown from './NotificationDropdown';
+import MessageDropdown from './MessageDropdown';
+import { useSidebar } from '../contexts/SidebarContext';
+import { fetchActiveConversations } from '../services/chatService';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isLoggedIn = isAuthenticated();
+  const { isExpanded } = useSidebar();
   
   // Memoize authData to prevent infinite re-renders
   const authData = useMemo(() => getAuthData(), [isLoggedIn]);
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
+  const [conversations, setConversations] = useState([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
+  const messageRef = useRef(null);
 
-  // Fetch user details when logged in
+  // Fetch user details and conversations when logged in
   useEffect(() => {
     const getUserDetails = async () => {
       if (isLoggedIn && authData?.userId && !isLoadingUser) {
@@ -29,7 +37,8 @@ const NavigationBar = () => {
           const details = await fetchUserDetails(authData.userId);
           setUserDetails(details);
           
-          
+          // Fetch conversations after getting user details
+          await loadConversations(details.id);
         } catch (error) {
           console.error('Failed to fetch user details:', error);
           setUserDetails(null);
@@ -41,6 +50,32 @@ const NavigationBar = () => {
 
     getUserDetails();
   }, [isLoggedIn, authData?.userId]);
+
+  // Load conversations
+  const loadConversations = async (userId) => {
+    if (!userId) return;
+    
+    setLoadingConversations(true);
+    try {
+      const activeConvos = await fetchActiveConversations(userId);
+      setConversations(activeConvos);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    } finally {
+      setLoadingConversations(false);
+    }
+  };
+
+  // Poll for new messages every 30 seconds
+  useEffect(() => {
+    if (!isLoggedIn || !userDetails?.id) return;
+
+    const interval = setInterval(() => {
+      loadConversations(userDetails.id);
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn, userDetails?.id]);
     
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -50,6 +85,9 @@ const NavigationBar = () => {
       }
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setIsNotificationOpen(false);
+      }
+      if (messageRef.current && !messageRef.current.contains(event.target)) {
+        setIsMessageOpen(false);
       }
     };
 
@@ -88,6 +126,13 @@ const NavigationBar = () => {
   const toggleNotifications = () => {
     setIsNotificationOpen(!isNotificationOpen);
     setIsDropdownOpen(false);
+    setIsMessageOpen(false);
+  };
+
+  const toggleMessages = () => {
+    setIsMessageOpen(!isMessageOpen);
+    setIsNotificationOpen(false);
+    setIsDropdownOpen(false);
   };
 
   // Get user's initials for profile display
@@ -122,48 +167,38 @@ const NavigationBar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-      <div className="max-w-[1440px] mx-auto px-8 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div onClick={() => navigate('/')} className="cursor-pointer">
-            <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
-          </div>
+    <nav className={`fixed top-0 z-40 bg-white shadow-sm h-16 transition-all duration-300 ${
+      isLoggedIn 
+        ? `${isExpanded ? 'left-[240px]' : 'left-[60px]'} right-0` 
+        : 'left-0 right-0'
+    }`}>
+      <div className="h-full px-8">
+        <div className="h-full flex items-center justify-between">
+          {/* Logo - Only show when NOT logged in */}
+          {!isLoggedIn && (
+            <div onClick={() => navigate('/')} className="cursor-pointer">
+              <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+            </div>
+          )}
           
-          {/* Navigation Links */}
-          <div className="flex items-center">
+          {/* Right Side */}
+          <div className={`flex items-center ${isLoggedIn ? 'ml-auto' : ''}`}>
             {isLoggedIn ? (
               <>
-                <div className="flex items-center gap-8">
-                  <Link
-                    to="/my-cases"
-                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
-                  >
-                    My Cases
-                  </Link>
-                  <Link
-                    to="/appointments"
-                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
-                  >
-                    Appointment
-                  </Link>
-                  <Link
-                    to="/documents"
-                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
-                  >
-                    Documents
-                  </Link>
-                </div>
-
                 {/* Right Side Icons and Profile */}
-                <div className="flex items-center gap-4 ml-8 border-l pl-8">
+                <div className="flex items-center gap-4">
                   {/* Message and Notification Icons */}
                   <div className="relative" ref={notificationRef}>
                     <button
                       onClick={toggleNotifications}
-                      className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-50 transition-all duration-200"
+                      className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                        isNotificationOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
                     >
-                      <Bell className="w-5 h-5 text-[#2B62C4]" strokeWidth={1.8} />
+                      <Bell 
+                        className={`w-5 h-5 ${isNotificationOpen ? 'text-blue-600' : 'text-[#2B62C4]'}`} 
+                        strokeWidth={1.8} 
+                      />
                     </button>
                     <NotificationDropdown
                       isOpen={isNotificationOpen}
@@ -171,94 +206,64 @@ const NavigationBar = () => {
                       currentUser={userDetails}
                     />
                   </div>
-                  
-                  {/* User Type Badge */}
-                  <UserTypeBadge />
-                  
-                  <div className="relative" ref={dropdownRef}>
+
+                  <div className="relative" ref={messageRef}>
                     <button
-                      onClick={toggleDropdown}
-                      className="flex items-center gap-2 hover:bg-gray-50 rounded-full p-2 transition-all duration-200"
+                      onClick={toggleMessages}
+                      className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                        isMessageOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
                     >
-                      {userDetails?.profilePhotoUrl ? (
-                        <img
-                          src={userDetails.profilePhotoUrl}
-                          alt="Profile"
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold">
-                          {getUserInitials()}
-                        </div>
-                      )}
-                      <ChevronDown className={`w-4 h-4 text-[#11265A] transition-all duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      <MessageCircle 
+                        className={`w-5 h-5 ${isMessageOpen ? 'text-blue-600' : 'text-[#2B62C4]'}`} 
+                        strokeWidth={1.8} 
+                      />
                     </button>
+                    <MessageDropdown
+                      isOpen={isMessageOpen}
+                      onClose={() => setIsMessageOpen(false)}
+                      conversations={conversations}
+                      currentUser={userDetails}
+                      loading={loadingConversations}
+                      onRefresh={() => loadConversations(userDetails?.id)}
+                    />
+                  </div>
                   
-                    {/* Dropdown Menu */}
-                    {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                        <div className="px-4 py-2 border-b border-gray-200">
-                          <p className="text-sm text-gray-600">Signed in as</p>
-                          <p className="text-sm font-semibold text-gray-900 truncate">
-                            {authData?.email || 'User'}
-                          </p>
-                        </div>
-                        <button
-                          onClick={handleProfileSettings}
-                          className="flex items-center gap-3 w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
-                        >
-                          <Settings className="w-5 h-5 text-gray-500" />
-                          <span>Profile Settings</span>
-                        </button>
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center w-full gap-3 px-4 py-2 text-left text-red-600 hover:bg-red-50"
-                        >
-                          <LogOut className="w-5 h-5 text-red-500" />
-                          <span>Logout</span>
-                        </button>              
+                  <div className="flex items-center gap-2 px-3 py-2 cursor-pointer">
+                    {userDetails?.profilePhotoUrl ? (
+                      <img
+                        src={userDetails.profilePhotoUrl}
+                        alt="Profile"
+                        className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold border-2 border-blue-100">
+                        {getUserInitials()}
                       </div>
                     )}
+                    <span className="text-sm font-medium text-gray-800">
+                      {userDetails?.firstName && userDetails?.lastName 
+                        ? `${userDetails.firstName}, ${userDetails.lastName}`
+                        : 'User'}
+                    </span>
                   </div>
                 </div>
               </>
             ) : (
-              <>
-                <div className="flex items-center gap-8">
-                  <Link 
-                    to="#" 
-                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
-                  >
-                    About
-                  </Link>
-                  <Link 
-                    to="#" 
-                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
-                  >
-                    Legal Resources
-                  </Link>
-                  <Link 
-                    to="#" 
-                    className="text-[#11265A] text-base font-medium hover:text-blue-600 transition-colors"
-                  >
-                    FAQ
-                  </Link>
-                </div>
-                <div className="flex items-center gap-4 ml-8 border-l pl-8">
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="px-4 py-2 text-sm font-medium text-[#1A6EFF] hover:text-blue-700 transition-colors"
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    onClick={() => navigate('/signup')}
-                    className="px-4 py-2 text-sm font-medium text-white bg-[#1A6EFF] rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    Get Started
-                  </button>
-                </div>
-              </>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-5 py-2 text-base font-medium bg-[#2563EB] text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="px-5 py-2 text-m font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Get Started
+                </button>
+              </div>
             )}
           </div>
         </div>
