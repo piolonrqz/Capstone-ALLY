@@ -251,7 +251,7 @@ const AllyConsultationChat = () => {
                 >
                   <Search className="w-4 h-4" />
                   <span className="text-sm font-medium">
-                    {useRAG ? '🔍 Case Search: ON' : 'Search for Relevant Cases'}
+                    {useRAG ? 'Case Search: ON' : 'Search for Relevant Cases'}
                   </span>
                 </button>
                 {!ragAvailable && (
