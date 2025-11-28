@@ -365,7 +365,7 @@ const ClientSettings = ({ user }) => {
 
           {/* Personal Information */}
           <Section title="Personal Information">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <InputField
                 label="First Name"
                 value={personalInfo.firstName}
@@ -391,7 +391,7 @@ const ClientSettings = ({ user }) => {
 
           {/* Address */}
           <Section title="Address">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <InputField
                 label="Address Line 1"
                 value={address.line1}

@@ -158,15 +158,15 @@ const NavigationBar = () => {
   return (
     <nav className={`fixed top-0 z-40 bg-white shadow-sm h-16 transition-all duration-300 ${
       isLoggedIn 
-        ? `${isExpanded ? 'left-[240px]' : 'left-[60px]'} right-0` 
+        ? `md:${isExpanded ? 'left-[240px]' : 'left-[60px]'} left-0 right-0` 
         : 'left-0 right-0'
     }`}>
-      <div className="h-full px-8">
+      <div className="h-full px-4 md:px-8">
         <div className="h-full flex items-center justify-between">
           {/* Logo - Only show when NOT logged in */}
           {!isLoggedIn && (
             <div onClick={() => navigate('/')} className="cursor-pointer">
-              <img src="/ally_logo.svg" alt="ALLY" className="w-28 h-10" />
+              <img src="/ally_logo.svg" alt="ALLY" className="w-20 md:w-28 h-8 md:h-10" />
             </div>
           )}
           
@@ -175,7 +175,7 @@ const NavigationBar = () => {
             {isLoggedIn ? (
               <>
                 {/* Right Side Icons and Profile */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 md:gap-4">
                   {/* Message and Notification Icons */}
                   <div className="relative" ref={notificationRef}>
                     <button
@@ -222,7 +222,7 @@ const NavigationBar = () => {
                   <div className="relative" ref={dropdownRef}>
                     <div 
                       onClick={toggleDropdown}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                      className={`flex items-center gap-1 md:gap-2 px-2 md:px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
                         isDropdownOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
                       }`}
                     >
@@ -230,7 +230,7 @@ const NavigationBar = () => {
                         <img
                           src={userDetails.profilePhotoUrl}
                           alt="Profile"
-                          className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
+                          className="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-blue-100"
                           onError={(e) => {
                             // If image fails to load, hide img and show initials
                             e.target.style.display = 'none';
@@ -242,15 +242,15 @@ const NavigationBar = () => {
                           }}
                         />
                       ) : null}
-                      <div className={`initials-fallback flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold border-2 border-blue-100 ${userDetails?.profilePhotoUrl && userDetails.profilePhotoUrl.trim() !== '' ? 'hidden' : ''}`}>
+                      <div className={`initials-fallback flex items-center justify-center w-8 h-8 md:w-9 md:h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-xs md:text-sm font-semibold border-2 border-blue-100 ${userDetails?.profilePhotoUrl && userDetails.profilePhotoUrl.trim() !== '' ? 'hidden' : ''}`}>
                         {getUserInitials()}
                       </div>
-                      <span className="text-sm font-medium text-gray-800">
+                      <span className="hidden sm:inline text-sm font-medium text-gray-800">
                         {userDetails?.firstName && userDetails?.lastName 
                           ? `${userDetails.firstName} ${userDetails.lastName}`
                           : 'User'}
                       </span>
-                      <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className="hidden sm:block w-4 h-4 text-gray-500 transition-transform duration-200" />
                     </div>
 
                     {/* Dropdown Menu */}
