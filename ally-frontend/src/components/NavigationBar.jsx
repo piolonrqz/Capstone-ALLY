@@ -102,17 +102,6 @@ const NavigationBar = () => {
     return null;
   }
 
-  const handleAuthAction = () => {
-    if (!isLoggedIn) {
-      navigate('/signup');
-    }
-  };
-
-  const handleProfileSettings = () => {
-    setIsDropdownOpen(false);
-    navigate('/settings');
-  };
-
   const handleLogout = () => {
     setIsDropdownOpen(false);
     logout();
@@ -229,23 +218,53 @@ const NavigationBar = () => {
                     />
                   </div>
                   
-                  <div className="flex items-center gap-2 px-3 py-2 cursor-pointer">
-                    {userDetails?.profilePhotoUrl ? (
-                      <img
-                        src={userDetails.profilePhotoUrl}
-                        alt="Profile"
-                        className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold border-2 border-blue-100">
+                  {/* Profile Dropdown */}
+                  <div className="relative" ref={dropdownRef}>
+                    <div 
+                      onClick={toggleDropdown}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        isDropdownOpen ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      {userDetails?.profilePhotoUrl && userDetails.profilePhotoUrl.trim() !== '' ? (
+                        <img
+                          src={userDetails.profilePhotoUrl}
+                          alt="Profile"
+                          className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
+                          onError={(e) => {
+                            // If image fails to load, hide img and show initials
+                            e.target.style.display = 'none';
+                            const initialsDiv = e.target.parentElement.querySelector('.initials-fallback');
+                            if (initialsDiv) {
+                              initialsDiv.style.display = 'flex';
+                              initialsDiv.classList.remove('hidden');
+                            }
+                          }}
+                        />
+                      ) : null}
+                      <div className={`initials-fallback flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#2B62C4] to-[#1A6EFF] text-white rounded-full text-sm font-semibold border-2 border-blue-100 ${userDetails?.profilePhotoUrl && userDetails.profilePhotoUrl.trim() !== '' ? 'hidden' : ''}`}>
                         {getUserInitials()}
                       </div>
+                      <span className="text-sm font-medium text-gray-800">
+                        {userDetails?.firstName && userDetails?.lastName 
+                          ? `${userDetails.firstName} ${userDetails.lastName}`
+                          : 'User'}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </div>
+
+                    {/* Dropdown Menu */}
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4 text-red-600" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
                     )}
-                    <span className="text-sm font-medium text-gray-800">
-                      {userDetails?.firstName && userDetails?.lastName 
-                        ? `${userDetails.firstName}, ${userDetails.lastName}`
-                        : 'User'}
-                    </span>
                   </div>
                 </div>
               </>

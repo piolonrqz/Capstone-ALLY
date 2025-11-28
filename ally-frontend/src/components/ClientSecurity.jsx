@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 
-const ClientSecurity = ({ user }) => {
+const ClientSecurity = () => {
   const token = localStorage.getItem('token');
 
   // Password change states
@@ -81,20 +81,9 @@ const ClientSecurity = ({ user }) => {
   return (
     <div className="container max-w-4xl px-4 mx-auto py-8">
       <div className="bg-white shadow-sm rounded-2xl p-6 sm:p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Security Settings</h1>
-            <p className="text-sm text-gray-500">Manage your password and review helpful tips.</p>
-          </div>
-          <div className="hidden sm:flex items-center space-x-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded">
-              <span className="font-bold text-white">A</span>
-            </div>
-            <div>
-              <h5 className="text-lg font-semibold text-gray-800">ALLY</h5>
-              <p className="text-xs text-gray-500">Secure legal assistance made simple.</p>
-            </div>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Security Settings</h1>
+          <p className="text-sm text-gray-500">Manage your password and review helpful tips.</p>
         </div>
 
         {/* Change Password Section */}
