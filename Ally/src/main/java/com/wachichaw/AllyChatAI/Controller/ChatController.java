@@ -154,9 +154,22 @@ public class ChatController {
             
             if (ragResults != null && ragResults.getCases() != null && !ragResults.getCases().isEmpty()) {
                 
+                // Filter by threshold AND deduplicate by case number
                 List<LegalCase> relevantCases = ragResults.getCases().stream()
                     .filter(c -> c.getScore() != null && c.getScore() >= relevanceThreshold)
+                    .collect(Collectors.toMap(
+                        LegalCase::getCitation,           // Key: case number (G.R. No. 265876)
+                        c -> c,                           // Value: the case itself
+                        (existing, replacement) -> 
+                            existing.getScore() > replacement.getScore() ? existing : replacement  // Keep highest score
+                    ))
+                    .values()
+                    .stream()
+                    .sorted((a, b) -> Double.compare(b.getScore(), a.getScore()))  // Sort by score descending
                     .collect(Collectors.toList());
+
+                System.out.println("📊 Found " + ragResults.getCases().size() + " cases total");
+                System.out.println("📊 " + relevantCases.size() + " unique cases above " + relevanceThreshold + "% threshold");
                 
                 System.out.println("📊 Found " + ragResults.getCases().size() + " cases total");
                 System.out.println("📊 " + relevantCases.size() + " cases above " + relevanceThreshold + "% threshold");
