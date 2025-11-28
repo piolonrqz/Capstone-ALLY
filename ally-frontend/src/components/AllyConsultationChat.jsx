@@ -235,8 +235,30 @@ const AllyConsultationChat = () => {
           </div>
 
           {/* Input Area - Fixed at bottom */}
-          <div className="bg-white">
+          <div className="bg-white border-t border-gray-200">
             <div className="max-w-4xl mx-auto px-4 py-4">
+              {/* RAG Toggle Button */}
+              <div className="mb-3 flex items-center justify-between">
+                <button
+                  onClick={() => setUseRAG(!useRAG)}
+                  disabled={!ragAvailable}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                    useRAG 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={!ragAvailable ? 'RAG service unavailable' : 'Toggle case search'}
+                >
+                  <Search className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {useRAG ? '🔍 Case Search: ON' : 'Search for Relevant Cases'}
+                  </span>
+                </button>
+                {!ragAvailable && (
+                  <span className="text-xs text-red-500">⚠️ Search unavailable</span>
+                )}
+              </div>
+
               {/* Input Row */}
               <div className="flex items-center gap-3 bg-white border border-gray-300 rounded-full px-4 py-2 shadow-sm">
                 <input
