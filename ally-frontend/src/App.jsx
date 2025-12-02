@@ -59,9 +59,9 @@ function AppContent() {
   // Show loading screen while validating
   if (isValidating) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="w-12 h-12 mx-auto border-b-2 border-blue-600 rounded-full animate-spin"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -82,6 +82,7 @@ function AppContent() {
           <Route path="/login" element={<Login />} />          
           <Route element={<LayoutRoutes />}>
             <Route path="/lawyers" element={<ProtectedRoute><LawyerDirectoryPage /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><ChatContainer /></ProtectedRoute>} />
             <Route path="/appointments" element={<ProtectedRoute><AppointmentsPage /></ProtectedRoute>} />
             <Route path="/my-cases" element={<ProtectedRoute><MyCasesPage /></ProtectedRoute>} />
             <Route path="/documents" element={<ProtectedRoute><DocumentsPage /></ProtectedRoute>} />

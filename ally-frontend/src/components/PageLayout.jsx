@@ -23,7 +23,7 @@ const PageLayout = ({ children }) => {
         <NavigationBar />
         
         {/* Main Content */}
-        <main className="pt-16">
+        <main className="pt-12">
           {children}
         </main>
       </div>
