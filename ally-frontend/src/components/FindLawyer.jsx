@@ -18,7 +18,7 @@ const FindLawyer = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto py-8">
+      <div className="max-w-4xl py-8 mx-auto">
         <SearchPanel
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}

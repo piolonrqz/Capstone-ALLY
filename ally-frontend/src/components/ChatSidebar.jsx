@@ -28,6 +28,7 @@ const ChatSidebar = () => {
 
   const navigationItems = [
     { name: 'New Chat', path: '/', icon: MessageSquarePlus, action: 'newChat' },
+    { name: 'Messages', path: '/messages', icon: MessageCircle },
     { name: 'My Cases', path: '/my-cases', icon: Folder },
     { name: 'Documents', path: '/documents', icon: FileText },
     { name: 'Appointment', path: '/appointments', icon: Calendar },
@@ -56,7 +57,7 @@ const ChatSidebar = () => {
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -64,7 +65,7 @@ const ChatSidebar = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200"
+        className="fixed z-50 p-2 bg-white border border-gray-200 rounded-lg shadow-lg md:hidden top-4 left-4"
         aria-label="Toggle menu"
       >
         {isMobileOpen ? (
@@ -83,23 +84,23 @@ const ChatSidebar = () => {
           // Desktop: always visible, responsive width
           'md:translate-x-0 md:flex'
         } ${
-          isExpanded ? 'w-[240px]' : 'w-[60px]'
+          isExpanded ? 'w-[320px]' : 'w-[60px]'
         }`}
       >
       {/* Logo Section */}
-      <div className="h-16 flex items-center justify-center px-4 border-b border-gray-200">
+      <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
         {isExpanded && (
           <img src="/ally_logo.svg" alt="ALLY" className="w-[114px] h-10" />
         )}
         {!isExpanded && (
-          <img src="/logo_notext.svg" alt="ALLY" className="w-9 h-10" />
+          <img src="/logo_notext.svg" alt="ALLY" className="h-10 w-9" />
         )}
       </div>
 
       {/* Toggle Button */}
       <button
         onClick={toggleSidebar}
-        className="absolute -right-3 top-20 w-8 h-8 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:border-blue-400 transition-all duration-200 hover:bg-blue-50 z-50"
+        className="absolute z-50 flex items-center justify-center w-8 h-8 transition-all duration-200 bg-white border-2 border-gray-300 rounded-full shadow-lg -right-3 top-20 hover:shadow-xl hover:border-blue-400 hover:bg-blue-50"
         aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
       >
         {isExpanded ? (
@@ -136,7 +137,7 @@ const ChatSidebar = () => {
         {/* Settings - Collapsible on desktop, regular items on mobile */}
         {/* Mobile: Show Profile and Security as regular menu items */}
         {isExpanded && (
-          <div className="md:hidden space-y-1">
+          <div className="space-y-1 md:hidden">
             <button
               onClick={() => navigate('/settings')}
               className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-[8px] text-base font-medium transition-all duration-200 ${
@@ -145,7 +146,7 @@ const ChatSidebar = () => {
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              <User className="w-5 h-5 flex-shrink-0" />
+              <User className="flex-shrink-0 w-5 h-5" />
               <span>Profile</span>
             </button>
             <button
@@ -156,7 +157,7 @@ const ChatSidebar = () => {
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              <Shield className="w-5 h-5 flex-shrink-0" />
+              <Shield className="flex-shrink-0 w-5 h-5" />
               <span>Security</span>
             </button>
           </div>
@@ -176,7 +177,7 @@ const ChatSidebar = () => {
                 title={!isExpanded ? 'Settings' : ''}
               >
                 <div className="flex items-center gap-3">
-                  <Settings className="w-5 h-5 flex-shrink-0 text-gray-500" />
+                  <Settings className="flex-shrink-0 w-5 h-5 text-gray-500" />
                   {isExpanded && <span>Settings</span>}
                 </div>
                 {isExpanded && (
@@ -196,7 +197,7 @@ const ChatSidebar = () => {
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  <User className="w-5 h-5 flex-shrink-0" />
+                  <User className="flex-shrink-0 w-5 h-5" />
                   <span>Profile</span>
                 </button>
                 <button
@@ -207,7 +208,7 @@ const ChatSidebar = () => {
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  <Shield className="w-5 h-5 flex-shrink-0" />
+                  <Shield className="flex-shrink-0 w-5 h-5" />
                   <span>Security</span>
                 </button>
               </CollapsibleContent>

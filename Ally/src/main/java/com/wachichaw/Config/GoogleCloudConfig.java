@@ -44,4 +44,3 @@ public GoogleCredentials googleCredentials() throws IOException {
         return new RestTemplate(factory);
     }
 }
-

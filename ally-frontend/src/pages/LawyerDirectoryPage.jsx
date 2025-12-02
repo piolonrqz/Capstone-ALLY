@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { SearchPanel } from '../components/SearchPanel';
 import { LawyerProfile } from '../components/LawyerProfile';
-import { AIMatching } from '../components/AIMatching';
+import { adminService } from '../services/adminService';
 
 export const LawyerDirectoryPage = () => {
-  const [activeView, setActiveView] = useState('search');
+  // activeView removed; always show search view
   const [selectedLawyer, setSelectedLawyer] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -83,38 +83,38 @@ export const LawyerDirectoryPage = () => {
   );
 
   useEffect(() => {
-    const fetchVerifiedLawyers = async () => {
+    const fetchLawyers = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8080/lawyers/verified');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        // Use adminService which aggregates verified and unverified lawyers
+        const data = await adminService.getAllLawyers();
+
         const transformedData = data.map(lawyer => ({
-          id: lawyer.userId,
-          name: `${lawyer.Fname} ${lawyer.Lname}`,
-          specialty: lawyer.specialization && lawyer.specialization.length > 0 ? lawyer.specialization.join(', ') : 'Not specified',
-          location: `${lawyer.city}, ${lawyer.province}`,
+          id: lawyer.userId || lawyer.id,
+          name: `${lawyer.Fname || lawyer.firstName || lawyer.fname || ''} ${lawyer.Lname || lawyer.lastName || lawyer.lname || ''}`.trim(),
+          specialty: lawyer.specialization && lawyer.specialization.length > 0 ? (Array.isArray(lawyer.specialization) ? lawyer.specialization.join(', ') : lawyer.specialization) : 'Not specified',
+          location: [lawyer.city, lawyer.province].filter(Boolean).join(', '),
           rating: lawyer.rating || 0,
-          experience: lawyer.experience ? `${lawyer.experience} years` : 'N/A',
-          fee: lawyer.consultationFee ? `₱${lawyer.consultationFee}/hour` : 'N/A',
-          image: `${lawyer.Fname ? lawyer.Fname[0] : ''}${lawyer.Lname ? lawyer.Lname[0] : ''}`.toUpperCase(),
-          about: lawyer.bio || 'No biography available.',
-          education: lawyer.educationInstitution|| 'Not specified',
-          areas: lawyer.specialization || [],
-          casesHandled: lawyer.casesHandled || 0,
+          experience: lawyer.experience ? (typeof lawyer.experience === 'string' && lawyer.experience.includes('year') ? lawyer.experience : `${lawyer.experience} years`) : 'N/A',
+          fee: lawyer.consultationFee ? `₱${lawyer.consultationFee}/hour` : (lawyer.fee || 'N/A'),
+          image: `${(lawyer.Fname || lawyer.firstName || lawyer.fname || '').charAt(0) || ''}${(lawyer.Lname || lawyer.lastName || lawyer.lname || '').charAt(0) || ''}`.toUpperCase(),
+          about: lawyer.bio || lawyer.about || 'No biography available.',
+          education: lawyer.educationInstitution || lawyer.education || 'Not specified',
+          areas: lawyer.specialization || lawyer.practiceAreas || [],
+          casesHandled: lawyer.casesHandled || lawyer.casesHandled || 0,
+          raw: lawyer
         }));
+
         setFetchedLawyers(transformedData);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to fetch lawyers');
         setFetchedLawyers([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchVerifiedLawyers();
+    fetchLawyers();
   }, []);
 
   const handleLawyerSelect = (lawyer) => {
@@ -135,54 +135,20 @@ export const LawyerDirectoryPage = () => {
         />
       )}
 
-      <div className="container max-w-6xl px-4 mx-auto py-8">        
+      <div className="container max-w-6xl px-4 py-8 mx-auto">        
         <div className="p-4 bg-white shadow-sm sm:p-6 md:p-8 rounded-xl">
           <h1 className="mb-2 text-xl font-bold text-gray-900 sm:mb-3 sm:text-2xl">Find the Right Lawyer for Your Case</h1>
           <p className="mb-6 text-sm text-gray-600 sm:mb-8 sm:text-base">Search our network of verified legal professionals and submit your case to get started with legal assistance</p>
-          {/* Responsive button group */}
-          <div className="flex flex-col gap-2 mb-6 sm:flex-row sm:gap-0 sm:mb-8">
-            <button 
-              className={`py-2 px-4 text-sm sm:text-base font-medium transition-colors ${
-                activeView === 'search' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              } ${
-                'rounded-lg sm:rounded-none sm:rounded-l-lg'
-              }`}
-              onClick={() => setActiveView('search')}
-            >
-              Search Lawyers
-            </button>
-            <button 
-              className={`py-2 px-4 text-sm sm:text-base font-medium transition-colors ${
-                activeView === 'ai-matching' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              } ${
-                'rounded-lg sm:rounded-none sm:rounded-r-lg'
-              }`}
-              onClick={() => setActiveView('ai-matching')}
-            >
-              AI Matching
-            </button>
-          </div>
           <div className="transition-opacity duration-200 ease-in-out">
-            {activeView === 'search' ? (
-              <SearchPanel 
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                filters={filters}
-                setFilters={setFilters}
-                lawyers={paginatedLawyers}
-                onLawyerSelect={handleLawyerSelect}
-                totalLawyers={filteredLawyers.length}
-              />
-            ) : (
-              <AIMatching 
-                lawyers={paginatedLawyers}
-                onLawyerSelect={handleLawyerSelect}
-              />
-            )}
+            <SearchPanel 
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              filters={filters}
+              setFilters={setFilters}
+              lawyers={paginatedLawyers}
+              onLawyerSelect={handleLawyerSelect}
+              totalLawyers={filteredLawyers.length}
+            />
           </div>
           {/* Pagination Controls */}
           {totalPages > 1 && (
