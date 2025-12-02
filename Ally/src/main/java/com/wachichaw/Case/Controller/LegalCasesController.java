@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.wachichaw.Case.Entity.CaseStatus;
 import com.wachichaw.Case.Entity.LegalCaseRequestDTO;
 import com.wachichaw.Case.Entity.LegalCasesEntity;
+import com.wachichaw.Case.Repo.LegalCaseRepo;
 import com.wachichaw.Case.Entity.LegalCaseResponseDTO;
 import com.wachichaw.Case.Service.LegalCaseService;
 import com.wachichaw.Lawyer.Entity.LawyerEntity;
@@ -155,5 +157,70 @@ public class LegalCasesController {
         }
     }
 
-    
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TEMPORARY endpoints for testing purposes - WEKA Dataset Builder
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    @Autowired
+    private LegalCaseRepo legalCaseRepo; // Add this if not already present
+
+    // Test endpoint for findMaxCaseNumber
+    @GetMapping("/test/max-case-number")
+    public ResponseEntity<Long> testFindMaxCaseNumber() {
+        try {
+            Optional<Long> maxCaseNumber = legalCaseRepo.findMaxCaseNumber();
+            return ResponseEntity.ok(maxCaseNumber.orElse(0L));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Test endpoint for findCompletedCasesWithLawyers
+    @GetMapping("/test/completed-cases-with-lawyers")
+    public ResponseEntity<List<LegalCasesEntity>> testFindCompletedCasesWithLawyers() {
+        try {
+            List<LegalCasesEntity> completedCases = legalCaseRepo.findCompletedCasesWithLawyers();
+            return ResponseEntity.ok(completedCases);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Test endpoint for findByCaseType
+    @GetMapping("/test/by-case-type/{caseType}")
+    public ResponseEntity<List<LegalCasesEntity>> testFindByCaseType(@PathVariable String caseType) {
+        try {
+            List<LegalCasesEntity> cases = legalCaseRepo.findByCaseType(caseType);
+            return ResponseEntity.ok(cases);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Test endpoint for findByClientUserId (if you want to test the basic method)
+    @GetMapping("/test/by-client/{clientId}")
+    public ResponseEntity<List<LegalCasesEntity>> testFindByClientUserId(@PathVariable int clientId) {
+        try {
+            List<LegalCasesEntity> cases = legalCaseRepo.findByClientUserId(clientId);
+            return ResponseEntity.ok(cases);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Test endpoint for findByLawyerUserId (if you want to test the basic method)
+    @GetMapping("/test/by-lawyer/{lawyerId}")
+    public ResponseEntity<List<LegalCasesEntity>> testFindByLawyerUserId(@PathVariable int lawyerId) {
+        try {
+            List<LegalCasesEntity> cases = legalCaseRepo.findByLawyerUserId(lawyerId);
+            return ResponseEntity.ok(cases);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

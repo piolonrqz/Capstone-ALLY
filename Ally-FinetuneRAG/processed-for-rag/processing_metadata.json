@@ -1,0 +1,13 @@
+{
+  "processing_date": "2025-11-12T13:07:00.067898",
+  "total_chunks": 5608,
+  "statistics": {
+    "total_cases": 1410,
+    "total_chunks": 5608,
+    "cases_with_facts": 1406,
+    "cases_with_decision": 1403,
+    "cases_with_ruling": 1402,
+    "cases_with_verdict": 1397,
+    "empty_cases": 3
+  }
+}

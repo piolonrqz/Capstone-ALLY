@@ -1,0 +1,10 @@
+venv
+myvenv
+.env
+service-account-key.json
+__pycache__
+
+# ============ VECTOR DATABASE ============
+vector-db/
+*.sqlite
+*.db

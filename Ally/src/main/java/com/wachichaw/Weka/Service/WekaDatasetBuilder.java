@@ -31,7 +31,7 @@ public class WekaDatasetBuilder {
         ArrayList<Attribute> attributes = new ArrayList<>();
         
         // Case attributes
-        List<String> caseTypes = Arrays.asList("CRIMINAL", "CIVIL", "FAMILY", "CORPORATE", "LABOR", "REAL_ESTATE");
+        List<String> caseTypes = Arrays.asList("CIVIL", "FAMILY_LAW", "CRIMINAL_DEFENSE", "BUSINESS_LAW", "REAL_ESTATE");
         attributes.add(new Attribute("case_type", caseTypes));
         
         List<String> urgencyLevels = Arrays.asList("LOW", "MEDIUM", "HIGH");
@@ -81,8 +81,13 @@ public class WekaDatasetBuilder {
         
         // !!!! Temporary for NOW || 06-29-2025 !!!!
         // Generate synthetic data if insufficient historical data
-        if (dataset.numInstances() < 100) {
+        // Troubleshoot only (5 instances)
+        if (dataset.numInstances() < 5) {
+            System.out.println("Insufficient training data, generating synthetic data...");
             generateSyntheticTrainingData(dataset, 300);
+        }else {
+            System.out.println("Sufficient training data found............");
+            System.out.println("Training dataset ready with " + dataset.numInstances() + " instances.");
         }
     }
     
@@ -111,7 +116,7 @@ public class WekaDatasetBuilder {
             
             // Specialization attributes
             List<String> lawyerSpecs = lawyer.getSpecialization();
-            List<String> caseTypes = Arrays.asList("CRIMINAL", "CIVIL", "FAMILY", "CORPORATE", "LABOR", "REAL_ESTATE");
+            List<String> caseTypes = Arrays.asList("CIVIL", "FAMILY_LAW", "CRIMINAL_DEFENSE", "BUSINESS_LAW", "REAL_ESTATE");
             
             for (String spec : caseTypes) {
                 boolean hasSpec = lawyerSpecs.contains(spec);
@@ -184,7 +189,7 @@ public class WekaDatasetBuilder {
     
     private void generateSyntheticTrainingData(Instances dataset, int numInstances) {
         Random random = new Random(42); // Fixed seed for reproducibility
-        String[] caseTypes = {"CRIMINAL", "CIVIL", "FAMILY", "CORPORATE", "LABOR", "REAL_ESTATE"};
+        String[] caseTypes = {"CIVIL", "FAMILY_LAW", "CRIMINAL_DEFENSE", "BUSINESS_LAW", "REAL_ESTATE"};
         String[] urgencyLevels = {"LOW", "MEDIUM", "HIGH"};
         
         for (int i = 0; i < numInstances; i++) {
@@ -261,7 +266,7 @@ public class WekaDatasetBuilder {
         
         // Check specialization match
         int specIndex = 4;
-        for (String spec : Arrays.asList("CRIMINAL", "CIVIL", "FAMILY", "CORPORATE", "LABOR", "REAL_ESTATE")) {
+        for (String spec : Arrays.asList("CIVIL", "FAMILY_LAW", "CRIMINAL_DEFENSE", "BUSINESS_LAW", "REAL_ESTATE")) {
             if (spec.equals(caseType) && "YES".equals(instance.stringValue(specIndex))) {
                 score += 4.0;
                 break;
@@ -305,12 +310,11 @@ public class WekaDatasetBuilder {
     
     private boolean hasRelatedSpecialization(List<String> lawyerSpecs, String caseType) {
         Map<String, List<String>> relatedSpecs = Map.of(
-            "CRIMINAL", Arrays.asList("CIVIL"),
-            "CIVIL", Arrays.asList("CRIMINAL", "REAL_ESTATE", "FAMILY"),
-            "FAMILY", Arrays.asList("CIVIL"),
-            "CORPORATE", Arrays.asList("LABOR", "REAL_ESTATE"),
-            "LABOR", Arrays.asList("CORPORATE", "CIVIL"),
-            "REAL_ESTATE", Arrays.asList("CORPORATE", "CIVIL")
+            "CRIMINAL_DEFENSE", Arrays.asList("CIVIL"),
+            "CIVIL", Arrays.asList("CRIMINAL_DEFENSE", "REAL_ESTATE", "FAMILY_LAW"),
+            "FAMILY_LAW", Arrays.asList("CIVIL"),
+            "BUSINESS_LAW", Arrays.asList("REAL_ESTATE"),
+            "REAL_ESTATE", Arrays.asList("BUSINESS_LAW", "CIVIL")
         );
         
         return relatedSpecs.getOrDefault(caseType, Collections.emptyList())
@@ -320,12 +324,11 @@ public class WekaDatasetBuilder {
     
     private boolean isRelatedSpecialization(String lawyerSpec, String caseType) {
         Map<String, List<String>> relatedSpecs = Map.of(
-            "CRIMINAL", Arrays.asList("CIVIL"),
-            "CIVIL", Arrays.asList("CRIMINAL", "REAL_ESTATE", "FAMILY"),
-            "FAMILY", Arrays.asList("CIVIL"),
-            "CORPORATE", Arrays.asList("LABOR", "REAL_ESTATE"),
-            "LABOR", Arrays.asList("CORPORATE", "CIVIL"),
-            "REAL_ESTATE", Arrays.asList("CORPORATE", "CIVIL")
+        "CRIMINAL_DEFENSE", Arrays.asList("CIVIL"),
+        "CIVIL", Arrays.asList("CRIMINAL_DEFENSE", "REAL_ESTATE", "FAMILY_LAW"),
+        "FAMILY_LAW", Arrays.asList("CIVIL"),
+        "BUSINESS_LAW", Arrays.asList("REAL_ESTATE"),
+        "REAL_ESTATE", Arrays.asList("BUSINESS_LAW", "CIVIL")
         );
         
         return relatedSpecs.getOrDefault(caseType, Collections.emptyList())

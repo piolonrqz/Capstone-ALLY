@@ -20,7 +20,10 @@ public interface LegalCaseRepo extends JpaRepository<LegalCasesEntity, Integer>{
     @Query("SELECT MAX(c.caseNumber) FROM LegalCasesEntity c")
     Optional<Long> findMaxCaseNumber();
 
-    @Query("SELECT c FROM LegalCasesEntity c WHERE c.lawyer IS NOT NULL AND c.status = 'COMPLETED'")
+    @Query("SELECT c FROM LegalCasesEntity c " +
+        "JOIN FETCH c.lawyer l " +
+        "JOIN FETCH l.specialization " +
+        "WHERE c.lawyer IS NOT NULL AND c.status = 'COMPLETED'")
     List<LegalCasesEntity> findCompletedCasesWithLawyers();
     
     @Query("SELECT c FROM LegalCasesEntity c WHERE c.caseType = :caseType")
