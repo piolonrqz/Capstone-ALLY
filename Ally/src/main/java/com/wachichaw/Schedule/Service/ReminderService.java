@@ -1,6 +1,6 @@
 package com.wachichaw.Schedule.Service;
 
-import com.wachichaw.EmailConfig.EmailService;
+import com.wachichaw.EmailConfig.Service.EmailService;
 import com.wachichaw.Schedule.Entity.ScheduleEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
