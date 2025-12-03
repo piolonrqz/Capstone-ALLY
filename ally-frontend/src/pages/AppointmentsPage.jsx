@@ -31,34 +31,34 @@ export const AppointmentsPage = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
-      <div className="container max-w-7xl px-4 mx-auto">
-        {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="mb-2 text-xl font-bold text-gray-900 sm:mb-3 sm:text-2xl">My Appointments</h1>
-          <p className="text-sm text-gray-600 sm:text-base">
-            {isLawyer
-              ? "View and manage your scheduled appointments with clients"
-              : "Select a case to book an appointment or view your existing appointments"
-            }
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container max-w-7xl px-4 mx-auto py-8">
+        <div className="p-4 bg-white shadow-sm sm:p-6 md:p-8 rounded-xl">
+          {/* Page Header */}
+          <div className="mb-6">
+            <h1 className="mb-2 text-xl font-bold text-gray-900 sm:mb-3 sm:text-2xl">My Appointments</h1>
+            <p className="text-sm text-gray-600 sm:text-base">
+              {isLawyer
+                ? "View and manage your scheduled appointments with clients."
+                : "Select a case to book an appointment or view your existing appointments."
+              }
+            </p>
+          </div>
 
-        {/* Two-column layout for clients, single column for lawyers */}
-        {!isLawyer ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Sidebar - Accepted Cases */}
-            <div className="lg:col-span-1">
-              <AcceptedCasesSidebar
-                onBookCase={handleBookCase}
-                refreshTrigger={refreshTrigger}
-              />
-            </div>
-            
-            {/* Right Main Area - Appointments */}
-            <div className="lg:col-span-3">
-              <div className="bg-white shadow-sm rounded-xl">
-                <div className="p-4 sm:p-6">
+          {/* Two-column layout for clients, single column for lawyers */}
+          {!isLawyer ? (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Left Sidebar - Accepted Cases */}
+              <div className="lg:col-span-1">
+                <AcceptedCasesSidebar
+                  onBookCase={handleBookCase}
+                  refreshTrigger={refreshTrigger}
+                />
+              </div>
+              
+              {/* Right Main Area - Appointments */}
+              <div className="lg:col-span-3">
+                <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">
                     My Appointments
                   </h2>
@@ -69,15 +69,13 @@ export const AppointmentsPage = () => {
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          /* Single column layout for lawyers */
-          <div className="bg-white shadow-sm rounded-xl">
-            <div className="p-4 sm:p-6 md:p-8">
+          ) : (
+            /* Single column layout for lawyers */
+            <div>
               <AppointmentsList refreshTrigger={refreshTrigger} />
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Booking Modal */}

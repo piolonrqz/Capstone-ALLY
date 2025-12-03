@@ -190,5 +190,75 @@ export const userService = {
       console.error('Error bulk updating user status:', error);
       throw error;
     }
+  },
+
+  async getLawyerStatus(userId) {
+    try {
+      // Get both verified and unverified lawyers
+      const [verifiedResponse, unverifiedResponse] = await Promise.all([
+        axios.get(`${API_URL}/lawyers/verified`),
+        axios.get(`${API_URL}/lawyers/unverified`)
+      ]);
+
+      const verifiedLawyers = verifiedResponse.data || [];
+      const unverifiedLawyers = unverifiedResponse.data || [];
+
+      // Convert userId to number for comparison (handle both string and number)
+      const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+      
+      console.log('Checking lawyer status for userId:', userId, 'as number:', userIdNum);
+      console.log('Verified lawyers count:', verifiedLawyers.length);
+      console.log('Unverified lawyers count:', unverifiedLawyers.length);
+
+      // Check if user is in verified list (handle both userId and id fields, and string/number types)
+      const isVerified = verifiedLawyers.some(lawyer => {
+        const lawyerId = lawyer.userId || lawyer.id;
+        const lawyerIdNum = typeof lawyerId === 'string' ? parseInt(lawyerId, 10) : lawyerId;
+        return lawyerIdNum === userIdNum || lawyerId === userId || lawyer.userId === userId;
+      });
+
+      // Check if user is in unverified list
+      const isUnverified = unverifiedLawyers.some(lawyer => {
+        const lawyerId = lawyer.userId || lawyer.id;
+        const lawyerIdNum = typeof lawyerId === 'string' ? parseInt(lawyerId, 10) : lawyerId;
+        return lawyerIdNum === userIdNum || lawyerId === userId || lawyer.userId === userId;
+      });
+
+      // Find the lawyer data
+      const lawyerData = verifiedLawyers.find(l => {
+        const lawyerId = l.userId || l.id;
+        const lawyerIdNum = typeof lawyerId === 'string' ? parseInt(lawyerId, 10) : lawyerId;
+        return lawyerIdNum === userIdNum || lawyerId === userId || l.userId === userId;
+      }) || unverifiedLawyers.find(l => {
+        const lawyerId = l.userId || l.id;
+        const lawyerIdNum = typeof lawyerId === 'string' ? parseInt(lawyerId, 10) : lawyerId;
+        return lawyerIdNum === userIdNum || lawyerId === userId || l.userId === userId;
+      });
+      
+      console.log('Lawyer found:', !!lawyerData, 'Is verified:', isVerified, 'Is unverified:', isUnverified);
+
+      // Determine status
+      if (isVerified) {
+        return { status: 'approved' };
+      } else if (isUnverified) {
+        // Check if they have credentials
+        const hasCredentials = lawyerData?.credentials && lawyerData.credentials.trim() !== '';
+        if (!hasCredentials) {
+          return { status: 'rejected' };
+        }
+        return { status: 'pending' };
+      } else {
+        // Lawyer not found in either list, check if they have credentials
+        if (lawyerData) {
+          const hasCredentials = lawyerData.credentials && lawyerData.credentials.trim() !== '';
+          return { status: hasCredentials ? 'pending' : 'rejected' };
+        }
+        // Default to pending if we can't determine
+        return { status: 'pending' };
+      }
+    } catch (error) {
+      console.error('Error fetching lawyer status:', error);
+      return null;
+    }
   }
 }; 

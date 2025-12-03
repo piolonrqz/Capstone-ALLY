@@ -23,10 +23,8 @@ const ChatContainer = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [editingMessage, setEditingMessage] = useState(null);
     const [isLoadingSend, setIsLoadingSend] = useState(false);
     const [chatroomId, setChatroomId] = useState(null);
-    const [isTyping, setIsTyping] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showChatInfo, setShowChatInfo] = useState(false);
     const messagesEndRef = useRef(null);
@@ -172,7 +170,7 @@ const ChatContainer = () => {
             setIsLoadingSend(false);
         }
     };
-
+    
     const handleEdit = async (messageId, content) => {
         if (!chatroomId) {
             toast.warn('No active chatroom found.');
@@ -181,7 +179,6 @@ const ChatContainer = () => {
 
         try {
             await editMessage(chatroomId, messageId, content);
-            setEditingMessage(null);
             toast.success('Message updated!');
         } catch (error) {
             console.error('Error editing message:', error.message);
@@ -205,11 +202,15 @@ const ChatContainer = () => {
     };
 
     return (
-        <div className={`flex h-screen bg-white ${isExpanded ? 'md:ml-[320px]' : 'md:ml-[60px]'}`}>
+        <div className={`min-h-screen bg-gray-50 ${isExpanded ? 'md:ml-[240px]' : 'md:ml-[60px]'}`}>
             {/* Global app sidebar */}
             <ChatSidebar />
-            {/* Sidebar - Conversations List */}
-            <div className="flex flex-col border-r w-96">
+            {/* Container wrapper */}
+            <div className="container max-w-7xl px-4 mx-auto py-8">
+                <div className="bg-white shadow-sm rounded-xl overflow-hidden">
+                    <div className="flex h-[calc(100vh-8rem)] bg-white">
+                        {/* Sidebar - Conversations List */}
+                        <div className="flex flex-col border-r w-96">
                 {/* User Profile Header */}
                 <div className="p-4 border-b">
                     <div className="flex items-center gap-3">
@@ -318,7 +319,7 @@ const ChatContainer = () => {
                                                     message={message}
                                                     isOwn={own}
                                                     senderName={own ? currentUser?.name : selectedUser?.name}
-                                                    onEdit={() => setEditingMessage(message)}
+                                                    onEdit={() => handleEdit(message.id, message.content)}
                                                     onDelete={() => handleDelete(message.id)}
                                                 />
                                             );
@@ -346,8 +347,6 @@ const ChatContainer = () => {
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Write your message..."
                                     className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    onFocus={() => setIsTyping(true)}
-                                    onBlur={() => setIsTyping(false)}
                                 />
                                 <button
                                     type="submit"
@@ -376,15 +375,17 @@ const ChatContainer = () => {
                         </div>
                     </div>
                 )}
+                    </div>
+                        {/* Chat Info Sidebar */}
+                        {showChatInfo && selectedUser && (
+                            <ChatInfoSidebar
+                                user={selectedUser}
+                                onClose={() => setShowChatInfo(false)}
+                            />
+                        )}
+                    </div>
+                </div>
             </div>
-
-            {/* Chat Info Sidebar */}
-            {showChatInfo && selectedUser && (
-                <ChatInfoSidebar
-                    user={selectedUser}
-                    onClose={() => setShowChatInfo(false)}
-                />
-            )}
         </div>
     );
 };

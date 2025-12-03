@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import Logo from './Logo';
@@ -8,8 +8,18 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Load saved email on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,6 +42,14 @@ const Login = () => {
       localStorage.setItem('role', data.accountType);
       localStorage.setItem('profilePhoto', data.profilePhoto);
       localStorage.setItem('userId', data.id);
+      
+      // Save email if "Remember me" is checked
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
+      
       console.log('Login successful:', data);
 
       
@@ -156,6 +174,8 @@ const Login = () => {
             <input
               id="remember"
               type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
             <label htmlFor="remember" className="block ml-2 text-sm text-gray-600">
