@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.wachichaw.Schedule.Entity.AppointmentStatus;
+
 @Repository
 public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Integer> {
 
@@ -65,4 +67,18 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Intege
 
     // Find all schedules within a given time range
     List<ScheduleEntity> findByBookingStartTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+    // Find accepted appointments that have ended and need to be marked as completed
+    @Query("SELECT s FROM ScheduleEntity s WHERE s.status = :status AND s.bookingEndTime < :now")
+    List<ScheduleEntity> findCompletedAppointments(@Param("now") LocalDateTime now, @Param("status") AppointmentStatus status);
+
+    // Find pending appointments that have passed their start time and should be cancelled
+    @Query("SELECT s FROM ScheduleEntity s WHERE s.status = :status AND s.bookingStartTime < :now")
+    List<ScheduleEntity> findExpiredPendingAppointments(@Param("now") LocalDateTime now, @Param("status") AppointmentStatus status);
+
+    // Find past schedules for a lawyer (booking start time in the past), ordered by most recent first
+    List<ScheduleEntity> findByLawyerAndBookingStartTimeBeforeOrderByBookingStartTimeDesc(LawyerEntity lawyer, LocalDateTime before);
+
+    // Find past schedules for a client (booking start time in the past), ordered by most recent first
+    List<ScheduleEntity> findByClientAndBookingStartTimeBeforeOrderByBookingStartTimeDesc(ClientEntity client, LocalDateTime before);
 }

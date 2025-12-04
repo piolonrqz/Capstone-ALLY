@@ -1,13 +1,18 @@
 {
+<<<<<<< HEAD
   "processing_date": "2025-11-17T11:42:31.593993",
   "total_chunks": 5608,
+=======
+  "processing_date": "2025-11-28T02:18:30.520065",
+  "total_chunks": 11775,
+>>>>>>> fb61165bf5971a5efa4fdc3f26e9f269d47a1bee
   "statistics": {
-    "total_cases": 1410,
-    "total_chunks": 5608,
-    "cases_with_facts": 1406,
-    "cases_with_decision": 1403,
-    "cases_with_ruling": 1402,
-    "cases_with_verdict": 1397,
+    "total_cases": 2953,
+    "total_chunks": 11775,
+    "cases_with_facts": 2949,
+    "cases_with_decision": 2945,
+    "cases_with_ruling": 2943,
+    "cases_with_verdict": 2938,
     "empty_cases": 3
   }
 }

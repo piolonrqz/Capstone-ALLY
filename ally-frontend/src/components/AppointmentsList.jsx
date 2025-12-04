@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { AppointmentCard } from './AppointmentCard';
 import { AppointmentDetailsModal } from './AppointmentDetailsModal';
 import { Loader2, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
 import { getAuthData } from '../utils/auth.jsx';
 import { scheduleService } from '../services/scheduleService.jsx';
 
 export const AppointmentsList = ({ refreshTrigger = 0 }) => {
   const [appointments, setAppointments] = useState([]);
+  const [pastAppointments, setPastAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -25,54 +27,66 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
         return;
       }
 
-      // Determine the correct endpoint based on user account type
-      let endpoint;
+      // Determine the correct endpoints based on user account type
+      let upcomingEndpoint;
+      let pastEndpoint;
       if (authData.accountType === 'LAWYER') {
-        endpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/upcoming`;
+        upcomingEndpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/upcoming`;
+        pastEndpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/past`;
       } else if (authData.accountType === 'CLIENT') {
-        endpoint = `http://localhost:8080/schedules/client/${authData.userId}/upcoming`;
+        upcomingEndpoint = `http://localhost:8080/schedules/client/${authData.userId}/upcoming`;
+        pastEndpoint = `http://localhost:8080/schedules/client/${authData.userId}/past`;
       } else {
         setError('Invalid account type. Please contact support.');
         return;
       }
-      
-      console.log('Using endpoint:', endpoint); // Debug log
 
-      const response = await fetch(endpoint);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('Using endpoints:', upcomingEndpoint, pastEndpoint);
+
+      // Fetch upcoming and past appointments in parallel
+      const [upcomingResponse, pastResponse] = await Promise.all([
+        fetch(upcomingEndpoint),
+        fetch(pastEndpoint)
+      ]);
+
+      if (!upcomingResponse.ok || !pastResponse.ok) {
+        throw new Error(`HTTP error! upcoming: ${upcomingResponse.status}, past: ${pastResponse.status}`);
       }
-        const data = await response.json();        
-      
-      // Transform the data to match our component expectations
-      const transformedAppointments = data.map(appointment => {
-        return {
-          scheduleId: appointment.scheduleId,
-          bookingStartTime: appointment.bookingStartTime,
-          bookingEndTime: appointment.bookingEndTime,
-          lawyer: {
-            Fname: appointment.lawyer?.fname || appointment.lawyer?.Fname || '',
-            Lname: appointment.lawyer?.lname || appointment.lawyer?.Lname || ''
-          },
-          client: {
-            Fname: appointment.client?.Fname || appointment.client?.fname || '',
-            Lname: appointment.client?.Lname || appointment.client?.lname || ''
-          },          
-          // Include case information if available
-          legalCase: appointment.legalCase ? {
-            caseId: appointment.legalCase.caseId,
-            title: appointment.legalCase.title,
-            status: appointment.legalCase.status,
-            description: appointment.legalCase.description
-          } : null,
-          status: appointment.status || 'PENDING',
-          declineReason: appointment.declineReason,
-          isBooked: appointment.isBooked
-        }
+
+      const [upcomingData, pastData] = await Promise.all([
+        upcomingResponse.json(),
+        pastResponse.json()
+      ]);
+
+      // Transform function for appointment data
+      const transformAppointment = (appointment) => ({
+        scheduleId: appointment.scheduleId,
+        bookingStartTime: appointment.bookingStartTime,
+        bookingEndTime: appointment.bookingEndTime,
+        lawyer: {
+          Fname: appointment.lawyer?.fname || appointment.lawyer?.Fname || '',
+          Lname: appointment.lawyer?.lname || appointment.lawyer?.Lname || ''
+        },
+        client: {
+          Fname: appointment.client?.Fname || appointment.client?.fname || '',
+          Lname: appointment.client?.Lname || appointment.client?.lname || ''
+        },
+        legalCase: appointment.legalCase ? {
+          caseId: appointment.legalCase.caseId,
+          title: appointment.legalCase.title,
+          status: appointment.legalCase.status,
+          description: appointment.legalCase.description
+        } : null,
+        status: appointment.status || 'PENDING',
+        declineReason: appointment.declineReason,
+        isBooked: appointment.isBooked
       });
-      
-      setAppointments(transformedAppointments);
+
+      const transformedUpcoming = upcomingData.map(transformAppointment);
+      const transformedPast = pastData.map(transformAppointment);
+
+      setAppointments(transformedUpcoming);
+      setPastAppointments(transformedPast);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch appointments:", err);
@@ -107,17 +121,17 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           : apt
       ));
       
-      alert('Appointment cancelled successfully!');
+      toast.success('Appointment cancelled successfully!');
     } catch (error) {
       console.error('Error cancelling appointment:', error);
-      alert(error.message || 'Failed to cancel appointment. Please try again.');
+      toast.error(error.message || 'Failed to cancel appointment. Please try again.');
     }
   };
 
   const handleAccept = async (appointment) => {
     const authData = getAuthData();
     if (!authData || authData.accountType !== 'LAWYER') {
-      alert('Only lawyers can accept appointments');
+      toast.error('Only lawyers can accept appointments');
       return;
     }
 
@@ -131,17 +145,17 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           : apt
       ));
       
-      alert('Appointment accepted successfully!');
+      toast.success('Appointment accepted successfully!');
     } catch (error) {
       console.error('Error accepting appointment:', error);
-      alert(error.message || 'Failed to accept appointment. Please try again.');
+      toast.error(error.message || 'Failed to accept appointment. Please try again.');
     }
   };
 
   const handleDecline = async (appointment, reason) => {
     const authData = getAuthData();
     if (!authData || authData.accountType !== 'LAWYER') {
-      alert('Only lawyers can decline appointments');
+      toast.error('Only lawyers can decline appointments');
       return;
     }
 
@@ -155,10 +169,10 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           : apt
       ));
       
-      alert('Appointment declined successfully!');
+      toast.success('Appointment declined successfully!');
     } catch (error) {
       console.error('Error declining appointment:', error);
-      alert(error.message || 'Failed to decline appointment. Please try again.');
+      toast.error(error.message || 'Failed to decline appointment. Please try again.');
     }
   };
 
@@ -192,17 +206,19 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
     apt.status?.toUpperCase() !== 'PENDING' && apt.status?.toUpperCase() !== 'ACCEPTED'
   );
 
-  if (appointments.length === 0) {
+  const hasAnyAppointments = appointments.length > 0 || pastAppointments.length > 0;
+
+  if (!hasAnyAppointments) {
     const authData = getAuthData();
     const isLawyer = authData?.accountType === 'LAWYER';
-    
+
     return (
       <div className="py-12 text-center">
         <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
         <h3 className="mb-2 text-lg font-medium text-gray-900">No Appointments Yet</h3>
         <p className="mb-6 text-gray-600">
           {isLawyer
-            ? "You don't have any upcoming appointments with clients."
+            ? "You don't have any appointments with clients."
             : "You haven't scheduled any appointments. Browse our lawyer directory to book a consultation."
           }
         </p>
@@ -259,12 +275,38 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           </div>
         )}
 
-        {/* Other Appointments Section (Cancelled, Declined, Completed) */}
+        {/* Appointment History Section */}
+        {pastAppointments.length > 0 && (
+          <div>
+            <div className="flex items-center mb-4">
+              <h3 className="text-lg font-semibold text-purple-700">
+                Appointment History
+              </h3>
+              <span className="ml-2 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
+                {pastAppointments.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {pastAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.scheduleId}
+                  appointment={appointment}
+                  onCardClick={handleCardClick}
+                  onCancel={handleCancel}
+                  onAccept={handleAccept}
+                  onDecline={handleDecline}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Past Appointments from Upcoming Data (edge cases) */}
         {otherAppointments.length > 0 && (
           <div>
             <div className="flex items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-700">
-                Past Appointments
+                Recently Completed
               </h3>
               <span className="ml-2 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
                 {otherAppointments.length}

@@ -94,27 +94,23 @@ const MyCasesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <span className="ml-3 text-gray-600">Loading your cases...</span>
-        </div>
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <span className="ml-3 text-gray-600">Loading your cases...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
-        <div className="container max-w-5xl px-4 mx-auto py-8">
-          <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
+      <div className="container max-w-5xl px-4 mx-auto py-8">
+        <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
               </div>
             </div>
           </div>
@@ -124,7 +120,7 @@ const MyCasesPage = () => {
   }
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-20 bg-gray-50">
+    <>
       {/* Case Submission Modal */}
       {showSubmissionForm && (
         <CaseSubmissionForm
@@ -133,7 +129,7 @@ const MyCasesPage = () => {
         />
       )}
 
-      <div className="container max-w-5xl px-4 mx-auto">
+      <div className="container max-w-5xl px-4 mx-auto py-8">
         <div className="p-4 bg-white shadow-sm sm:p-6 md:p-8 rounded-xl">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -186,7 +182,7 @@ const MyCasesPage = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

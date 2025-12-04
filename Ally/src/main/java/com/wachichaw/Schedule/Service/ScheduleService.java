@@ -328,20 +328,34 @@ public class ScheduleService {
     public ScheduleEntity declineAppointment(int scheduleId, int lawyerId, String reason) {
         ScheduleEntity schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found with ID: " + scheduleId));
-        
+
         // Validate that the lawyer owns this appointment
         if (schedule.getLawyer().getUserId() != lawyerId) {
             throw new RuntimeException("Lawyer does not own this appointment");
         }
-        
+
         // Validate appointment status can be changed
         if (schedule.getStatus() != AppointmentStatus.PENDING) {
             throw new RuntimeException("Only pending appointments can be declined");
         }
-        
+
         schedule.setStatus(AppointmentStatus.DECLINED);
         schedule.setDeclineReason(reason);
-        
+
         return scheduleRepository.save(schedule);
+    }
+
+    /**
+     * Get past schedules for a lawyer (appointment history)
+     */
+    public List<ScheduleEntity> getPastSchedulesForLawyer(LawyerEntity lawyer) {
+        return scheduleRepository.findByLawyerAndBookingStartTimeBeforeOrderByBookingStartTimeDesc(lawyer, LocalDateTime.now());
+    }
+
+    /**
+     * Get past schedules for a client (appointment history)
+     */
+    public List<ScheduleEntity> getPastSchedulesForClient(ClientEntity client) {
+        return scheduleRepository.findByClientAndBookingStartTimeBeforeOrderByBookingStartTimeDesc(client, LocalDateTime.now());
     }
 }

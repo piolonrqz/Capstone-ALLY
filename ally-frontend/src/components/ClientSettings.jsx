@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { User, Shield, Trash2, Bell } from 'lucide-react';
+import { toast } from 'sonner';
 import Section from './shared/Section';
 import InputField from './shared/InputField';
 
@@ -11,6 +12,9 @@ const ClientSettings = ({ user }) => {
     title: 'Client',
     location: user?.location || user?.city || '',
   });
+
+  // State for hover effect on profile photo
+  const [isHoveringPhoto, setIsHoveringPhoto] = useState(false);
 
   // State for selected profile photo file and preview
   const [selectedProfileFile, setSelectedProfileFile] = useState(null);
@@ -33,9 +37,6 @@ const ClientSettings = ({ user }) => {
     zipCode: user?.zipCode || user?.zip || '',
     cityState: user?.cityState || user?.city || '',
   });
-
-  const location = useLocation();
-  const path = location.pathname;
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -106,13 +107,13 @@ const ClientSettings = ({ user }) => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file.');
+      toast.error('Please select a valid image file.');
       return;
     }
 
     // Validate file size (e.g., 5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB.');
+      toast.error('File size must be less than 5MB.');
       return;
     }
 
@@ -180,6 +181,29 @@ const ClientSettings = ({ user }) => {
     }
   };
 
+  // Handler to remove profile photo
+  const handleRemoveProfilePhoto = () => {
+    // Clear preview URL if exists
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    
+    // Clear selected file
+    setSelectedProfileFile(null);
+    
+    // Clear profile photo from localStorage
+    localStorage.removeItem('profilePhoto');
+    
+    // Reset file input
+    const fileInput = document.getElementById('profile-photo-input');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    toast.success('Profile photo removed successfully!');
+  };
+
   // Modified handleUpdate function
   const handleUpdate = async () => {
     try {
@@ -234,70 +258,31 @@ const ClientSettings = ({ user }) => {
           ...(profilePhotoUrl && { profilePhoto: profilePhotoUrl })
         }));
         
-        alert('Profile updated successfully!');
+        toast.success('Profile updated successfully!');
       } else {
-        alert('Profile update failed.');
+        toast.error('Profile update failed.');
       }
     } catch (error) {
       console.error('Update error:', error);
-      alert(`Update failed: ${error.message}`);
+      toast.error(`Update failed: ${error.message}`);
     }
   };
 
   // Get profile photo source for display
   const getProfilePhotoSource = () => {
-    if (previewUrl) {
+    if (previewUrl && previewUrl.trim() !== '') {
       return previewUrl; // Show preview of selected file
     }
-    if (profilePhoto) {
+    if (profilePhoto && profilePhoto.trim() !== '') {
       return profilePhoto; // Show current profile photo
     }
-    return null; // No photo
+    return null; // No photo - will show initials
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="fixed top-0 left-0 flex flex-col w-64 h-screen bg-white shadow-lg">
-        <div className="p-6 border-b border-gray-200">
-          <Link to="/">
-            <img src="/small_logo.png" alt="ALLY Logo" className="h-8 cursor-pointer" />
-          </Link>
-        </div>
-        <nav className="flex flex-col justify-between flex-1">
-          <ul className="mt-6">
-            <li className={`mx-2 px-4 py-3 rounded-lg ${path === '/settings' ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}>
-              <Link to="/settings" className={`flex items-center ${path === '/settings' ? 'text-blue-600' : 'text-gray-700'}`}>
-                <User className="w-5 h-5 mr-3" />
-                <span className={path === '/settings' ? 'font-medium' : ''}>My Profile</span>
-              </Link>
-            </li>
-            <li className={`mx-2 px-4 py-3 rounded-lg ${path === '/settings/security' ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}>
-              <Link to="/settings/security" className={`flex items-center ${path === '/settings/security' ? 'text-blue-600' : 'text-gray-700'}`}>
-                <Shield className="w-5 h-5 mr-3" />
-                <span className={path === '/settings/security' ? 'font-medium' : ''}>Security</span>
-              </Link>
-            </li>
-            <li className={`mx-2 px-4 py-3 rounded-lg ${path === '/settings/notifications' ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}>
-              <Link to="/settings/notifications" className={`flex items-center ${path === '/settings/notifications' ? 'text-blue-600' : 'text-gray-700'}`}>
-                <Bell className="w-5 h-5 mr-3" />
-                <span className={path === '/settings/notifications' ? 'font-medium' : ''}>Notifications</span>
-              </Link>
-            </li>
-          </ul>
-          <ul className="mb-6">
-            <li className={`mx-2 px-4 py-3 rounded-lg hover:bg-red-50`}>
-              <Link to="/settings/delete-account" className="flex items-center text-red-600">
-                <Trash2 className="w-5 h-5 mr-3" />
-                <span>Delete Account</span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-
+    <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
-      <div className="flex-1 p-8 ml-64">
+      <div className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="mb-6 text-2xl font-bold text-gray-800">Account Settings</h1>
 
@@ -305,21 +290,47 @@ const ClientSettings = ({ user }) => {
           <Section title="My Profile">
             <div className="flex items-center justify-between space-x-4">
               <div className="flex items-center">
-                <div className="flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full">
+                <div 
+                  className="relative flex items-center justify-center w-16 h-16 overflow-hidden bg-blue-100 rounded-full cursor-pointer group"
+                  onMouseEnter={() => setIsHoveringPhoto(true)}
+                  onMouseLeave={() => setIsHoveringPhoto(false)}
+                >
                   {getProfilePhotoSource() ? (
-                    <img
-                      src={getProfilePhotoSource()}
-                      alt="Profile"
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <span className="text-xl font-semibold text-blue-600">
-                      {(
-                        (personalInfo.firstName?.charAt(0) || '') +
-                        (personalInfo.lastName?.charAt(0) || '')
-                      ).toUpperCase() || 'U'}
-                    </span>
-                  )}
+                    <>
+                      <img
+                        src={getProfilePhotoSource()}
+                        alt="Profile"
+                        className="object-cover w-full h-full"
+                        onError={(e) => {
+                          // If image fails to load, hide img and show initials
+                          e.target.style.display = 'none';
+                          const initialsSpan = e.target.parentElement.querySelector('.initials-fallback');
+                          if (initialsSpan) {
+                            initialsSpan.style.display = 'flex';
+                            initialsSpan.classList.remove('hidden');
+                          }
+                        }}
+                      />
+                      {/* Hover overlay with remove button */}
+                      {isHoveringPhoto && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
+                          <button
+                            onClick={handleRemoveProfilePhoto}
+                            className="p-2 text-white hover:text-red-400 transition-colors"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : null}
+                  <span className={`initials-fallback absolute inset-0 flex items-center justify-center text-xl font-semibold text-blue-600 ${getProfilePhotoSource() ? 'hidden' : ''}`}>
+                    {(
+                      (personalInfo.firstName?.charAt(0) || '') +
+                      (personalInfo.lastName?.charAt(0) || '')
+                    ).toUpperCase() || 'U'}
+                  </span>
                 </div>
                 <div>
                   <h4 className="ml-4 font-semibold text-gray-800">{profile.name}</h4>
@@ -354,7 +365,7 @@ const ClientSettings = ({ user }) => {
 
           {/* Personal Information */}
           <Section title="Personal Information">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <InputField
                 label="First Name"
                 value={personalInfo.firstName}
@@ -380,7 +391,7 @@ const ClientSettings = ({ user }) => {
 
           {/* Address */}
           <Section title="Address">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <InputField
                 label="Address Line 1"
                 value={address.line1}

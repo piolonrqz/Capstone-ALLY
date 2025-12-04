@@ -10,7 +10,7 @@ import {
 } from '../services/chatService';
 import { fetchUserDetails } from '../utils/auth';
 
-const Chat = ({ currentUserId, receiverId, currentUserRole, currentUserName, receiverName }) => {
+const Chat = ({ currentUserId, receiverId, currentUserRole, currentUserName, receiverName, compact = false }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [editingMessage, setEditingMessage] = useState(null);
@@ -98,8 +98,10 @@ const Chat = ({ currentUserId, receiverId, currentUserRole, currentUserName, rec
             setNewMessage('');
             toast.success('Message sent!');
 
-            // Immediately redirect to new chatroom URL
-            navigate(`/messages/${chatroomId}`, { replace: true });
+            // Only redirect if not in compact mode (inline chat)
+            if (!compact) {
+                navigate(`/messages/${chatroomId}`, { replace: true });
+            }
 
         } catch (error) {
             console.error('Error sending message:', error.message);
@@ -154,18 +156,20 @@ const Chat = ({ currentUserId, receiverId, currentUserRole, currentUserName, rec
 
     return (
         <div className="flex flex-col h-full overflow-hidden bg-white">
-            {/* Chat Header */}
-            <div className="flex items-center flex-shrink-0 p-4 bg-white border-b shadow-sm">
-                <div className="flex items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-                    <span className="text-lg font-semibold text-gray-600">
-                        {getInitials(receiverName, currentUserId)}
-                    </span>
+            {/* Chat Header - Hide in compact mode */}
+            {!compact && (
+                <div className="flex items-center flex-shrink-0 p-4 bg-white border-b shadow-sm">
+                    <div className="flex items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
+                        <span className="text-lg font-semibold text-gray-600">
+                            {getInitials(receiverName, currentUserId)}
+                        </span>
+                    </div>
+                    <div className="ml-3">
+                        <h2 className="text-lg font-semibold">{receiverName || receiverId || 'Unknown Contact'}</h2>
+                        <span className="text-sm text-green-500">Active Now</span>
+                    </div>
                 </div>
-                <div className="ml-3">
-                    <h2 className="text-lg font-semibold">{receiverName || receiverId || 'Unknown Contact'}</h2>
-                    <span className="text-sm text-green-500">Active Now</span>
-                </div>
-            </div>
+            )}
 
             {/* Messages Container */}
             <div className="flex-1 p-4 overflow-y-auto bg-gray-50">

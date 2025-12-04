@@ -352,6 +352,52 @@ public class ScheduleController {    @Autowired
     }
 
     /**
+     * Get past schedules for a lawyer (appointment history)
+     * GET /schedules/lawyer/{lawyerId}/past
+     */
+    @GetMapping("/lawyer/{lawyerId}/past")
+    public ResponseEntity<?> getPastLawyerSchedules(@PathVariable int lawyerId) {
+        try {
+            LawyerEntity lawyer = (LawyerEntity) userRepo.findById(lawyerId)
+                .orElseThrow(() -> new RuntimeException("Lawyer not found with ID: " + lawyerId));
+
+            List<ScheduleEntity> schedules = scheduleService.getPastSchedulesForLawyer(lawyer);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve past schedules");
+        }
+    }
+
+    /**
+     * Get past schedules for a client (appointment history)
+     * GET /schedules/client/{clientId}/past
+     */
+    @GetMapping("/client/{clientId}/past")
+    public ResponseEntity<?> getPastClientSchedules(@PathVariable int clientId) {
+        try {
+            ClientEntity client = clientRepo.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Client not found with ID: " + clientId));
+
+            List<ScheduleEntity> schedules = scheduleService.getPastSchedulesForClient(client);
+            List<ScheduleResponseDTO> scheduleResponseDTOs = schedules.stream()
+                .map(this::convertToScheduleResponseDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(scheduleResponseDTOs);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve past schedules");
+        }
+    }
+
+    /**
      * Helper method to parse datetime strings
      */
     private LocalDateTime parseDateTime(String dateTimeStr) {

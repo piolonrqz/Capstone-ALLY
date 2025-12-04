@@ -61,9 +61,7 @@ export const SearchPanel = ({
   };
 
   return (
-    <div className="p-8 bg-white shadow-sm rounded-xl">
-      <h1 className="mb-3 text-2xl font-bold text-gray-900">Find the Right Lawyer for Your Case</h1>
-      <p className="mb-8 text-gray-600">Search our network of verified legal professionals or let our AI match you with the perfect attorney</p>
+    <div className="p-6 bg-white shadow-sm rounded-xl">
 
       {error && (
         <div className="p-4 mb-4 border border-red-200 rounded-lg bg-red-50">
@@ -77,102 +75,101 @@ export const SearchPanel = ({
         </div>
       )}
 
-      <div className="relative mb-6">
-        <Search className="absolute w-4 h-4 text-gray-400 left-3 top-3" />
-        <input
-          type="text"
-          placeholder="Search by name, specialty, or location"
-          className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      <div className="mb-6 space-y-4">
-        <h3 className="font-semibold">Filter Lawyers</h3>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Specialty</label>
-          <select
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={filters.specialty}
-            onChange={(e) => setFilters({ ...filters, specialty: e.target.value })}
-          >
-            <option value="All Specialties">All Specialties</option>
-            <option value="familyLaw">Family Law</option>
-            <option value="realEstate">Real Estate</option>
-            <option value="businessLaw">Business Law</option>
-            <option value="estatePlanning">Estate Planning</option>
-            <option value="criminalDefense">Criminal Defense</option>
-          </select>
+      <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-end">
+        <div className="relative flex-1">
+          <Search className="absolute w-4 h-4 text-gray-400 left-3 top-3" />
+          <input
+            type="text"
+            placeholder="Search by name, specialty, or location"
+            className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Location</label>
-          <select
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={filters.location}
-            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-          >
-            <option value="All Locations">All Locations</option>
-            {locations.map((location, index) => (
-              <option key={index} value={location}>{location}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Years of Experience Filter */}
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Years of Experience</label>
-          <select
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={filters.experience || 'All Years'}
-            onChange={(e) => setFilters({ ...filters, experience: e.target.value })}
-          >
-            {experienceRanges.map((range) => (
-              <option key={range.value} value={range.value}>{range.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Availability</label>
-          <select
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={filters.availability}
-            onChange={(e) => setFilters({ ...filters, availability: e.target.value })}
-          >
-            <option>Any Day</option>
-            <option>Weekdays</option>
-            <option>Weekends</option>
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">Cases Handled</label>
-          <select
-            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            value={filters.casesHandled || 'All Cases'}
-            onChange={(e) => setFilters({ ...filters, casesHandled: e.target.value })}
-          >
-            {casesHandledRanges.map((range) => (
-              <option key={range.value} value={range.value}>{range.label}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center justify-end">
           <button
-            className="flex-1 px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
             onClick={resetFilters}
           >
-            Reset
+            Reset Filters
           </button>
         </div>
       </div>
-      {/* Results count */}
-      <div className="mb-4">
-        <p className="text-sm text-gray-600">
+
+      <div className="mb-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Specialty</label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={filters.specialty}
+              onChange={(e) => setFilters({ ...filters, specialty: e.target.value })}
+            >
+              <option value="All Specialties">All Specialties</option>
+              <option value="familyLaw">Family Law</option>
+              <option value="realEstate">Real Estate</option>
+              <option value="businessLaw">Business Law</option>
+              <option value="estatePlanning">Estate Planning</option>
+              <option value="criminalDefense">Criminal Defense</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Location</label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={filters.location}
+              onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+            >
+              <option value="All Locations">All Locations</option>
+              {locations.map((location, index) => (
+                <option key={index} value={location}>{location}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Experience</label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={filters.experience || 'All Years'}
+              onChange={(e) => setFilters({ ...filters, experience: e.target.value })}
+            >
+              {experienceRanges.map((range) => (
+                <option key={range.value} value={range.value}>{range.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Availability</label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={filters.availability}
+              onChange={(e) => setFilters({ ...filters, availability: e.target.value })}
+            >
+              <option>Any Day</option>
+              <option>Weekdays</option>
+              <option>Weekends</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Cases Handled</label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={filters.casesHandled || 'All Cases'}
+              onChange={(e) => setFilters({ ...filters, casesHandled: e.target.value })}
+            >
+              {casesHandledRanges.map((range) => (
+                <option key={range.value} value={range.value}>{range.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="mt-3 text-sm text-gray-600">
           Showing {totalLawyers} lawyer{totalLawyers !== 1 ? 's' : ''}
-        </p>
+        </div>
       </div>
 
       {/* Lawyers list */}
