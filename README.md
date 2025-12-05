@@ -17,7 +17,6 @@ ALLY is a digital platform designed to streamline and secure the process of find
 ALLY offers a suite of features designed to improve the legal engagement process:
 
 * **🤖 AI-Powered Legal Assistant (RAG):** An advanced chatbot that answers legal questions by retrieving relevant information from cases of Philippine Supreme Court. Uses fine-tuned Gemini models, Pinecone cloud vector database, and semantic search to provide accurate, citation-backed legal information in real-time.
-* **🧠 Client-Lawyer Matching:** An intelligent system that uses AI to connect clients with the most suitable lawyers based on specialization, location, and availability. Lawyers benefit from a dedicated dashboard to manage their profiles and appointments.
 * **🗂 Virtual Legal Process Organization:** Provides a secure, centralized repository for document uploads and management, significantly reducing reliance on physical paperwork and improving accessibility.
 * **💬 On-the-Spot Online Consultations:** A temporary, real-time chat system for clients to ask quick legal queries and receive immediate preliminary advice. Designed with privacy in mind, messages are not stored long-term.
 * **📈 Case Tracking and Updates:** Keeps clients informed with automated email notifications on case progress. A unique case tracking ID allows clients to independently check their case status on the platform.
