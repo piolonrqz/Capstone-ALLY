@@ -15,25 +15,13 @@ import org.springframework.core.io.Resource;
 
 @Configuration
 public class GoogleCloudConfig {
-  @Value("${google.service.account.path}")
-private String serviceAccountPath;
-
-@Bean
-public GoogleCredentials googleCredentials() throws IOException {
-    Resource resource;
-
-    if (serviceAccountPath.startsWith("file:")) {
-        resource = new FileSystemResource(serviceAccountPath.substring(5));
-    } else {
-        resource = new ClassPathResource(
-            serviceAccountPath.replace("classpath:", "")
-        );
-    }
-
-    return GoogleCredentials
-            .fromStream(resource.getInputStream())
+    @Bean
+    public GoogleCredentials googleCredentials() throws IOException {
+        return GoogleCredentials
+            .fromStream(new ClassPathResource("service-account-key.json").getInputStream())
             .createScoped("https://www.googleapis.com/auth/cloud-platform");
-}
+
+    }
 
 
     @Bean

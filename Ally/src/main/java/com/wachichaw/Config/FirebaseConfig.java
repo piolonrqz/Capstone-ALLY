@@ -33,40 +33,45 @@ public class FirebaseConfig {
         this.env = env;
     }
 
-    @PostConstruct
-public void initializeFirebase() {
-    try {
-        if (!"firebase".equalsIgnoreCase(storageType)) return;
+   @PostConstruct
+    public void initializeFirebase() {
+        try {
+            if (!"firebase".equalsIgnoreCase(storageType)) {
+                return;
+            }
 
-        InputStream serviceAccount;
-        if (serviceAccountPath.startsWith("classpath:")) {
-            String path = serviceAccountPath.replace("classpath:", "");
-            serviceAccount = getClass().getClassLoader().getResourceAsStream(path);
-            if (serviceAccount == null) {
-                throw new RuntimeException("Firebase JSON not found in classpath: " + path);
+            InputStream serviceAccount;
+            if (serviceAccountPath.startsWith("classpath:")) {
+                String path = serviceAccountPath.replace("classpath:", "");
+                serviceAccount = getClass().getClassLoader().getResourceAsStream(path);
+            } else {
+                serviceAccount = new FileInputStream(serviceAccountPath);
             }
-        } else {
-            String filePath = serviceAccountPath.replace("file:", "");
-            File f = new File(filePath);
-            if (!f.exists()) {
-                throw new RuntimeException("Firebase JSON file does not exist: " + filePath);
+
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setStorageBucket(storageBucket)
+                    .build();
+
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
             }
-            serviceAccount = new FileInputStream(f);
+
+
+
+
+
+
+
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to initialize Firebase", e);
         }
 
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setStorageBucket(storageBucket)
-                .build();
 
-        if (FirebaseApp.getApps().isEmpty()) {
-            FirebaseApp.initializeApp(options);
-        }
 
-    } catch (IOException e) {
-        throw new RuntimeException("Failed to initialize Firebase", e);
     }
-}
+ 
 
     @Bean
     public FirebaseApp firebaseApp() {
