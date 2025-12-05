@@ -1,6 +1,6 @@
 # Ally-FinetuneRAG
 
-RAG (Retrieval-Augmented Generation) and Context Classification feature for the ALLY Legal Assistant chatbot. This is a submodule of the main Spring Boot + Vite React project.
+RAG (Retrieval-Augmented Generation) and Context Classification feature for the ALLY Legal Assistant chatbot. This is a submodule of the main ALLY project.
 
 ## Features
 
@@ -113,7 +113,6 @@ Processes cases from `ally-dataset/csv-dataset/` into chunks stored in `processe
 - Categorizes cases (criminal, civil, labor, commercial, family, tax, administrative, land)
 - Splits each case into semantic chunks
 
-
 #### 2. Upload vectors to Pinecone (RUN ONLY ONCE, IF DB IS NOT YET ESTABLISHED)
 ```bash
 python scripts/2_index_pinecone.py
@@ -121,7 +120,12 @@ python scripts/2_index_pinecone.py
 Uploads all processed chunks as vectors to Pinecone cloud. **This only needs to be run ONCE** (if new database).
 Feat: Auto-Resume, If internet fails or you press Ctrl+C, run the script again to resume exactly where you left off.
 
-**This will take hours** depending on dataset size.
+**THIS WILL TAKE HOURS** depending on dataset size.
+
+**!! IMPORTANT NOTE !!**
+- Prepare your device to run minimum 6 hours non-stop.
+- Plug your laptop into a power source. Do not run on battery, as performance throttling may slow down the upload or the system might die mid-process.
+- Close other applicationss to minimize overheating.
 
 #### 3. Update Pinecone (If new chunks/data are added, RUN THIS)
 ```bash
