@@ -40,63 +40,13 @@ git clone <repository_url>
 * Configure the database connection (MySQL).
 * Run the Spring Boot application.
 
+The Backend API Documentation will be available at `http://localhost:8080/swagger-ui/index.html`
+
 ### 3. RAG Setup (ALLY Legal Assistant):
-
-**Navigate to the RAG directory:**
-```bash
-cd Ally-FinetuneRAG
-```
-
-**Create and activate Python virtual environment:**
-
-**Windows (PowerShell):**
-```bash
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-
-**Linux:**
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-**Install Python dependencies:**
-```bash
-pip install -r requirements.txt
-```
-
-**Configure environment variables** - Create `.env` file in `Ally-FinetuneRAG/`:
-```env
-# Vertex AI Fine-tuned Model Configuration
-GOOGLE_PROJECT_ID=your-project-id-here
-GOOGLE_ENDPOINT_ID=your-endpoint-id-here
-GOOGLE_REGION=us-central1
-
-# Only needed if you want to run/test "3_query_system.py"
-# Place your Google Cloud service account key as `service-account-key.json` in the `Ally-FinetuneRAG/` folder
-GOOGLE_APPLICATION_CREDENTIALS=./service-account-key.json
-
-# Pinecone Cloud Vector Database (PRODUCTION)
-PINECONE_API_KEY=your-pinecone-api-key-here
-PINECONE_ENVIRONMENT=us-east-1
-PINECONE_INDEX_NAME=ally-supreme-court-cases
-
-# Qdrant Local Vector Database (LOCAL TESTING ONLY - Optional)
-QDRANT_PATH=./vector-db
-```
-
-**Run one-time setup to process data and upload to Pinecone:**
-```bash
-python scripts/1_process_csv.py
-python scripts/2_index_pinecone.py
-```
-⚠️ **Note:** Step 2 (uploading to Pinecone) takes around 30 minutes to hours (depending on size) and only needs to be run once (or when adding new data).
-
-**Test the RAG system (Optional):**
-```bash
-python scripts/3_query_system.py
-```
+* Navigate to the RAG directory.
+* Create and activate Python virtual environment.
+* Install Python dependencies (`pip install -r requirements.txt`).
+* Configure environment variables (Create `.env` file).
 
 **Start the ALLY FastAPI server:**
 ```bash
@@ -105,24 +55,18 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 The RAG API will be available at `http://localhost:8000`
 
+For detailed RAG setup instructions, see [`Ally-FinetuneRAG/readme.md`](./Ally-FinetuneRAG/readme.md)
+
 ### 4. Frontend Setup (Vite + React):
-
-**Navigate to the frontend directory:**
-```bash
-cd ally-frontend
-```
-
-**Install dependencies:**
-```bash
-npm install
-```
-
-**Configure API endpoint** (if needed) in your config file
+* Navigate to the frontend directory. 
+* Install dependencies (npm install).
+* Configure API endpoint (if needed) in your config file
 
 **Start the development server:**
 ```bash
 npm run dev
 ```
+
 **Open your browser at** `http://localhost:5173`
 
 ---
@@ -154,6 +98,7 @@ The main Spring Boot backend communicates with the FastAPI RAG service for AI-po
   * Qdrant (optional - local vector database for testing)
 * **AI Model**: Google Gemini Flash 2.0 - Lite (Fine-tuned via Vertex AI)
 * **ML Embeddings**: [BAAI/bge-large-en-v1.5](https://huggingface.co/BAAI/bge-large-en-v1.5)
+* **Context Classification**: Gemini Base Model for context classification and query routing
 * **Vector Search**: Pinecone Cloud (Production), Qdrant (Local Testing - Optional)
 
 ---
