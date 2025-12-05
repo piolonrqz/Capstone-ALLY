@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Logo from './Logo';
+import { toast } from 'sonner';
 
 const VerifyLawyer = () => {
   const [verificationCode, setVerificationCode] = useState('');
@@ -25,31 +25,50 @@ const VerifyLawyer = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(async () => {
-      setIsLoading(false);
-      await fetch("http://localhost:8080/verifyLawyer?token=" + verificationCode, {
+
+    try {
+      const response = await fetch("http://localhost:8080/verifyLawyer?token=" + verificationCode, {
         method: "POST"
       });
-      alert("Registration successful! Please login.");
-      navigate('/login');
-    }, 1500);
+
+      setIsLoading(false);
+
+      if (response.ok) {
+        toast.success("Registration successful! Please login.", {
+          duration: 3000,
+        });
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
+      } else {
+        toast.error("Invalid verification code. Please try again.", {
+          duration: 3000,
+        });
+        setVerificationCode('');
+      }
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Verification failed. Please try again.", {
+        duration: 3000,
+      });
+      console.error("Verification error:", error);
+    }
   };
 
-  const handleResendCode = () => {
-   e.preventDefault();
+  const handleResendCode = async (e) => {
+    e.preventDefault();
     setIsLoading(true);
     setTimeout(async () => {
       setIsLoading(false);
       await fetch("http://localhost:8080/resendCodeLawyer?email=" + email, {
         method: "POST"
       });
-    alert('Verification code resent!');
+    toast.success('Verification code resent!');
     }, 1500);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 font-['Poppins'] relative">
-      <Logo />
+    <div className="flex items-center justify-center min-h-screen font-['Poppins'] relative p-4">
       <div className="w-full max-w-md p-8 bg-white border border-gray-200 shadow-md rounded-2xl">
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-bold text-gray-800">Verify Your Email</h2>
@@ -57,12 +76,12 @@ const VerifyLawyer = () => {
         </div>
         <div>
           <div className="flex flex-col items-center mb-4">
-            <div className="flex justify-start w-[330px] mb-3">
+            <div className="w-full mb-3">
               <label className="text-sm font-medium text-gray-700">
                 Verification Code
               </label>
             </div>
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-between w-full">
               {[0, 1, 2, 3, 4, 5].map((index) => (
                 <input
                   key={index}
@@ -111,10 +130,16 @@ const VerifyLawyer = () => {
               ))}
             </div>
           </div>
-          <div className="flex justify-center mt-6">
+          <div className="flex gap-3 mt-6 w-full">
+            <button
+              onClick={() => navigate('/login')}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-6 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-colors duration-300"
+            >
+              Cancel
+            </button>
             <button
               onClick={handleSubmit}
-              className="bg-blue-600 text-white py-2 w-[30.6svh] px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300"
+              className="flex-1 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300"
               disabled={isLoading}
             >
               {isLoading ? 'Verifying...' : 'Verify Email'}

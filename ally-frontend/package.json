@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@firebase/firestore": "^4.7.16",
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-scroll-area": "^1.2.9",
     "@radix-ui/react-slot": "^1.2.3",
     "ally-frontend": "file:",

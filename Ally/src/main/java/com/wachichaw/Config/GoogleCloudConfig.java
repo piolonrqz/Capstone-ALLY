@@ -32,4 +32,3 @@ public class GoogleCloudConfig {
         return new RestTemplate(factory);
     }
 }
-

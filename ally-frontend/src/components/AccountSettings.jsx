@@ -30,6 +30,7 @@ const AccountSettings = () => {
         setUserType(data.accountType.toLowerCase());
         setUserData(data);
       } catch (err) {
+        console.error('Error loading user data:', err);
         setError('Failed to load user data. Please try again.');
       } finally {
         setLoading(false);
@@ -39,15 +40,21 @@ const AccountSettings = () => {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-gray-50">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-gray-600">Loading account settings...</p>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="p-6 text-center bg-white rounded shadow">
+      <div className="container max-w-3xl px-4 mx-auto py-8">
+        <div className="p-6 text-center bg-white border border-red-200 rounded-xl">
           <p className="mb-2 text-lg font-semibold text-red-600">{error}</p>
-          <p className="text-gray-700">If the problem persists, please log out and log in again, or contact support.</p>
+          <p className="text-gray-700">
+            If the problem persists, please log out and log in again, or contact support.
+          </p>
         </div>
       </div>
     );
@@ -55,11 +62,29 @@ const AccountSettings = () => {
 
   switch (userType) {
     case 'lawyer':
-      return <LawyerSettings user={userData} />;
+      return (
+        <div className="container max-w-5xl px-4 mx-auto py-8">
+          <div className="bg-white shadow-sm rounded-2xl p-6 sm:p-8">
+            <LawyerSettings user={userData} />
+          </div>
+        </div>
+      );
     case 'client':
-      return <ClientSettings user={userData} />;
+      return (
+        <div className="container max-w-5xl px-4 mx-auto py-8">
+          <div className="bg-white shadow-sm rounded-2xl p-6 sm:p-8">
+            <ClientSettings user={userData} />
+          </div>
+        </div>
+      );
     case 'admin':
-      return <AdminSettings user={userData} />;
+      return (
+        <div className="container max-w-5xl px-4 mx-auto py-8">
+          <div className="bg-white shadow-sm rounded-2xl p-6 sm:p-8">
+            <AdminSettings user={userData} />
+          </div>
+        </div>
+      );
     default:
       return null;
   }
