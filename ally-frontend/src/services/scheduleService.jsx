@@ -230,15 +230,51 @@ export const scheduleService = {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || 'Failed to cancel appointment');
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error('Error cancelling appointment:', error);
+      throw error;
+    }
+  },
+
+  // Reschedule an appointment (for clients)
+  rescheduleAppointment: async (scheduleId, clientId, date, time) => {
+    try {
+      const newStartTime = formatDateTime(date, time);
+      if (!newStartTime) {
+        throw new Error('Invalid date or time format');
+      }
+
+      const newEndTime = new Date(new Date(newStartTime).getTime() + 60 * 60 * 1000).toISOString().slice(0, 19); // Add 1 hour
+
+      const requestBody = {
+        clientId: parseInt(clientId),
+        newStartTime: newStartTime,
+        newEndTime: newEndTime
+      };
+
+      const response = await fetch(`${API_BASE_URL}/${scheduleId}/reschedule`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to reschedule appointment');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
       throw error;
     }
   }

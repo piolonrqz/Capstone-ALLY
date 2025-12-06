@@ -44,4 +44,17 @@ public class EmailService {
             throw new RuntimeException("Failed to send email to " + to, e);
         }
     }
+
+    public void sendAppointmentReminder(String to, String userName, java.time.LocalDateTime appointmentTime, String userType) {
+        String subject = "Appointment Reminder";
+        String body = "<html>" +
+                "<body>" +
+                "<h3>Hi " + userName + ",</h3>" +
+                "<p>This is a reminder for your upcoming appointment on " + appointmentTime.toLocalDate() + " at " + appointmentTime.toLocalTime() + ".</p>" +
+                "<p>Thank you,</p>" +
+                "<p>Ally Team</p>" +
+                "</body>" +
+                "</html>";
+        sendEmail(to, subject, body);
+    }
 }

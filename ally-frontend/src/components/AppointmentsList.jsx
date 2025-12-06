@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppointmentCard } from './AppointmentCard';
 import { AppointmentDetailsModal } from './AppointmentDetailsModal';
+import { BookingModal } from './BookingModal';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAuthData } from '../utils/auth.jsx';
@@ -8,10 +9,13 @@ import { scheduleService } from '../services/scheduleService.jsx';
 
 export const AppointmentsList = ({ refreshTrigger = 0 }) => {
   const [appointments, setAppointments] = useState([]);
+  const [pastAppointments, setPastAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [appointmentToReschedule, setAppointmentToReschedule] = useState(null);
 
   useEffect(() => {
     fetchUserAppointments();
@@ -26,54 +30,67 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
         return;
       }
 
-      // Determine the correct endpoint based on user account type
-      let endpoint;
+      // Determine the correct endpoints based on user account type
+      let upcomingEndpoint;
+      let pastEndpoint;
       if (authData.accountType === 'LAWYER') {
-        endpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/upcoming`;
+        upcomingEndpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/upcoming`;
+        pastEndpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/past`;
       } else if (authData.accountType === 'CLIENT') {
-        endpoint = `http://localhost:8080/schedules/client/${authData.userId}/upcoming`;
+        upcomingEndpoint = `http://localhost:8080/schedules/client/${authData.userId}/upcoming`;
+        pastEndpoint = `http://localhost:8080/schedules/client/${authData.userId}/past`;
       } else {
         setError('Invalid account type. Please contact support.');
         return;
       }
-      
-      console.log('Using endpoint:', endpoint); // Debug log
 
-      const response = await fetch(endpoint);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('Using endpoints:', upcomingEndpoint, pastEndpoint);
+
+      // Fetch upcoming and past appointments in parallel
+      const [upcomingResponse, pastResponse] = await Promise.all([
+        fetch(upcomingEndpoint),
+        fetch(pastEndpoint)
+      ]);
+
+      if (!upcomingResponse.ok || !pastResponse.ok) {
+        throw new Error(`HTTP error! upcoming: ${upcomingResponse.status}, past: ${pastResponse.status}`);
       }
-        const data = await response.json();        
-      
-      // Transform the data to match our component expectations
-      const transformedAppointments = data.map(appointment => {
-        return {
-          scheduleId: appointment.scheduleId,
-          bookingStartTime: appointment.bookingStartTime,
-          bookingEndTime: appointment.bookingEndTime,
-          lawyer: {
-            Fname: appointment.lawyer?.fname || appointment.lawyer?.Fname || '',
-            Lname: appointment.lawyer?.lname || appointment.lawyer?.Lname || ''
-          },
-          client: {
-            Fname: appointment.client?.Fname || appointment.client?.fname || '',
-            Lname: appointment.client?.Lname || appointment.client?.lname || ''
-          },          
-          // Include case information if available
-          legalCase: appointment.legalCase ? {
-            caseId: appointment.legalCase.caseId,
-            title: appointment.legalCase.title,
-            status: appointment.legalCase.status,
-            description: appointment.legalCase.description
-          } : null,
-          status: appointment.status || 'PENDING',
-          declineReason: appointment.declineReason,
-          isBooked: appointment.isBooked
-        }
+
+      const [upcomingData, pastData] = await Promise.all([
+        upcomingResponse.json(),
+        pastResponse.json()
+      ]);
+
+      // Transform function for appointment data
+      const transformAppointment = (appointment) => ({
+        scheduleId: appointment.scheduleId,
+        bookingStartTime: appointment.bookingStartTime,
+        bookingEndTime: appointment.bookingEndTime,
+        lawyer: {
+          userId: appointment.lawyer?.userId,
+          Fname: appointment.lawyer?.fname || appointment.lawyer?.Fname || '',
+          Lname: appointment.lawyer?.lname || appointment.lawyer?.Lname || ''
+        },
+        client: {
+          Fname: appointment.client?.Fname || appointment.client?.fname || '',
+          Lname: appointment.client?.Lname || appointment.client?.lname || ''
+        },
+        legalCase: appointment.legalCase ? {
+          caseId: appointment.legalCase.caseId,
+          title: appointment.legalCase.title,
+          status: appointment.legalCase.status,
+          description: appointment.legalCase.description
+        } : null,
+        status: appointment.status || 'PENDING',
+        declineReason: appointment.declineReason,
+        isBooked: appointment.isBooked
       });
-      
-      setAppointments(transformedAppointments);
+
+      const transformedUpcoming = upcomingData.map(transformAppointment);
+      const transformedPast = pastData.map(transformAppointment);
+
+      setAppointments(transformedUpcoming);
+      setPastAppointments(transformedPast);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch appointments:", err);
@@ -148,19 +165,45 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
 
     try {
       await scheduleService.declineAppointment(appointment.scheduleId, authData.userId, reason);
-      
+
       // Update the appointment status in the local state
-      setAppointments(prev => prev.map(apt => 
-        apt.scheduleId === appointment.scheduleId 
+      setAppointments(prev => prev.map(apt =>
+        apt.scheduleId === appointment.scheduleId
           ? { ...apt, status: 'DECLINED', declineReason: reason }
           : apt
       ));
-      
+
       toast.success('Appointment declined successfully!');
     } catch (error) {
       console.error('Error declining appointment:', error);
       toast.error(error.message || 'Failed to decline appointment. Please try again.');
     }
+  };
+
+  const handleReschedule = (appointment) => {
+    setAppointmentToReschedule(appointment);
+    setIsRescheduleModalOpen(true);
+  };
+
+  const handleRescheduleSuccess = () => {
+    setIsRescheduleModalOpen(false);
+    setAppointmentToReschedule(null);
+
+    // Move the rescheduled appointment from accepted to pending section
+    setAppointments(prev => prev.map(apt =>
+      apt.scheduleId === appointmentToReschedule?.scheduleId
+        ? { ...apt, status: 'PENDING' }
+        : apt
+    ));
+
+    // Refresh the appointments to get the latest data
+    fetchUserAppointments();
+    toast.success('Appointment rescheduled successfully! Now pending lawyer approval.');
+  };
+
+  const handleCloseRescheduleModal = () => {
+    setIsRescheduleModalOpen(false);
+    setAppointmentToReschedule(null);
   };
 
   if (loading) {
@@ -193,10 +236,12 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
     apt.status?.toUpperCase() !== 'PENDING' && apt.status?.toUpperCase() !== 'ACCEPTED'
   );
 
-  if (appointments.length === 0) {
+  const hasAnyAppointments = appointments.length > 0 || pastAppointments.length > 0;
+
+  if (!hasAnyAppointments) {
     const authData = getAuthData();
     const isLawyer = authData?.accountType === 'LAWYER';
-    
+
     return (
       <div className="py-12 text-center">
         <div className="mb-6 flex justify-center">
@@ -269,12 +314,38 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
           </div>
         )}
 
-        {/* Other Appointments Section (Cancelled, Declined, Completed) */}
+        {/* Appointment History Section */}
+        {pastAppointments.length > 0 && (
+          <div>
+            <div className="flex items-center mb-4">
+              <h3 className="text-lg font-semibold text-purple-700">
+                Appointment History
+              </h3>
+              <span className="ml-2 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
+                {pastAppointments.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {pastAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.scheduleId}
+                  appointment={appointment}
+                  onCardClick={handleCardClick}
+                  onCancel={handleCancel}
+                  onAccept={handleAccept}
+                  onDecline={handleDecline}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Past Appointments from Upcoming Data (edge cases) */}
         {otherAppointments.length > 0 && (
           <div>
             <div className="flex items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-700">
-                Past Appointments
+                Recently Completed
               </h3>
               <span className="ml-2 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
                 {otherAppointments.length}
@@ -304,6 +375,27 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
         onAccept={handleAccept}
         onDecline={handleDecline}
         onCancel={handleCancel}
+        onReschedule={handleReschedule}
+      />
+
+      {/* Reschedule Modal */}
+      <BookingModal
+        lawyer={{
+          id: appointmentToReschedule?.lawyer?.userId || appointmentToReschedule?.lawyer?.id,
+          name: `${appointmentToReschedule?.lawyer?.Fname || ''} ${appointmentToReschedule?.lawyer?.Lname || ''}`.trim(),
+          fee: 'Contact for details' // We don't have fee data in appointment
+        }}
+        caseInfo={appointmentToReschedule?.legalCase ? {
+          caseId: appointmentToReschedule.legalCase.caseId,
+          title: appointmentToReschedule.legalCase.title,
+          status: appointmentToReschedule.legalCase.status,
+          description: appointmentToReschedule.legalCase.description
+        } : null}
+        isOpen={isRescheduleModalOpen}
+        onClose={handleCloseRescheduleModal}
+        isRescheduling={true}
+        appointmentToReschedule={appointmentToReschedule}
+        onRescheduleSuccess={handleRescheduleSuccess}
       />
     </>
   );

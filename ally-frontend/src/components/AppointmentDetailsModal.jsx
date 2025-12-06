@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { X, Calendar, Clock, User, FileText, Check, Trash2, MapPin } from 'lucide-react';
 import { getAuthData } from '../utils/auth.jsx';
 
-export const AppointmentDetailsModal = ({ 
-  appointment, 
-  isOpen, 
-  onClose, 
-  onAccept, 
-  onDecline, 
-  onCancel 
+export const AppointmentDetailsModal = ({
+  appointment,
+  isOpen,
+  onClose,
+  onAccept,
+  onDecline,
+  onCancel,
+  onReschedule
 }) => {
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
@@ -261,6 +262,22 @@ export const AppointmentDetailsModal = ({
               >
                 <Trash2 className="w-4 h-4 mr-1" />
                 Cancel
+              </button>
+            )}
+
+            {/* Client Actions for Accepted Appointments */}
+            {!isLawyer && appointment.status?.toUpperCase() === 'ACCEPTED' && (
+              <button
+                onClick={() => {
+                  if (onReschedule) {
+                    onReschedule(appointment);
+                  }
+                  onClose();
+                }}
+                className="flex items-center px-4 py-2 text-blue-700 bg-blue-50 border border-blue-500 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <Calendar className="w-4 h-4 mr-1" />
+                Reschedule
               </button>
             )}
           </div>
