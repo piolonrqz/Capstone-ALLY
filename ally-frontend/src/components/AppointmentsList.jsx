@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppointmentCard } from './AppointmentCard';
 import { AppointmentDetailsModal } from './AppointmentDetailsModal';
+import { BookingModal } from './BookingModal';
 import { Loader2, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAuthData } from '../utils/auth.jsx';
@@ -13,6 +14,8 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
   const [error, setError] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [appointmentToReschedule, setAppointmentToReschedule] = useState(null);
 
   useEffect(() => {
     fetchUserAppointments();
@@ -64,6 +67,7 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
         bookingStartTime: appointment.bookingStartTime,
         bookingEndTime: appointment.bookingEndTime,
         lawyer: {
+          userId: appointment.lawyer?.userId,
           Fname: appointment.lawyer?.fname || appointment.lawyer?.Fname || '',
           Lname: appointment.lawyer?.lname || appointment.lawyer?.Lname || ''
         },
@@ -161,19 +165,45 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
 
     try {
       await scheduleService.declineAppointment(appointment.scheduleId, authData.userId, reason);
-      
+
       // Update the appointment status in the local state
-      setAppointments(prev => prev.map(apt => 
-        apt.scheduleId === appointment.scheduleId 
+      setAppointments(prev => prev.map(apt =>
+        apt.scheduleId === appointment.scheduleId
           ? { ...apt, status: 'DECLINED', declineReason: reason }
           : apt
       ));
-      
+
       toast.success('Appointment declined successfully!');
     } catch (error) {
       console.error('Error declining appointment:', error);
       toast.error(error.message || 'Failed to decline appointment. Please try again.');
     }
+  };
+
+  const handleReschedule = (appointment) => {
+    setAppointmentToReschedule(appointment);
+    setIsRescheduleModalOpen(true);
+  };
+
+  const handleRescheduleSuccess = () => {
+    setIsRescheduleModalOpen(false);
+    setAppointmentToReschedule(null);
+
+    // Move the rescheduled appointment from accepted to pending section
+    setAppointments(prev => prev.map(apt =>
+      apt.scheduleId === appointmentToReschedule?.scheduleId
+        ? { ...apt, status: 'PENDING' }
+        : apt
+    ));
+
+    // Refresh the appointments to get the latest data
+    fetchUserAppointments();
+    toast.success('Appointment rescheduled successfully! Now pending lawyer approval.');
+  };
+
+  const handleCloseRescheduleModal = () => {
+    setIsRescheduleModalOpen(false);
+    setAppointmentToReschedule(null);
   };
 
   if (loading) {
@@ -336,6 +366,27 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
         onAccept={handleAccept}
         onDecline={handleDecline}
         onCancel={handleCancel}
+        onReschedule={handleReschedule}
+      />
+
+      {/* Reschedule Modal */}
+      <BookingModal
+        lawyer={{
+          id: appointmentToReschedule?.lawyer?.userId || appointmentToReschedule?.lawyer?.id,
+          name: `${appointmentToReschedule?.lawyer?.Fname || ''} ${appointmentToReschedule?.lawyer?.Lname || ''}`.trim(),
+          fee: 'Contact for details' // We don't have fee data in appointment
+        }}
+        caseInfo={appointmentToReschedule?.legalCase ? {
+          caseId: appointmentToReschedule.legalCase.caseId,
+          title: appointmentToReschedule.legalCase.title,
+          status: appointmentToReschedule.legalCase.status,
+          description: appointmentToReschedule.legalCase.description
+        } : null}
+        isOpen={isRescheduleModalOpen}
+        onClose={handleCloseRescheduleModal}
+        isRescheduling={true}
+        appointmentToReschedule={appointmentToReschedule}
+        onRescheduleSuccess={handleRescheduleSuccess}
       />
     </>
   );

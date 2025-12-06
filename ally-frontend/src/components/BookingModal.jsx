@@ -6,7 +6,16 @@ import { scheduleService } from '../services/scheduleService.jsx';
 import { getAuthData, fetchUserDetails } from '../utils/auth.jsx';
 import { getStartOfDay, isPastDate, filterPastTimeSlots, isPastTimeSlot } from '../utils/dateUtils.js';
 
-export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) => {
+export const BookingModal = ({
+  lawyer,
+  caseInfo,
+  isOpen,
+  onClose,
+  onSuccess,
+  isRescheduling = false,
+  appointmentToReschedule,
+  onRescheduleSuccess
+}) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState('');
   const [consultationType, setConsultationType] = useState('in-person');
@@ -100,16 +109,34 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
       const availableTimeSlots = availabilityData.availableSlots.map(slot => slot.startTime);
       
       // Filter out past time slots for today
-      const filteredTimeSlots = filterPastTimeSlots(selectedDate, availableTimeSlots);
+      let filteredTimeSlots = filterPastTimeSlots(selectedDate, availableTimeSlots);
+      
+      // Filter out current appointment slot when rescheduling
+      if (isRescheduling && appointmentToReschedule) {
+        const currentAppointmentDate = new Date(appointmentToReschedule.bookingStartTime).toDateString();
+        const selectedDateStr = selectedDate.toDateString();
+
+        if (currentAppointmentDate === selectedDateStr) {
+          // Parse current appointment time to 12-hour format (e.g., "09:00 AM")
+          const currentAppointmentTime = new Date(appointmentToReschedule.bookingStartTime);
+          const hours24 = currentAppointmentTime.getHours();
+          const minutes = currentAppointmentTime.getMinutes();
+          const period = hours24 >= 12 ? 'PM' : 'AM';
+          const hours12 = hours24 % 12 || 12;
+          const currentTimeSlot = `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+
+          // Filter out this time slot from available slots
+          filteredTimeSlots = filteredTimeSlots.filter(slot => slot !== currentTimeSlot);
+        }
+      }
+
+      // Update available slots with filtered results
       setAvailableSlots(filteredTimeSlots);
       
       // Clear selected time if it's no longer available or is in the past
       if (selectedTime && (!filteredTimeSlots.includes(selectedTime) || isPastTimeSlot(selectedDate, selectedTime))) {
         setSelectedTime('');
       }
-      
-      // Optional: Store full availability data for enhanced UI features
-      // setFullAvailabilityData(availabilityData);
     } catch (error) {
       console.error('Error checking availability:', error);
       setError('Failed to check availability. Please try again.');
@@ -122,7 +149,7 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
   };
   const handleBooking = async (e) => {
     e.preventDefault();
-    
+
     if (!selectedDate || !selectedTime) {
       setError('Please select a date and time');
       return;
@@ -139,38 +166,59 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
     }
 
     setIsLoading(true);
-    setError('');    try {
-      const bookingData = {
-        lawyerId: lawyer.id,
-        clientId: userDetails.id,
-        date: selectedDate,
-        time: selectedTime,
-        consultationType,
-        notes
-      };
+    setError('');
+    try {
+      if (isRescheduling && appointmentToReschedule) {
+        // Handle rescheduling
+        const result = await scheduleService.rescheduleAppointment(
+          appointmentToReschedule.scheduleId,
+          userDetails.id,
+          selectedDate,
+          selectedTime
+        );
 
-      let result;
-      if (caseInfo) {
-        // Case-based appointment booking
-        result = await scheduleService.createCaseAppointment({
-          ...bookingData,
-          caseId: caseInfo.caseId
-        });
+        console.log('Appointment rescheduled successfully:', result);
+        toast.success('Appointment rescheduled successfully!');
+
+        if (onRescheduleSuccess) {
+          onRescheduleSuccess();
+        } else {
+          onClose();
+        }
       } else {
-        // Regular appointment booking
-        result = await scheduleService.createAppointment(bookingData);
-      }
-      
-      console.log('Appointment created successfully:', result);
-      toast.success('Consultation booked successfully!');
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        onClose();
+        // Handle new booking
+        const bookingData = {
+          lawyerId: lawyer.id,
+          clientId: userDetails.id,
+          date: selectedDate,
+          time: selectedTime,
+          consultationType,
+          notes
+        };
+
+        let result;
+        if (caseInfo) {
+          // Case-based appointment booking
+          result = await scheduleService.createCaseAppointment({
+            ...bookingData,
+            caseId: caseInfo.caseId
+          });
+        } else {
+          // Regular appointment booking
+          result = await scheduleService.createAppointment(bookingData);
+        }
+
+        console.log('Appointment created successfully:', result);
+        toast.success('Consultation booked successfully!');
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          onClose();
+        }
       }
     } catch (error) {
-      console.error('Error creating appointment:', error);
-      setError(error.message || 'Failed to book consultation. Please try again.');
+      console.error(`Error ${isRescheduling ? 'rescheduling' : 'creating'} appointment:`, error);
+      setError(error.message || `Failed to ${isRescheduling ? 'reschedule' : 'book'} consultation. Please try again.`);
     } finally {
       setIsLoading(false);
     }
@@ -199,9 +247,11 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
           </div>
           
           <div className="p-8">            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Schedule Consultation</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isRescheduling ? 'Reschedule Consultation' : 'Schedule Consultation'}
+              </h2>
               <p className="mt-1 text-gray-600">
-                Book an appointment with {lawyer.name}
+                {isRescheduling ? 'Reschedule your appointment' : 'Book an appointment'} with {lawyer.name}
                 {caseInfo && (
                   <span className="block mt-1 text-sm text-blue-600">
                     For Case: {caseInfo.title} (#{caseInfo.caseId})
@@ -423,10 +473,10 @@ export const BookingModal = ({ lawyer, caseInfo, isOpen, onClose, onSuccess }) =
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Booking...
+                      {isRescheduling ? 'Rescheduling...' : 'Booking...'}
                     </>
                   ) : (
-                    'Book Consultation'
+                    isRescheduling ? 'Reschedule Appointment' : 'Book Consultation'
                   )}
                 </button>
               </div>

@@ -346,6 +346,47 @@ public class ScheduleService {
     }
 
     /**
+     * Reschedule an appointment (for clients)
+     * Only accepted appointments can be rescheduled, changes status back to PENDING
+     */
+    public ScheduleEntity rescheduleAppointment(int scheduleId, int clientId, LocalDateTime newStartTime, LocalDateTime newEndTime) {
+        ScheduleEntity schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found with ID: " + scheduleId));
+
+        // Validate that the client owns this appointment
+        if (schedule.getClient().getUserId() != clientId) {
+            throw new RuntimeException("Client does not own this appointment");
+        }
+
+        // Validate appointment status can be rescheduled
+        if (schedule.getStatus() != AppointmentStatus.ACCEPTED) {
+            throw new RuntimeException("Only accepted appointments can be rescheduled");
+        }
+
+        // Validate new start time is in the future
+        if (newStartTime.isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Cannot reschedule to a time in the past");
+        }
+
+        // Check for scheduling conflicts with the new time
+        if (hasSchedulingConflict(schedule.getLawyer(), newStartTime, newEndTime)) {
+            throw new RuntimeException("Lawyer is not available at the requested time slot");
+        }
+
+        // Update the booking times
+        schedule.setBookingStartTime(newStartTime);
+        schedule.setBookingEndTime(newEndTime);
+
+        // Reset status to PENDING (lawyer needs to accept again)
+        schedule.setStatus(AppointmentStatus.PENDING);
+        schedule.setDeclineReason(null); // Clear any previous decline reason
+
+        reminderService.sendAppointmentReminders(schedule);
+
+        return scheduleRepository.save(schedule);
+    }
+
+    /**
      * Get past schedules for a lawyer (appointment history)
      */
     public List<ScheduleEntity> getPastSchedulesForLawyer(LawyerEntity lawyer) {

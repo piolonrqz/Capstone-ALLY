@@ -314,6 +314,32 @@ public class ScheduleController {    @Autowired
     }
 
     /**
+     * Reschedule an appointment (for clients)
+     * Only accepted appointments can be rescheduled
+     * PUT /schedules/{scheduleId}/reschedule
+     */
+    @PutMapping("/{scheduleId}/reschedule")
+    public ResponseEntity<?> rescheduleAppointment(
+            @PathVariable Integer scheduleId,
+            @RequestBody RescheduleRequestDTO request) {
+        try {
+            LocalDateTime newStartTime = parseDateTime(request.getNewStartTime());
+            LocalDateTime newEndTime = parseDateTime(request.getNewEndTime());
+
+            ScheduleEntity schedule = scheduleService.rescheduleAppointment(scheduleId, request.getClientId(), newStartTime, newEndTime);
+            ScheduleResponseDTO scheduleResponseDTO = convertToScheduleResponseDTO(schedule);
+            return ResponseEntity.ok(scheduleResponseDTO);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Use yyyy-MM-dd'T'HH:mm:ss");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to reschedule appointment");
+        }
+    }
+
+    /**
      * Get a specific schedule by ID
      * GET /schedules/{scheduleId}
      */
