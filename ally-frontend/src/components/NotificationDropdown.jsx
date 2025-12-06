@@ -1,33 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Bell, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Bell, X, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import useLawyerStatus from '../hooks/useLawyerStatus.js';
 
 const NotificationDropdown = ({ isOpen, onClose, currentUser }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+    const { status, loading: statusLoading, isLawyer } = useLawyerStatus();
 
-    useEffect(() => {
-        if (isOpen && currentUser?.id) {
-            loadNotifications();
-        }
-    }, [isOpen, currentUser]);
-
-    const loadNotifications = async () => {
+    const loadNotifications = useCallback(async () => {
         try {
             setLoading(true);
             
             // TODO: Fetch system notifications from backend
             // This would be implemented when you add system notifications API
+            const systemNotifications = [];
 
+            // Add lawyer approval warning as a notification if applicable
+            if (!statusLoading && isLawyer && status && status !== 'approved') {
+                const approvalNotification = {
+                    id: 'lawyer-approval-warning',
+                    title: status === 'pending' 
+                        ? 'Account Pending Approval' 
+                        : 'Account Rejected',
+                    message: status === 'pending'
+                        ? 'Your lawyer account is pending admin approval. This usually takes 1-2 business days. You can still upload documents in Settings while you wait.'
+                        : 'Your lawyer account has been rejected. Please contact support or check your credentials in Settings.',
+                    type: status === 'rejected' ? 'error' : 'warning',
+                    timestamp: new Date().toISOString(),
+                    isLawyerApproval: true
+                };
+                systemNotifications.unshift(approvalNotification); // Add at the beginning
+            }
+
+            setNotifications(systemNotifications);
             setLoading(false);
         } catch (error) {
             console.error('Error loading notifications:', error);
             toast.error('Failed to load notifications');
             setLoading(false);
         }
-    };
+    }, [status, isLawyer, statusLoading]);
+
+    useEffect(() => {
+        if (isOpen && currentUser?.id) {
+            loadNotifications();
+        }
+    }, [isOpen, currentUser, loadNotifications]);
 
 
     if (!isOpen) return null;
@@ -51,20 +70,48 @@ const NotificationDropdown = ({ isOpen, onClose, currentUser }) => {
                         {/* System Notifications */}
                         {notifications.length > 0 ? (
                             <div className="space-y-3">
-                                {notifications.map((notification) => (
-                                    <div
-                                        key={notification.id}
-                                        className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                                    >
-                                        <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-                                        <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
-                                        {notification.timestamp && (
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                {new Date(notification.timestamp).toLocaleString()}
-                                            </p>
-                                        )}
-                                    </div>
-                                ))}
+                                {notifications.map((notification) => {
+                                    const isWarning = notification.type === 'warning' || notification.isLawyerApproval;
+                                    const isError = notification.type === 'error';
+                                    
+                                    return (
+                                        <div
+                                            key={notification.id}
+                                            className={`p-3 rounded-lg transition-colors ${
+                                                isError
+                                                    ? 'bg-red-50 border border-red-200 hover:bg-red-100'
+                                                    : isWarning
+                                                    ? 'bg-amber-50 border border-amber-200 hover:bg-amber-100'
+                                                    : 'bg-gray-50 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                {(isWarning || isError) && (
+                                                    <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                                                        isError ? 'text-red-600' : 'text-amber-600'
+                                                    }`} />
+                                                )}
+                                                <div className="flex-1">
+                                                    <p className={`text-sm font-medium ${
+                                                        isError ? 'text-red-900' : isWarning ? 'text-amber-900' : 'text-gray-900'
+                                                    }`}>
+                                                        {notification.title}
+                                                    </p>
+                                                    <p className={`text-xs mt-1 ${
+                                                        isError ? 'text-red-700' : isWarning ? 'text-amber-700' : 'text-gray-600'
+                                                    }`}>
+                                                        {notification.message}
+                                                    </p>
+                                                    {notification.timestamp && (
+                                                        <p className="text-xs text-gray-400 mt-1">
+                                                            {new Date(notification.timestamp).toLocaleString()}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className="text-center py-8">

@@ -7,6 +7,7 @@ import NotificationDropdown from './NotificationDropdown';
 import MessageDropdown from './MessageDropdown';
 import { useSidebar } from '../contexts/SidebarContext';
 import { fetchActiveConversations } from '../services/chatService';
+import useLawyerStatus from '../hooks/useLawyerStatus.js';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const NavigationBar = () => {
   
   // Memoize authData to prevent infinite re-renders
   const authData = useMemo(() => getAuthData(), [isLoggedIn]);
+  const { status, loading: statusLoading, isLawyer } = useLawyerStatus();
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -27,6 +29,15 @@ const NavigationBar = () => {
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
   const messageRef = useRef(null);
+
+  // Check if there are notifications (lawyer approval warning or other notifications)
+  const hasNotifications = useMemo(() => {
+    if (!statusLoading && isLawyer && status && status !== 'approved') {
+      return true;
+    }
+    // TODO: Add check for other backend notifications when implemented
+    return false;
+  }, [status, isLawyer, statusLoading]);
 
   // Fetch user details and conversations when logged in
   useEffect(() => {
@@ -188,6 +199,10 @@ const NavigationBar = () => {
                         className={`w-5 h-5 ${isNotificationOpen ? 'text-blue-600' : 'text-[#2B62C4]'}`} 
                         strokeWidth={1.8} 
                       />
+                      {/* Notification Badge */}
+                      {hasNotifications && (
+                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                      )}
                     </button>
                     <NotificationDropdown
                       isOpen={isNotificationOpen}
