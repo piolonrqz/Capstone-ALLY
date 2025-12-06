@@ -145,8 +145,8 @@ const MyCasesPage = () => {
               </h1>
               <p className="text-sm text-gray-600 sm:text-base">
                 {authData?.accountType === 'CLIENT' 
-                  ? 'Track your legal case submissions and their progress'
-                  : 'Manage cases assigned to you and update their status'
+                  ? 'Track your legal case submissions and their progress.'
+                  : 'Manage cases assigned to you and update their status.'
                 }
               </p>
             </div>
