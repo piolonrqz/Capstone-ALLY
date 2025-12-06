@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageSquarePlus, Folder, FileText, Calendar, UserSearch, MessageCircle, Settings, LogOut, ChevronLeft, ChevronRight, ChevronsUpDown, User, Shield, X, Menu } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { getAuthData } from '../utils/auth.jsx';
 
 const ChatSidebar = () => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const ChatSidebar = () => {
           // Desktop: always visible, responsive width
           'md:translate-x-0 md:flex'
         } ${
-          isExpanded ? 'w-[320px]' : 'w-[60px]'
+          isExpanded ? 'w-[240px]' : 'w-[60px]'
         }`}
       >
       {/* Logo Section */}
@@ -112,27 +113,37 @@ const ChatSidebar = () => {
 
       {/* Navigation Items */}
       <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
-        {navigationItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.path);
-          
-          return (
-            <div key={item.path}>
-              <button
-                onClick={() => handleNavigation(item)}
-                className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-[8px] text-base font-medium transition-all duration-200 ${
-                  active
-                    ? 'bg-[#1A6EFF] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                } ${!isExpanded ? 'justify-center' : ''}`}
-                title={!isExpanded ? item.name : ''}
-              >
-                <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-white' : 'text-gray-500'}`} />
-                {isExpanded && <span className="truncate">{item.name}</span>}
-              </button>
-            </div>
-          );
-        })}
+        {navigationItems
+          .filter(item => {
+            // Hide Messages from navigation
+            if (item.path === '/messages') return false;
+            // Hide Find Lawyer for lawyers
+            const authData = getAuthData();
+            const isLawyer = authData?.accountType === 'LAWYER';
+            if (item.path === '/lawyers' && isLawyer) return false;
+            return true;
+          })
+          .map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            
+            return (
+              <div key={item.path}>
+                <button
+                  onClick={() => handleNavigation(item)}
+                  className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-[8px] text-base font-medium transition-all duration-200 ${
+                    active
+                      ? 'bg-[#1A6EFF] text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  } ${!isExpanded ? 'justify-center' : ''}`}
+                  title={!isExpanded ? item.name : ''}
+                >
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-white' : 'text-gray-500'}`} />
+                  {isExpanded && <span className="truncate">{item.name}</span>}
+                </button>
+              </div>
+            );
+          })}
 
         {/* Settings - Collapsible on desktop, regular items on mobile */}
         {/* Mobile: Show Profile and Security as regular menu items */}

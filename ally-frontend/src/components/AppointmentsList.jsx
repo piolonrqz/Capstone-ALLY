@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AppointmentCard } from './AppointmentCard';
 import { AppointmentDetailsModal } from './AppointmentDetailsModal';
-import { Loader2, Calendar } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getAuthData } from '../utils/auth.jsx';
 import { scheduleService } from '../services/scheduleService.jsx';
@@ -99,7 +99,7 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
     }
 
     try {
-      const result = await scheduleService.cancelAppointment(appointment.scheduleId);
+      await scheduleService.cancelAppointment(appointment.scheduleId);
       
       // Update the appointment status in the local state instead of removing it
       setAppointments(prev => prev.map(apt => 
@@ -199,12 +199,21 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
     
     return (
       <div className="py-12 text-center">
-        <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-        <h3 className="mb-2 text-lg font-medium text-gray-900">No Appointments Yet</h3>
-        <p className="mb-6 text-gray-600">
+        <div className="mb-6 flex justify-center">
+          <img 
+            src="/booking.svg" 
+            alt="No appointments" 
+            className="w-48 h-48 object-contain cursor-normal"
+            draggable="false"
+          />
+        </div>
+        <h3 className="mb-3 text-xl sm:text-2xl font-semibold text-gray-900">
+          No Appointments Yet
+        </h3>
+        <p className="max-w-md mx-auto mb-6 text-sm sm:text-base text-gray-600 leading-relaxed">
           {isLawyer
-            ? "You don't have any upcoming appointments with clients."
-            : "You haven't scheduled any appointments. Browse our lawyer directory to book a consultation."
+            ? "You don't have any upcoming appointments with clients. Appointments will appear here once clients book consultations with you."
+            : "You haven't scheduled any appointments yet. Browse our lawyer directory to book a consultation and get started with your legal needs."
           }
         </p>
       </div>

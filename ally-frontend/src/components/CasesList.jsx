@@ -37,9 +37,10 @@ const CasesList = ({ cases, userRole, onStatusChange, onAppointmentBooked }) => 
       <div className="py-12 text-center">
         <div className="mb-6 flex justify-center">
           <img 
-            src="/no_case.jpg" 
+            src="/business_call.svg" 
             alt="No cases" 
-            className="w-48 h-48 object-contain"
+            className="w-48 h-48 object-contain cursor-normal"
+            draggable="false"
           />
         </div>
         <h3 className="mb-3 text-xl sm:text-2xl font-semibold text-gray-900">
