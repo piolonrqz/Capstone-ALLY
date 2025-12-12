@@ -24,7 +24,7 @@ export const validateToken = async (token) => {
     }
 
     // Make a lightweight API call to verify token is still valid
-    const response = await fetch(`http://localhost:8080/users/getUser/${userId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/getUser/${userId}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -124,7 +124,7 @@ export const fetchUserDetails = async (userId) => {
       throw new Error('Not authenticated');
     }
 
-    const response = await fetch(`http://localhost:8080/users/getUser/${userId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/getUser/${userId}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authData.token}`,
@@ -150,7 +150,7 @@ export const fetchUserDetails = async (userId) => {
     // If user is admin, fetch department information
     let department = null;
     if (userData.accountType === 'ADMIN') {
-      const adminResponse = await fetch(`http://localhost:8080/admins/${userId}`, {
+      const adminResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admins/${userId}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           'Content-Type': 'application/json',

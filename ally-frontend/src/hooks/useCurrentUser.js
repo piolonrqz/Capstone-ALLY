@@ -19,7 +19,7 @@ const useCurrentUser = () => {
                     return;
                 }
 
-                const res = await fetch(`http://localhost:8080/users/getUser/${authData.userId}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/getUser/${authData.userId}`, {
                     headers: {
                         Authorization: `Bearer ${authData.token}`,
                         'Content-Type': 'application/json',

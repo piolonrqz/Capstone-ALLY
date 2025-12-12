@@ -311,7 +311,7 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
       
       if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
         // For images, we can use the download URL directly
-        const response = await fetch(`http://localhost:8080/api/documents/${document.documentId}/download`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/documents/${document.documentId}/download`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${authData.token}`,
@@ -327,7 +327,7 @@ const CaseDocumentManager = ({ caseId, caseInfo, userRole, authData, onDocuments
         }
       }  else if (['txt', 'md'].includes(fileType)) {
         // For text files, we'll fetch and display the content
-        const response = await fetch(`http://localhost:8080/api/documents/${document.documentId}/download`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/documents/${document.documentId}/download`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${authData.token}`,

@@ -264,7 +264,7 @@ export default function LawyerRegistrationForm() {
         body.append("credentials", formData.credentials);
         console.log("Submitting form with:", body);
         
-        const response = await fetch("http://localhost:8080/users/Lawyer", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/Lawyer`, {
           method: "POST",
           body: body
         });

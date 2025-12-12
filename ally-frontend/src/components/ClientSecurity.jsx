@@ -42,7 +42,7 @@ const ClientSecurity = () => {
     setPasswordChange(prev => ({ ...prev, isLoading: true }));
 
     try {
-      const response = await fetch('http://localhost:8080/users/change-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

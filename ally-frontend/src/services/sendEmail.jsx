@@ -1,6 +1,6 @@
 export const sendEmail = async (emailData, token) => {
     try {
-      const response = await fetch("http://localhost:8080/api/email/send", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/email/send`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -20,4 +20,3 @@ export const sendEmail = async (emailData, token) => {
       console.error("Failed to send email:", error.message);
     }
   };
-  

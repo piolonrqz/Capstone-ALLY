@@ -27,7 +27,7 @@ const VerifyLawyer = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/verifyLawyer?token=" + verificationCode, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/verifyLawyer?token=${verificationCode}`, {
         method: "POST"
       });
 
@@ -60,7 +60,7 @@ const VerifyLawyer = () => {
     setIsLoading(true);
     setTimeout(async () => {
       setIsLoading(false);
-      await fetch("http://localhost:8080/resendCodeLawyer?email=" + email, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/resendCodeLawyer?email=${email}`, {
         method: "POST"
       });
     toast.success('Verification code resent!');
