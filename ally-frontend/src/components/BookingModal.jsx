@@ -252,13 +252,11 @@ export const BookingModal = ({
               </h2>
               <p className="mt-1 text-gray-600">
                 {isRescheduling ? 'Reschedule your appointment' : 'Book an appointment'} with {lawyer.name}
-                {caseInfo && (
-                  <span className="block mt-1 text-sm text-blue-600">
-                    For Case: {caseInfo.title} (#{caseInfo.caseId})
-                  </span>
-                )}
+                
               </p>
-            </div>            <form onSubmit={handleBooking} className="space-y-6">
+            </div>            
+            
+            <form onSubmit={handleBooking} className="space-y-6">
               {/* Case Information Display */}
               {caseInfo && (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -352,84 +350,8 @@ export const BookingModal = ({
                     </div>
                   )}
                 </div>
-              </div>              {/* Client Information - Show authenticated user's details */}
-              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                <h4 className="flex items-center mb-3 text-sm font-medium text-gray-700">
-                  <User className="w-4 h-4 mr-2" />
-                  Your Information
-                </h4>
-                {loadingUserDetails ? (
-                  <div className="flex items-center text-gray-500">
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Loading your information...
-                  </div>
-                ) : userDetails ? (
-                  <div className="grid gap-2 md:grid-cols-2">
-                    <div>
-                      <span className="text-sm font-medium text-gray-600">Name:</span>
-                      <p className="text-gray-900">{userDetails.fullName}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-600">Email:</span>
-                      <p className="text-gray-900">{userDetails.email}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-red-600">Unable to load user information</p>
-                )}
-              </div>
+              </div>              
 
-              {/* Consultation Type */}
-              <div>
-                <label className="block mb-3 text-sm font-medium text-gray-700">
-                  Consultation Type
-                </label>
-                <div className="flex space-x-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="in-person"
-                      checked={consultationType === 'in-person'}
-                      onChange={(e) => setConsultationType(e.target.value)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">In-Person</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="video"
-                      checked={consultationType === 'video'}
-                      onChange={(e) => setConsultationType(e.target.value)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Video Call</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="phone"
-                      checked={consultationType === 'phone'}
-                      onChange={(e) => setConsultationType(e.target.value)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Phone Call</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Additional Notes */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Additional Notes (Optional)
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Briefly describe your legal matter or any specific questions you have..."
-                />              </div>
 
               {/* Error Display */}
               {error && (
@@ -443,7 +365,9 @@ export const BookingModal = ({
                     </div>
                   </div>
                 </div>
-              )}              {/* Booking Summary */}
+              )}              
+              
+              {/* Booking Summary */}
               {selectedDate && selectedTime && userDetails && (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <h4 className="font-semibold text-blue-900">Booking Summary</h4>
@@ -452,8 +376,6 @@ export const BookingModal = ({
                     <p><strong>Lawyer:</strong> {lawyer.name}</p>
                     <p><strong>Date:</strong> {selectedDate.toLocaleDateString()}</p>
                     <p><strong>Time:</strong> {selectedTime}</p>
-                    <p><strong>Type:</strong> {consultationType.charAt(0).toUpperCase() + consultationType.slice(1)}</p>
-                    <p><strong>Fee:</strong> {lawyer.fee}</p>
                   </div>
                 </div>
               )}{/* Action Buttons */}
