@@ -26,7 +26,7 @@ const EditProfile = () => {
       return;
     }
     // Fetch lawyer settings from backend
-    fetch(`http://localhost:8080/users/getUser/${currentUser.id}`, {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/users/getUser/${currentUser.id}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
         'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ const EditProfile = () => {
           console.log(key, value);
         }
 
-        const uploadResponse = await fetch("http://localhost:8080/api/upload-profile-picture", {
+        const uploadResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload-profile-picture`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem('jwtToken')}`
@@ -175,7 +175,7 @@ const EditProfile = () => {
         formDataPayload.append('prof_pic', profilePhotoUrl);
       }
 
-      const response = await fetch(`http://localhost:8080/user/update`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/update`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`

@@ -1,7 +1,7 @@
 // Document service for handling document management API calls
 import { getAuthData } from '../utils/auth.jsx';
 
-const API_BASE_URL = 'http://localhost:8080/api/documents';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/documents`;
 
 export const documentService = {
   // Get documents for a specific case

@@ -102,7 +102,7 @@ const AllyConsultationChat = () => {
 
   const handleNewChat = async () => {
     try {
-      await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080') + '/api/chat/reset', {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/chat/reset`, {
         method: 'GET',
       });
       setMessages([]);

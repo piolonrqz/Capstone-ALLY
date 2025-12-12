@@ -25,7 +25,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8080/users/login', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -56,7 +56,7 @@ const Login = () => {
       // If user is admin, fetch department information
       if (data.accountType === 'ADMIN') {
         try {
-          const adminResponse = await fetch(`http://localhost:8080/admins/${data.id}`, {
+          const adminResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admins/${data.id}`, {
             headers: {
               Authorization: `Bearer ${data.token}`,
               'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const Login = () => {
         <button 
           className="flex items-center justify-center gap-3 w-full px-4 py-2 text-sm font-medium text-gray-700 transition bg-white border border-gray-300 rounded-md sm:text-base hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           onClick={() => {
-            window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+            window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
           }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">

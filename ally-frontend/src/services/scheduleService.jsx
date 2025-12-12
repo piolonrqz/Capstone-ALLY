@@ -1,7 +1,7 @@
 // Schedule API service
 import { formatDateForAPI, formatDateTimeForAPI } from '../utils/dateUtils.js';
 
-const API_BASE_URL = 'http://localhost:8080/schedules';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/schedules`;
 
 // Helper function to format date and time for backend
 const formatDateTime = (date, time) => {
