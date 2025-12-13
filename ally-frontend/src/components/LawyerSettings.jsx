@@ -60,7 +60,7 @@ const LawyerSettings = ({ user }) => {
   // Fetch user data
   const fetchUserData = () => {
     if (!user?.id || !token) return;
-    fetch(`http://localhost:8080/users/getUser/${user.id}`, {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/users/getUser/${user.id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ const LawyerSettings = ({ user }) => {
     }
 
     console.log('Fetching specializations...');
-    fetch('http://localhost:8080/users/specializations', {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/users/specializations`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -233,7 +233,7 @@ const LawyerSettings = ({ user }) => {
       credentials: personalInfo.credentials, 
     };
     try {
-      const response = await fetch(`http://localhost:8080/users/lawyerUpdate/${user.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/lawyerUpdate/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ const LawyerSettings = ({ user }) => {
   formData.append('credentials', credentials);
 
   try {
-    const response = await fetch(`http://localhost:8080/users/lawyerUpdate/credentials/${user.id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/lawyerUpdate/credentials/${user.id}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,

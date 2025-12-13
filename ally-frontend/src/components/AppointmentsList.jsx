@@ -34,11 +34,11 @@ export const AppointmentsList = ({ refreshTrigger = 0 }) => {
       let upcomingEndpoint;
       let pastEndpoint;
       if (authData.accountType === 'LAWYER') {
-        upcomingEndpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/upcoming`;
-        pastEndpoint = `http://localhost:8080/schedules/lawyer/${authData.userId}/past`;
+        upcomingEndpoint = `${import.meta.env.VITE_API_BASE_URL}/schedules/lawyer/${authData.userId}/upcoming`;
+        pastEndpoint = `${import.meta.env.VITE_API_BASE_URL}/schedules/lawyer/${authData.userId}/past`;
       } else if (authData.accountType === 'CLIENT') {
-        upcomingEndpoint = `http://localhost:8080/schedules/client/${authData.userId}/upcoming`;
-        pastEndpoint = `http://localhost:8080/schedules/client/${authData.userId}/past`;
+        upcomingEndpoint = `${import.meta.env.VITE_API_BASE_URL}/schedules/client/${authData.userId}/upcoming`;
+        pastEndpoint = `${import.meta.env.VITE_API_BASE_URL}/schedules/client/${authData.userId}/past`;
       } else {
         setError('Invalid account type. Please contact support.');
         return;

@@ -21,7 +21,7 @@ const CaseSubmissionForm = ({ onClose, onSuccess, selectedLawyer }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
 
-    fetch('http://localhost:8080/lawyers/verified', {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/lawyers/verified`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -11,7 +11,7 @@ import java.util.Map;
 @Service
 public class RagService {
 
-    @Value("${rag.service.url:http://localhost:8000}")
+    @Value("${rag.service.url}")
     private String ragServiceUrl;
 
     private final RestTemplate restTemplate;

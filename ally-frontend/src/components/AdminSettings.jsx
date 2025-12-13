@@ -38,7 +38,7 @@ const AdminSettings = ({ user, onMenuClick }) => {
   });
 
   useEffect(() => {
-    fetch(`http://localhost:8080/users/getUser/${user.id}`, {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/users/getUser/${user.id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ const AdminSettings = ({ user, onMenuClick }) => {
     };
 
     try {
-      const response = await fetch(`http://localhost:8080/users/adminUpdate/${user.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/adminUpdate/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
