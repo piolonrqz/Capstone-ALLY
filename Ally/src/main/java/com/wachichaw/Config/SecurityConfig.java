@@ -1,6 +1,7 @@
 package com.wachichaw.Config;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +21,9 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oauthLogin;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     public SecurityConfig(OAuth2LoginSuccessHandler oauthLogin) {
                 this.oauthLogin = oauthLogin;
@@ -70,7 +74,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "https://ally-zeta.vercel.app/")); // Specify allowed origins
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", frontendUrl)); // Specify allowed origins
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
