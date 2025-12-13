@@ -2,7 +2,7 @@
 ALLY FastAPI Server - Gemini Classification
 Run with: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-Instruction for GCP RAG Deployment
+Instruction for Google Cloud Platform RAG Deployment
  gcloud run deploy ally \
  --source . \   
  --region us-central1 \   
