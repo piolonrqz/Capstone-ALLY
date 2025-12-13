@@ -1,11 +1,6 @@
 {
-<<<<<<< HEAD
-  "processing_date": "2025-11-17T11:42:31.593993",
-  "total_chunks": 5608,
-=======
   "processing_date": "2025-11-28T02:18:30.520065",
   "total_chunks": 11775,
->>>>>>> fb61165bf5971a5efa4fdc3f26e9f269d47a1bee
   "statistics": {
     "total_cases": 2953,
     "total_chunks": 11775,
