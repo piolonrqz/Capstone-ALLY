@@ -1,10 +1,22 @@
 """
 ALLY FastAPI Server - Gemini Classification
 Run with: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+Instruction for GCP RAG Deployment
+ gcloud run deploy ally \
+ --source . \   
+ --region us-central1 \   
+ --allow-unauthenticated \   
+ --cpu-boost \   
+ --memory 4Gi \  
+ --timeout 300 \
+ --service-account ally-646@majestic-disk-480605-n9.iam.gserviceaccount.com \  
+ --set-env-vars="PINECONE_API_KEY=pcsk_6cvypC_Jh3e45dQgHSrbJK3uNFV5Xguch5xesv3xebtp1kEunK535Pap1rcbDvpEGJrVeu,GOOGLE_PROJECT_ID=majestic-disk-480605-n9,GOOGLE_REGION=us-central1"
 """
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
 from pydantic import BaseModel
 from typing import List, Optional
 from sentence_transformers import SentenceTransformer
