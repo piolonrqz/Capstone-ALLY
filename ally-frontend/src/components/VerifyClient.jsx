@@ -27,7 +27,7 @@ const VerifyClient = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/verifyClient?token=" + verificationCode, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/verifyClient?token=${verificationCode}`, {
         method: "POST"
       });
 
@@ -60,7 +60,7 @@ const VerifyClient = () => {
     setIsLoading(true);
     setTimeout(async () => {
       setIsLoading(false);
-      await fetch("http://localhost:8080/resendCodeClient?email=" + email, {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/resendCodeClient?email=${email}`, {
         method: "POST"
       });
     toast.success('Verification code resent!');

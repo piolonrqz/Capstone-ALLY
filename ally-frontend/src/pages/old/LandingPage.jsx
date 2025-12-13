@@ -17,7 +17,7 @@ const LandingPage = () => {
   if (!token || !userId) return null;
 
   try {
-    const response = await fetch(`http://localhost:8080/users/${userId}/checkcredentials`, {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}/checkcredentials`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

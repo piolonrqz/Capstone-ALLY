@@ -1,7 +1,7 @@
 // Case service for handling legal case API calls
 import { getAuthData } from '../utils/auth.jsx';
 
-const API_BASE_URL = 'http://localhost:8080/Cases';
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/Cases`;
 
 export const caseService = {
   // Get cases for a client

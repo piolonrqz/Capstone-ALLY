@@ -43,7 +43,7 @@ const LawyerCredentialsModal = ({ lawyer, isOpen, onClose }) => {
         window.open(documentUrl, '_blank');
       } else {
         // If it's a local path, construct the full URL
-        const baseUrl = 'http://localhost:8080'; // Replace with your backend URL
+        const baseUrl = import.meta.env.VITE_API_BASE_URL;
         const fullUrl = `${baseUrl}/documents/${documentUrl}`;
         window.open(fullUrl, '_blank');
       }

@@ -40,7 +40,7 @@ const ClientSettings = ({ user }) => {
 
   // Fetch user data on component mount
   useEffect(() => {
-    fetch(`http://localhost:8080/users/getUser/${user.id}`, {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/users/getUser/${user.id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ const ClientSettings = ({ user }) => {
       console.log('Current profile photo to delete:', currentProfilePhoto);
 
       // Upload to your backend API
-      const response = await fetch('http://localhost:8080/api/upload-profile-picture', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/upload-profile-picture`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -234,7 +234,7 @@ const ClientSettings = ({ user }) => {
       };
 
       // Update user profile
-      const response = await fetch(`http://localhost:8080/users/clientUpdate/${user.id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/clientUpdate/${user.id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

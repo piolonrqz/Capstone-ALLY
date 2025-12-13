@@ -53,7 +53,7 @@ export const CaseDetailsModal = ({
 
     try {
       // Call API to complete the case
-      const response = await fetch(`http://localhost:8080/Cases/${case_.caseId}/complete/${getAuthData()?.userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/Cases/${case_.caseId}/complete/${getAuthData()?.userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
